@@ -1,0 +1,831 @@
+{
+  "rating": {
+    "0": 
+    {
+      "next": "problem"
+    },
+    "1":
+    {
+      "next": "problem"
+    },
+    "2":
+    {
+      "next": "problem"
+    },
+    "3":
+    {
+      "next": "problem"
+    },
+    "4":
+    {
+      "next": "problem"
+    },
+    "5":
+    {
+      "next": "problem"
+    },
+    "6":
+    {
+      "next": "problem"
+    },
+    "7":
+    {
+      "next": "problem"
+    },
+    "8":
+    {
+      "next": "like"
+    },
+    "9":
+    {
+      "next": "like"
+    },
+    "10":
+    {
+      "next": "like"
+    }
+  },
+  "problem": {
+    "titleLabel":{
+      "id": "app.customFeedback.problem.title"
+    },
+    "progress": "1/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.problem.audio"
+        },
+        "type": "radio",
+        "next": "audioProblem",
+        "key": "feedback.problem",
+        "value": "audio"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.problem.camera"
+        },
+        "type": "radio",
+        "next": "cameraProblem",
+        "key": "feedback.problem",
+        "value": "camera"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.problem.connection"
+        },
+        "type": "radio",
+        "next": "connectionProblem",
+        "key": "feedback.problem",
+        "value": "connection"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.problem.smartphone"
+        },
+        "type": "radio",
+        "next": "smartphoneProblem",
+        "key": "feedback.problem",
+        "value": "smartphone"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.problem.microphone"
+        },
+        "type": "radio",
+        "next": "microphoneProblem",
+        "key": "feedback.problem",
+        "value": "microphone"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.problem.multiUser"
+        },
+        "type": "radio",
+        "next": "multiuserProblem",
+        "key": "feedback.problem",
+        "value": "multiuser"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.problem.browser"
+        },
+        "type": "radio",
+        "next": "browserProblem",
+        "key": "feedback.problem",
+        "value": "browser"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.problem.whiteboard"
+        },
+        "type": "radio",
+        "next": "whiteboardProblem",
+        "key": "feedback.problem",
+        "value": "whiteboard"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.problem.interface"
+        },
+        "type": "radio",
+        "next": "interfaceProblem",
+        "key": "feedback.problem",
+        "value": "interface"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.problem.fileUpload"
+        },
+        "type": "radio",
+        "next": "fileUploadProblem",
+        "key": "feedback.problem",
+        "value": "fileupload"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.problem.audioCaptions"
+        },
+        "type": "radio",
+        "next": "audioCaptionsProblem",
+        "key": "feedback.problem",
+        "value": "audioCaptions"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.problem_described"
+      }
+    ]
+  },
+  "audioProblem": {
+    "titleLabel":{
+      "id": "app.customFeedback.audioProblem.title"
+    },
+    "progress": "2/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.audioProblem.soundQuality"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "soundquality"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.audioProblem.hearOthers"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "hearothers"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.audioProblem.audioSync"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "audiosync"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.problem_described"
+      }
+    ]
+  },
+  "cameraProblem": {
+    "titleLabel":{
+      "id": "app.customFeedback.cameraProblem.title"
+    },
+    "progress": "2/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.cameraProblem.activation"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "activation"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.cameraProblem.seeOthers"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "seeothers"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.cameraProblem.badQuality"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "imagequality"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.problem_described"
+      }
+    ]
+  },
+  "connectionProblem": {
+    "titleLabel":{
+      "id": "app.customFeedback.connectionProblem.title"
+    },
+    "progress": "2/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.connectionProblem.instability"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "instability"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.connectionProblem.freeze"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "freeze"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.connectionProblem.dataConsumption"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "data"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.problem_described"
+      }
+    ]
+  },
+  "smartphoneProblem": {
+    "titleLabel":{
+      "id": "app.customFeedback.smartphoneProblem.title"
+    },
+    "progress": "2/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.smartphoneProblem.performance"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "performance"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.smartphoneProblem.screenshare"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "screenshare"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.smartphoneProblem.conferenceJoin"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "conferenceJoin"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.problem_described"
+      }
+    ]
+  },
+  "microphoneProblem": {
+    "titleLabel":{
+      "id": "app.customFeedback.microphoneProblem.title"
+    },
+    "progress": "2/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.microphoneProblem.activation"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "activation"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.microphoneProblem.deviceIdentification"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "deviceidentification"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.microphoneProblem.echo"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "echo"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.problem_described"
+      }
+    ]
+  },
+  "multiuserProblem": {
+    "titleLabel":{
+      "id": "app.customFeedback.multiuserProblem.title"
+    },
+    "progress": "2/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.multiuserProblem.simultaneousUse"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "simultaneoususe"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.multiuserProblem.breakoutRoomReturn"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "breakoutroomreturn"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.multiuserProblem.mutedBreakoutRoomReturn"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "mutedbreakoutroomreturn"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.problem_described"
+      }
+    ]
+  },
+  "browserProblem": {
+    "titleLabel":{
+      "id": "app.customFeedback.browserProblem.title"
+    },
+    "progress": "2/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.browserProblem.browserIncompatibility"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "browserincompatibility"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.browserProblem.slowness"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "slowness"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.browserProblem.screenshare"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "screenshare"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.problem_described"
+      }
+    ]
+  },
+  "whiteboardProblem": {
+    "titleLabel":{
+      "id": "app.customFeedback.whiteboardProblem.title"
+    },
+    "progress": "2/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.whiteboardProblem.eraseTool"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "erasertool"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.whiteboardProblem.bucketTool"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "buckettool"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.whiteboardProblem.textEdition"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "textedition"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.problem_described"
+      }
+    ]
+  },
+  "interfaceProblem": {
+    "titleLabel":{
+      "id": "app.customFeedback.interfaceProblem.title"
+    },
+    "progress": "2/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.interfaceProblem.micSelect"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "micselect"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.interfaceProblem.raiseHandShortcut"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "raisehandshortcut"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.interfaceProblem.changeStatus"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "changestatus"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.problem_described"
+      }
+    ]
+  },
+  "fileUploadProblem": {
+    "titleLabel":{
+      "id": "app.customFeedback.fileUploadProblem.title"
+    },
+    "progress": "2/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.fileUploadProblem.presentationFormatting"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "presentationformatting"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.fileUploadProblem.presentationSize"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "presentationsize"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.fileUploadProblem.chatFileUpload"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "chatfileupload"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.problem_described"
+      }
+    ]
+  },
+  "audioCaptionsProblem": {
+    "titleLabel":{
+      "id": "app.customFeedback.audioCaptionsProblem.title"
+    },
+    "progress": "2/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.audioCaptionsProblem.position"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "position"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.audioCaptionsProblem.difficultyEnabling"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "difficultyEnabling"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.audioCaptionsProblem.correctness"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "correctness"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.problem_detailed",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.problem_described"
+      }
+    ]
+  },
+  "like": {
+    "titleLabel":{
+      "id": "app.customFeedback.like.title"
+    },
+    "progress": "1/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.like.interactiveWhiteboard"
+        },
+        "type": "radio",
+        "next": "wish",
+        "key": "feedback.like",
+        "value": "whiteboard"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.like.multimediaSharing"
+        },
+        "type": "radio",
+        "next": "wish",
+        "key": "feedback.like",
+        "value": "multimediasharing"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.like.installFree"
+        },
+        "type": "radio",
+        "next": "wish",
+        "key": "feedback.like",
+        "value": "installfree"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.like.audioCaptions"
+        },
+        "type": "radio",
+        "next": "wish",
+        "key": "feedback.like",
+        "value": "audioCaptions"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "wish",
+        "key": "feedback.like",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.like_described"
+      }
+    ]
+  },
+  "wish": {
+    "titleLabel":{
+      "id": "app.customFeedback.wish.title"
+    },
+    "progress": "2/2",
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.wish.moreUsers"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.wish",
+        "value": "moreusers"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.wish.chatInteracions"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.wish",
+        "value": "chatinteractions"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.wish.whiteboardTools"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.wish",
+        "value": "whiteboardtools"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.wish.accessibilityTools"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.wish",
+        "value": "accessibilityTools"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.other"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "feedback.wish",
+        "value": "other"
+      },
+      {
+        "type": "textArea",
+        "key": "feedback.wish_described"
+      }
+    ]
+  },
+  "email": {
+    "titleLabel":{
+      "id": "app.customFeedback.redirection.thank"
+    },
+    "options":[
+      {
+        "textLabel":{
+          "id": "app.customFeedback.email.contact"
+        },
+        "type": "paragraph"
+      },
+      {
+        "type": "email",
+        "placeholderLabel":{
+          "id": "app.customFeedback.email.placeholder"
+        },
+        "key": "user.email"
+      }
+    ]
+  }
+}
+

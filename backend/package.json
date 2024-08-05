@@ -1,0 +1,17 @@
+{
+  "name": "feedback-app-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "node-fetch": "^3.3.2",
+    "redis": "^4.7.0",
+    "request": "^2.88.2"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}
