@@ -1,0 +1,16 @@
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - "3009:3009"
+    environment:
+      - DEBUG=true
+      - PORT=3009
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
