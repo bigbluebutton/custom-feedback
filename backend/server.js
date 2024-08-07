@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { createClient } from 'redis';
 import request from 'request';
+import path from 'path';
 
 import Logger from './lib/logger.js';
 
@@ -17,6 +18,8 @@ await redisClient.connect();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use('/feedback', express.static(path.resolve('./public')));
 
 app.post('/feedback/webhook', async (req, res) => {
   try {
