@@ -2,15 +2,12 @@ version: '3'
 services:
   app:
     build: .
+    network_mode: host
     ports:
       - "3009:3009"
     environment:
-      - DEBUG=true
+      - FEEDBACK_URL=https://feedback.requestcatcher.com/
+      - LOG_LEVEL=info
+      - LOG_STDOUT=true
       - PORT=3009
-      - REDIS_HOST=redis
-    depends_on:
-      - redis
-  redis:
-    image: redis:7
-    ports:
-      - "6379:6379"
+      - REDIS_HOST=localhost

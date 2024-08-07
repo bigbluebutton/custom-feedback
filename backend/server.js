@@ -8,7 +8,8 @@ import Logger from './lib/logger.js';
 
 const app = express();
 const port = process.env.PORT || 3009;
-const DEBUG = process.env.DEBUG === 'true';
+
+const FEEDBACK_URL = process.env.FEEDBACK_URL;
 
 const redisClient = createClient();
 
@@ -89,8 +90,8 @@ app.post('/feedback/submit', async (req, res) => {
     };
 
     request.post(
-        'https://feedback.requestcatcher.com/',
-        { json: completeFeedback },
+	FEEDBACK_URL,
+	{ json: completeFeedback },
         (error, response, body) => {
             if (!error && response.statusCode === 200) {
             } else {
