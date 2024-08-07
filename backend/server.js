@@ -3,13 +3,15 @@ import bodyParser from 'body-parser';
 import { createClient } from 'redis';
 import request from 'request';
 
+import Logger from './lib/logger.js';
+
 const app = express();
 const port = process.env.PORT || 3009;
 const DEBUG = process.env.DEBUG === 'true';
 
 const redisClient = createClient();
 
-redisClient.on('error', (err) => console.log('Redis Client Error', err));
+redisClient.on('error', (err) => Logger.error('Redis Client Error', err));
 
 await redisClient.connect();
 
@@ -21,6 +23,7 @@ app.post('/feedback/webhook', async (req, res) => {
     const { event, domain } = req.body;
     const events = JSON.parse(event);
 
+    Logger.info(`Got webhook ${event} from ${domain}`);
     for (const evt of events) {
       if (evt.data.type === 'event') {
         const eventType = evt.data.id;
@@ -50,7 +53,7 @@ app.post('/feedback/webhook', async (req, res) => {
 
     res.status(200).send('Webhook received');
   } catch (error) {
-    console.error("Error processing webhook:", error);
+    Logger.error("Error processing webhook:", error);
     res.status(500).send();
   }
 });
@@ -61,6 +64,8 @@ app.post('/feedback/submit', async (req, res) => {
 
     const sessionData = await redisClient.hGetAll(`session:${session.sessionId}`);
     const userData = await redisClient.hGetAll(`user:${user.userId}`);
+
+    Logger.info(`Submitting feedback for userID: ${userData.id} meetingID: ${sessionData.session_id}`);
 
     const completeFeedback = {
       rating,
@@ -86,18 +91,18 @@ app.post('/feedback/submit', async (req, res) => {
         (error, response, body) => {
             if (!error && response.statusCode === 200) {
             } else {
-                console.error('Failed to send feedback to final URL', error);
+                Logger.error('Failed to send feedback to final URL', error);
             }
         }
     );
 
     res.json({ status: 'success', data: completeFeedback });
   } catch (error) {
-    console.error('Error submitting feedback:', error);
+    Logger.error('Error submitting feedback:', error);
     res.status(500).send();
   }
 });
 
 app.listen(port, () => {
-  console.debug(`Server listening on port ${port}`);
+  Logger.info(`Server listening on port ${port}`);
 });
