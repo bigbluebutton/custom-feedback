@@ -6,7 +6,14 @@ services:
     ports:
       - "3009:3009"
     environment:
-      - FEEDBACK_URL=https://feedback.requestcatcher.com/
+      - FEEDBACK_URL=
+      - SHARED_SECRET=
+      - CHECKSUM_ALGORITHM=sha1
+      - BASIC_URL=
+      - API_PATH=/bigbluebutton/api/
+      - HOOKS_CREATE=hooks/create
+      - HOOKS_DESTROY=hooks/destroy
+      - CALLBACK_PATH=/feedback/webhook
       - LOG_LEVEL=info
       - LOG_STDOUT=true
       - PORT=3009

@@ -3,13 +3,27 @@ import bodyParser from 'body-parser';
 import { createClient } from 'redis';
 import request from 'request';
 import path from 'path';
-
+import Utils from './utils.js';
 import Logger from './lib/logger.js';
 
 const app = express();
 const port = process.env.PORT || 3009;
 
 const FEEDBACK_URL = process.env.FEEDBACK_URL;
+const SHARED_SECRET = process.env.SHARED_SECRET;
+const CHECKSUM_ALGORITHM = 'sha1';
+const BASIC_URL= process.env.BASIC_URL;
+const API_PATH= process.env.API_PATH;
+const HOOKS_CREATE= process.env.HOOKS_CREATE;
+const HOOKS_DESTROY= process.env.HOOKS_DESTROY;
+const CALLBACK_PATH= process.env.CALLBACK_PATH;
+
+if (!FEEDBACK_URL || !SHARED_SECRET || !BASIC_URL) {
+  Logger.error('FEEDBACK_URL, SHARED_SECRET, and BASIC_URL must be defined in the environment variables.');
+  process.exit(1);
+}
+
+let storedHookId = null;
 
 const redisClient = createClient();
 
@@ -19,6 +33,31 @@ await redisClient.connect();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+async function createHook() {
+  const callbackURL = encodeURIComponent(`${BASIC_URL}${CALLBACK_PATH}`);
+  const fullUrl = `${BASIC_URL}${API_PATH}${HOOKS_CREATE}?callbackURL=${callbackURL}`;
+
+  const checksum = Utils.checksumAPI(fullUrl, SHARED_SECRET, CHECKSUM_ALGORITHM);
+
+  const urlWithChecksum = `${fullUrl}&checksum=${checksum}`;
+
+  Logger.info('Final URL with checksum:', { urlWithChecksum });
+
+  request.get(urlWithChecksum, (error, response, body) => {
+    if (!error && response.statusCode === 200) {
+      const hookIdMatch = body.match(/<hookID>([^<]+)<\/hookID>/);
+      if (hookIdMatch) {
+        storedHookId = hookIdMatch[1];
+        Logger.info(`Hook created with ID: ${storedHookId}`);
+      } else {
+        Logger.error('Failed to parse hook ID');
+      }
+    } else {
+      Logger.error('Failed to create hook', error);
+    }
+  });
+}
 
 app.use('/feedback', express.static(path.resolve('./public')));
 
@@ -90,14 +129,28 @@ app.post('/feedback/submit', async (req, res) => {
     };
 
     request.post(
-	FEEDBACK_URL,
-	{ json: completeFeedback },
-        (error, response, body) => {
-            if (!error && response.statusCode === 200) {
-            } else {
-                Logger.error('Failed to send feedback to final URL', error);
-            }
+      FEEDBACK_URL,
+      { json: completeFeedback },
+      (error, response) => {
+        if (!error && response.statusCode === 200) {
+          if (storedHookId) {
+
+            const destroyUrl = `${BASIC_URL}${API_PATH}${HOOKS_DESTROY}?hookID=${storedHookId}`;
+            const checksum = Utils.checksumAPI(destroyUrl, SHARED_SECRET, CHECKSUM_ALGORITHM);
+            const fullUrl = `${destroyUrl}&checksum=${checksum}`;
+
+            request.get(fullUrl, (error, res) => {
+              if (!error && res.statusCode === 200) {
+                Logger.info(`Hook with ID: ${storedHookId} destroyed`);
+              } else {
+                Logger.error('Failed to destroy hook', err);
+              }
+            });
+          }
+        } else {
+          Logger.error('Failed to send feedback to final URL', error);
         }
+      }
     );
 
     res.json({ status: 'success', data: completeFeedback });
@@ -107,6 +160,7 @@ app.post('/feedback/submit', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
+app.listen(port, async () => {
   Logger.info(`Server listening on port ${port}`);
+  await createHook();
 });

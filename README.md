@@ -14,15 +14,15 @@ At the end of the feedback process, the HTTP server receives the feedback data a
 Modifications to the nginx files are required as follows:
 ```
 location /feedback {
-        proxy_pass http://172.17.0.2:3000;
-}
-
-location /feedback/submit {
-        proxy_pass http://172.17.0.2:3009;
+        proxy_pass http://localhost:3009/feedback;
 }
 
 ```
-Change the URL for the POST request in server.js from the default to: https://feedback.requestcatcher.com/
+Changes to docker-compose.yml are required.Add your:
+FEEDBACK_URL -> it will be the destination url for the feedback submit
+SHARED_SECRET -> add your server secret
+BASIC_URL -> domain of your server without /bigbluebutton/
+
 
 ## Dependencies
 ### Backend
