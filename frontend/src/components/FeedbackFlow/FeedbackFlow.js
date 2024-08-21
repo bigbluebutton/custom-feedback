@@ -3,10 +3,12 @@ import { getDeviceInfo, getURLParams, submitFeedback, handleBeforeUnload } from 
 import RatingStep from '../RatingStep/RatingStep';
 import ProblemStep from '../ProblemStep/ProblemStep';
 import EmailStep from '../EmailStep/EmailStep';
+import ConfirmationStep from '../ConfirmatioStep/ConfirmationStep';
 import feedbackData from '../../feedbackData.json';
 
 const FeedbackFlow = () => {
   const [currentStep, setCurrentStep] = useState('rating');
+  const [isValidSession, setIsValidSession] = useState(true);
   const [feedback, setFeedback] = useState({
     session: {},
     device: getDeviceInfo(),
@@ -24,13 +26,17 @@ const FeedbackFlow = () => {
 
   useEffect(() => {
     const { sessionId, userId } = getURLParams();
-    if (sessionId && userId) {
-      setFeedback(prev => ({
-        ...prev,
-        session: { sessionId },
-        user: { userId }
-      }));
+    if (!sessionId || !userId) {
+      setIsValidSession(false);
+      return;
     }
+
+    setFeedback(prev => ({
+      ...prev,
+      session: { sessionId },
+      user: { userId }
+    }));
+
     const savedFeedback = sessionStorage.getItem('feedbackData');
     if (savedFeedback) {
       setFeedback(JSON.parse(savedFeedback));
@@ -56,13 +62,17 @@ const FeedbackFlow = () => {
   
     if (!nextStep) {
       submitFeedback(feedback);
-      window.close();
+      setCurrentStep(nextStep);
     } else {
       setCurrentStep(nextStep);
     }
   };
 
   const renderStep = () => {
+    if (!isValidSession) {
+      return <div>Session or User ID is missing. Please try again.</div>;
+    }
+
     switch (currentStep) {
       case 'rating':
         return <RatingStep onNext={handleNext} />;
@@ -86,8 +96,10 @@ const FeedbackFlow = () => {
         return <ProblemStep key="wish" onNext={handleNext} stepData={feedbackData.wish} />;
       case 'email':
         return <EmailStep key="email" onNext={handleNext} stepData={feedbackData.email} />;
+      case 'confirmation':
+        return <ConfirmationStep />;
       default:
-        return <EmailStep key="default" onNext={handleNext} stepData={feedbackData.email} />;
+        return <ConfirmationStep />;
     }
   };
 

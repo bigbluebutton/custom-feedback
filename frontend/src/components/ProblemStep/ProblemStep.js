@@ -23,8 +23,7 @@ const ProblemStep = ({ onNext, stepData, intl }) => {
   };
 
   const handleLeave = () => {
-    onNext(null);
-    window.close();
+    onNext(null, {  });
   };
 
   const handleSubmit = () => {

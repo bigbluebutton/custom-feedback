@@ -1,4 +1,5 @@
-{
+{ 
+  "app.customFeedback.confirmation.message": "¡Gracias por tus comentarios! La ventana se cerrará en breve.",
   "app.customFeedback.defaultButtons.next": "Siguiente",
   "app.customFeedback.defaultButtons.nextDesc": "Avanzar al siguiente paso del feedback",
   "app.customFeedback.defaultButtons.skip": "Saltar",

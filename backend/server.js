@@ -12,11 +12,11 @@ const port = process.env.PORT || 3009;
 const FEEDBACK_URL = process.env.FEEDBACK_URL;
 const SHARED_SECRET = process.env.SHARED_SECRET;
 const CHECKSUM_ALGORITHM = 'sha1';
-const BASIC_URL= process.env.BASIC_URL;
-const API_PATH= process.env.API_PATH;
-const HOOKS_CREATE= process.env.HOOKS_CREATE;
-const HOOKS_DESTROY= process.env.HOOKS_DESTROY;
-const CALLBACK_PATH= process.env.CALLBACK_PATH;
+const BASIC_URL = process.env.BASIC_URL;
+const API_PATH = process.env.API_PATH;
+const HOOKS_CREATE = process.env.HOOKS_CREATE;
+const HOOKS_DESTROY = process.env.HOOKS_DESTROY;
+const CALLBACK_PATH = process.env.CALLBACK_PATH;
 
 if (!FEEDBACK_URL || !SHARED_SECRET || !BASIC_URL) {
   Logger.error('FEEDBACK_URL, SHARED_SECRET, and BASIC_URL must be defined in the environment variables.');
@@ -57,6 +57,22 @@ async function createHook() {
       Logger.error('Failed to create hook', error);
     }
   });
+}
+
+async function destroyHook() {
+  if (storedHookId) {
+    const destroyUrl = `${BASIC_URL}${API_PATH}${HOOKS_DESTROY}?hookID=${storedHookId}`;
+    const checksum = Utils.checksumAPI(destroyUrl, SHARED_SECRET, CHECKSUM_ALGORITHM);
+    const fullUrl = `${destroyUrl}&checksum=${checksum}`;
+
+    request.get(fullUrl, (error, res) => {
+      if (!error && res.statusCode === 200) {
+        Logger.info(`Hook with ID: ${storedHookId} destroyed`);
+      } else {
+        Logger.error('Failed to destroy hook', error);
+      }
+    });
+  }
 }
 
 app.use('/feedback', express.static(path.resolve('./public')));
@@ -105,6 +121,14 @@ app.post('/feedback/submit', async (req, res) => {
   try {
     const { session, user, feedback, device, rating } = req.body;
 
+    const feedbackKey = `feedback:${session.sessionId}:${user.userId}`;
+    const existingFeedback = await redisClient.get(feedbackKey);
+
+    if (existingFeedback) {
+      Logger.warn(`Feedback já enviado para userID: ${user.userId} e sessionID: ${session.sessionId}`);
+      return res.status(400).json({ status: 'error', message: 'Feedback já enviado.' });
+    }
+
     const sessionData = await redisClient.hGetAll(`session:${session.sessionId}`);
     const userData = await redisClient.hGetAll(`user:${user.userId}`);
 
@@ -128,26 +152,13 @@ app.post('/feedback/submit', async (req, res) => {
       feedback
     };
 
+    await redisClient.set(feedbackKey, JSON.stringify(completeFeedback), { EX: 3600 });
+
     request.post(
       FEEDBACK_URL,
       { json: completeFeedback },
-      (error, response) => {
-        if (!error && response.statusCode === 200) {
-          if (storedHookId) {
-
-            const destroyUrl = `${BASIC_URL}${API_PATH}${HOOKS_DESTROY}?hookID=${storedHookId}`;
-            const checksum = Utils.checksumAPI(destroyUrl, SHARED_SECRET, CHECKSUM_ALGORITHM);
-            const fullUrl = `${destroyUrl}&checksum=${checksum}`;
-
-            request.get(fullUrl, (error, res) => {
-              if (!error && res.statusCode === 200) {
-                Logger.info(`Hook with ID: ${storedHookId} destroyed`);
-              } else {
-                Logger.error('Failed to destroy hook', err);
-              }
-            });
-          }
-        } else {
+      (error, response, body) => {
+        if (error || response.statusCode !== 200) {
           Logger.error('Failed to send feedback to final URL', error);
         }
       }
@@ -163,4 +174,16 @@ app.post('/feedback/submit', async (req, res) => {
 app.listen(port, async () => {
   Logger.info(`Server listening on port ${port}`);
   await createHook();
+});
+
+process.on('SIGINT', async () => {
+  Logger.info('Shutting down server...');
+  await destroyHook();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  Logger.info('Shutting down server...');
+  await destroyHook();
+  process.exit(0);
 });

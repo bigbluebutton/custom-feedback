@@ -30,8 +30,7 @@ const RatingStep = ({ onNext, intl }) => {
   };
 
   const handleLeave = () => {
-    onNext(null);
-    window.close();
+    onNext(null, {  });
   };
 
   return (

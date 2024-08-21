@@ -32,6 +32,12 @@ const EmailStep = ({ onNext, stepData, intl }) => {
     onNext(null, { email });
   };
 
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
   return (
     <Styled.Container>
       <Styled.Box>
@@ -42,6 +48,7 @@ const EmailStep = ({ onNext, stepData, intl }) => {
           placeholder={intl.formatMessage(messages.emailPlaceholder)}
           value={email}
           onChange={handleEmailChange}
+          onKeyDown={handleKeyDown}
         />
         <Styled.ButtonContainer>
           <Styled.Button onClick={handleSubmit}>
