@@ -4,7 +4,7 @@ import { createClient } from 'redis';
 import request from 'request';
 import path from 'path';
 import Utils from './utils.js';
-import Logger from './lib/logger.js';
+import pino from 'pino';
 
 const app = express();
 const port = process.env.PORT || 3009;
@@ -18,8 +18,10 @@ const HOOKS_CREATE = process.env.HOOKS_CREATE;
 const HOOKS_DESTROY = process.env.HOOKS_DESTROY;
 const CALLBACK_PATH = process.env.CALLBACK_PATH;
 
+const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
+
 if (!FEEDBACK_URL || !SHARED_SECRET || !BASIC_URL) {
-  Logger.error('FEEDBACK_URL, SHARED_SECRET, and BASIC_URL must be defined in the environment variables.');
+  logger.error('FEEDBACK_URL, SHARED_SECRET, and BASIC_URL must be defined in the environment variables.');
   process.exit(1);
 }
 
@@ -27,7 +29,7 @@ let storedHookId = null;
 
 const redisClient = createClient();
 
-redisClient.on('error', (err) => Logger.error('Redis Client Error', err));
+redisClient.on('error', (err) => logger.error('Redis Client Error', err));
 
 await redisClient.connect();
 
@@ -39,22 +41,21 @@ async function createHook() {
   const fullUrl = `${BASIC_URL}${API_PATH}${HOOKS_CREATE}?callbackURL=${callbackURL}`;
 
   const checksum = Utils.checksumAPI(fullUrl, SHARED_SECRET, CHECKSUM_ALGORITHM);
-
   const urlWithChecksum = `${fullUrl}&checksum=${checksum}`;
 
-  Logger.info('Final URL with checksum:', { urlWithChecksum });
+  logger.info('Final URL with checksum:', { urlWithChecksum });
 
   request.get(urlWithChecksum, (error, response, body) => {
     if (!error && response.statusCode === 200) {
       const hookIdMatch = body.match(/<hookID>([^<]+)<\/hookID>/);
       if (hookIdMatch) {
         storedHookId = hookIdMatch[1];
-        Logger.info(`Hook created with ID: ${storedHookId}`);
+        logger.info(`Hook created with ID: ${storedHookId}`);
       } else {
-        Logger.error('Failed to parse hook ID');
+        logger.error('Failed to parse hook ID');
       }
     } else {
-      Logger.error('Failed to create hook', error);
+      logger.error('Failed to create hook', error);
     }
   });
 }
@@ -67,9 +68,9 @@ async function destroyHook() {
 
     request.get(fullUrl, (error, res) => {
       if (!error && res.statusCode === 200) {
-        Logger.info(`Hook with ID: ${storedHookId} destroyed`);
+        logger.info(`Hook with ID: ${storedHookId} destroyed`);
       } else {
-        Logger.error('Failed to destroy hook', error);
+        logger.error('Failed to destroy hook', error);
       }
     });
   }
@@ -82,7 +83,7 @@ app.post('/feedback/webhook', async (req, res) => {
     const { event, domain } = req.body;
     const events = JSON.parse(event);
 
-    Logger.info(`Got webhook ${event} from ${domain}`);
+    logger.info(`Got webhook ${event} from ${domain}`);
     for (const evt of events) {
       if (evt.data.type === 'event') {
         const eventType = evt.data.id;
@@ -112,7 +113,7 @@ app.post('/feedback/webhook', async (req, res) => {
 
     res.status(200).send('Webhook received');
   } catch (error) {
-    Logger.error("Error processing webhook:", error);
+    logger.error("Error processing webhook:", error);
     res.status(500).send();
   }
 });
@@ -125,14 +126,14 @@ app.post('/feedback/submit', async (req, res) => {
     const existingFeedback = await redisClient.get(feedbackKey);
 
     if (existingFeedback) {
-      Logger.warn(`Feedback já enviado para userID: ${user.userId} e sessionID: ${session.sessionId}`);
+      logger.warn(`Feedback já enviado para userID: ${user.userId} e sessionID: ${session.sessionId}`);
       return res.status(400).json({ status: 'error', message: 'Feedback já enviado.' });
     }
 
     const sessionData = await redisClient.hGetAll(`session:${session.sessionId}`);
     const userData = await redisClient.hGetAll(`user:${user.userId}`);
 
-    Logger.info(`Submitting feedback for userID: ${userData.id} meetingID: ${sessionData.session_id}`);
+    logger.info(`Submitting feedback for userID: ${userData.id} meetingID: ${sessionData.session_id}`);
 
     const completeFeedback = {
       rating,
@@ -159,31 +160,31 @@ app.post('/feedback/submit', async (req, res) => {
       { json: completeFeedback },
       (error, response, body) => {
         if (error || response.statusCode !== 200) {
-          Logger.error('Failed to send feedback to final URL', error);
+          logger.error('Failed to send feedback to final URL', error);
         }
       }
     );
 
     res.json({ status: 'success', data: completeFeedback });
   } catch (error) {
-    Logger.error('Error submitting feedback:', error);
+    logger.error('Error submitting feedback:', error);
     res.status(500).send();
   }
 });
 
 app.listen(port, async () => {
-  Logger.info(`Server listening on port ${port}`);
+  logger.info(`Server listening on port ${port}`);
   await createHook();
 });
 
 process.on('SIGINT', async () => {
-  Logger.info('Shutting down server...');
+  logger.info('Shutting down server...');
   await destroyHook();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
-  Logger.info('Shutting down server...');
+  logger.info('Shutting down server...');
   await destroyHook();
   process.exit(0);
 });
