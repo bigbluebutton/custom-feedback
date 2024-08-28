@@ -41,3 +41,6 @@ react-i18next: ^14.1.3
 i18next: ^23.12.2
 styled-components: ^6.1.12
 ua-parser-js: ^1.0.38
+
+## License
+This project is licensed under the GNU Lesser General Public License v3.0 - see the [LICENSE](./LICENSE) file for details.
