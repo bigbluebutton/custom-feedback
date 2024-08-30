@@ -14,8 +14,8 @@ const SHARED_SECRET = process.env.SHARED_SECRET;
 const CHECKSUM_ALGORITHM = 'sha1';
 const BASIC_URL = process.env.BASIC_URL;
 const API_PATH = process.env.API_PATH;
-const HOOKS_CREATE = process.env.HOOKS_CREATE;
-const HOOKS_DESTROY = process.env.HOOKS_DESTROY;
+const HOOKS_CREATE = process.env.HOOKS_CREATE || 'hooks/create';
+const HOOKS_DESTROY = process.env.HOOKS_DESTROY || 'hooks/destroy';
 const CALLBACK_PATH = process.env.CALLBACK_PATH;
 
 const logger = pino({ level: process.env.LOG_LEVEL || 'info' });

@@ -11,8 +11,6 @@ services:
       - CHECKSUM_ALGORITHM=sha1
       - BASIC_URL=
       - API_PATH=/bigbluebutton/api/
-      - HOOKS_CREATE=hooks/create
-      - HOOKS_DESTROY=hooks/destroy
       - CALLBACK_PATH=/feedback/webhook
       - LOG_LEVEL=info
       - LOG_STDOUT=true
