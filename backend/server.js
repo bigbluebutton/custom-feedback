@@ -83,7 +83,7 @@ app.post('/feedback/webhook', async (req, res) => {
     const { event, domain } = req.body;
     const events = JSON.parse(event);
 
-    logger.info(`Got webhook ${event} from ${domain}`);
+    logger.debug(`Got webhook ${event} from ${domain}`);
     for (const evt of events) {
       if (evt.data.type === 'event') {
         const eventType = evt.data.id;
@@ -126,8 +126,8 @@ app.post('/feedback/submit', async (req, res) => {
     const existingFeedback = await redisClient.get(feedbackKey);
 
     if (existingFeedback) {
-      logger.warn(`Feedback já enviado para userID: ${user.userId} e sessionID: ${session.sessionId}`);
-      return res.status(400).json({ status: 'error', message: 'Feedback já enviado.' });
+      logger.warn(`Feedback already submitted for userID: ${user.userId} sessionID: ${session.sessionId}`);
+      return res.status(400).json({ status: 'error', message: 'Feedback already submitted' });
     }
 
     const sessionData = await redisClient.hGetAll(`session:${session.sessionId}`);
