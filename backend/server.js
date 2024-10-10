@@ -5,6 +5,7 @@ import request from 'request';
 import path from 'path';
 import Utils from './utils.js';
 import pino from 'pino';
+import pinoPretty from 'pino-pretty';
 
 const app = express();
 const port = process.env.PORT || 3009;
@@ -18,10 +19,19 @@ const HOOKS_CREATE = process.env.HOOKS_CREATE || 'hooks/create';
 const HOOKS_DESTROY = process.env.HOOKS_DESTROY || 'hooks/destroy';
 const CALLBACK_PATH = process.env.CALLBACK_PATH;
 
-const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
+const prettyStream = pinoPretty({
+  translateTime: 'SYS:standard',
+  ignore: 'pid,hostname',
+  messageFormat: (log, messageKey) => {
+    return `[info] : ${log[messageKey]}`;
+  },
+});
 
-if (!FEEDBACK_URL || !SHARED_SECRET || !BASIC_URL) {
-  logger.error('FEEDBACK_URL, SHARED_SECRET, and BASIC_URL must be defined in the environment variables.');
+const logger = pino({ level: process.env.LOG_LEVEL || 'info' }, prettyStream);
+
+
+if (!SHARED_SECRET || !BASIC_URL) {
+  logger.error('SHARED_SECRET, and BASIC_URL must be defined in the environment variables.');
   process.exit(1);
 }
 
@@ -153,17 +163,25 @@ app.post('/feedback/submit', async (req, res) => {
       feedback
     };
 
-    await redisClient.set(feedbackKey, JSON.stringify(completeFeedback), { EX: 3600 });
+    const cleanFeedback = JSON.parse(JSON.stringify(completeFeedback, (key, value) => value === undefined ? undefined : value));
 
-    request.post(
-      FEEDBACK_URL,
-      { json: completeFeedback },
-      (error, response, body) => {
-        if (error || response.statusCode !== 200) {
-          logger.error('Failed to send feedback to final URL', error);
+    logger.info(`CUSTOM FEEDBACK LOG: ${JSON.stringify(cleanFeedback)}`);
+
+    if (FEEDBACK_URL) {
+      await redisClient.set(feedbackKey, JSON.stringify(completeFeedback), { EX: 3600 });
+
+      request.post(
+        FEEDBACK_URL,
+        { json: completeFeedback },
+        (error, response) => {
+          if (error || response.statusCode !== 200) {
+            logger.error('Failed to send feedback to FEEDBACK_URL', error);
+          }
         }
-      }
-    );
+      );
+    } else {
+      logger.info('No FEEDBACK_URL set, logging feedback to syslog only.');
+    }
 
     res.json({ status: 'success', data: completeFeedback });
   } catch (error) {
