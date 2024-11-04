@@ -180,7 +180,7 @@ app.post('/feedback/submit', async (req, res) => {
         }
       );
     } else {
-      logger.info('No FEEDBACK_URL set, logging feedback to syslog only.');
+      logger.debug('No FEEDBACK_URL set, logging feedback to syslog only.');
     }
 
     res.json({ status: 'success', data: completeFeedback });
