@@ -5,7 +5,6 @@ import request from 'request';
 import path from 'path';
 import Utils from './utils.js';
 import pino from 'pino';
-import pinoPretty from 'pino-pretty';
 
 const app = express();
 const port = process.env.PORT || 3009;
@@ -19,15 +18,9 @@ const HOOKS_CREATE = process.env.HOOKS_CREATE || 'hooks/create';
 const HOOKS_DESTROY = process.env.HOOKS_DESTROY || 'hooks/destroy';
 const CALLBACK_PATH = process.env.CALLBACK_PATH;
 
-const prettyStream = pinoPretty({
-  translateTime: 'SYS:standard',
-  ignore: 'pid,hostname',
-  messageFormat: (log, messageKey) => {
-    return `[info] : ${log[messageKey]}`;
-  },
-});
+const formattedDate = new Date().toISOString();
 
-const logger = pino({ level: process.env.LOG_LEVEL || 'info' }, prettyStream);
+const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 
 
 if (!SHARED_SECRET || !BASIC_URL) {
@@ -164,8 +157,9 @@ app.post('/feedback/submit', async (req, res) => {
     };
 
     const cleanFeedback = JSON.parse(JSON.stringify(completeFeedback, (key, value) => value === undefined ? undefined : value));
+    const logLevel = logger.level;
 
-    logger.info(`CUSTOM FEEDBACK LOG: ${JSON.stringify(cleanFeedback)}`);
+    console.log(`${formattedDate} custom-feedback [${logLevel}] : CUSTOM FEEDBACK LOG: ${JSON.stringify(cleanFeedback)}`);
 
     if (FEEDBACK_URL) {
       await redisClient.set(feedbackKey, JSON.stringify(completeFeedback), { EX: 3600 });
