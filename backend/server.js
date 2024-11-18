@@ -18,8 +18,6 @@ const HOOKS_CREATE = process.env.HOOKS_CREATE || 'hooks/create';
 const HOOKS_DESTROY = process.env.HOOKS_DESTROY || 'hooks/destroy';
 const CALLBACK_PATH = process.env.CALLBACK_PATH;
 
-const formattedDate = new Date().toISOString();
-
 const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 
 
@@ -159,7 +157,7 @@ app.post('/feedback/submit', async (req, res) => {
     const cleanFeedback = JSON.parse(JSON.stringify(completeFeedback, (key, value) => value === undefined ? undefined : value));
     const logLevel = logger.level;
 
-    console.log(`${formattedDate} custom-feedback [${logLevel}] : CUSTOM FEEDBACK LOG: ${JSON.stringify(cleanFeedback)}`);
+    console.log(`${new Date().toISOString()} custom-feedback [${logLevel}] : CUSTOM FEEDBACK LOG: ${JSON.stringify(cleanFeedback)}`);
 
     if (FEEDBACK_URL) {
       await redisClient.set(feedbackKey, JSON.stringify(completeFeedback), { EX: 3600 });
