@@ -34,7 +34,7 @@ export const submitFeedback = async (feedback) => {
 
     if (response.ok) {
       const responseData = await response.json();
-      console.log('Feedback successfully submitted:', responseData);
+      sessionStorage.setItem('redirectUrl', responseData.data?.session?.redirectUrl);
       sessionStorage.removeItem('feedbackData');
     } else {
       console.error('Failed to submit feedback');
@@ -42,6 +42,10 @@ export const submitFeedback = async (feedback) => {
   } catch (error) {
     console.error('Error submitting feedback:', error);
   }
+};
+
+export const getRedirectUrl = () => {
+  return sessionStorage.getItem('redirectUrl');
 };
 
 export const handleBeforeUnload = async () => {

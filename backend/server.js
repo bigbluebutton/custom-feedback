@@ -96,6 +96,7 @@ app.post('/feedback/webhook', async (req, res) => {
             institution_name: domain,
             institution_guid: meeting['external-meeting-id'],
             session_id: meeting['internal-meeting-id'],
+            redirect_url: meeting.metadata.feedbackredirecturl,
           };
 
           await redisClient.hSet(`session:${meeting['internal-meeting-id']}`, sessionData);
@@ -142,7 +143,8 @@ app.post('/feedback/submit', async (req, res) => {
         session_name: sessionData.session_name,
         institution_name: sessionData.institution_name,
         institution_guid: sessionData.institution_guid,
-        session_id: sessionData.session_id
+        session_id: sessionData.session_id,
+        redirectUrl: sessionData.redirect_url,
       },
       device,
       user: {
