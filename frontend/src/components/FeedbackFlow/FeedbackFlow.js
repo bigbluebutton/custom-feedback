@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getDeviceInfo, getURLParams, submitFeedback, handleBeforeUnload, getRedirectUrl } from '../service';
+import { getDeviceInfo, getURLParams, submitFeedback, handleBeforeUnload, getRedirectUrl, getRedirectTimeout } from '../service';
 import RatingStep from '../RatingStep/RatingStep';
 import ProblemStep from '../ProblemStep/ProblemStep';
 import EmailStep from '../EmailStep/EmailStep';
@@ -98,7 +98,7 @@ const FeedbackFlow = () => {
         return <EmailStep key="email" onNext={handleNext} stepData={feedbackData.email} />;
       case 'confirmation':
       default:
-        return <ConfirmationStep getRedirectUrl={getRedirectUrl} />;
+        return <ConfirmationStep getRedirectUrl={getRedirectUrl} getRedirectTimeout={getRedirectTimeout} />;
     }
   };
 

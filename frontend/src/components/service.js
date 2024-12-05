@@ -23,6 +23,11 @@ export const getURLParams = () => {
 };
 
 export const submitFeedback = async (feedback) => {
+
+  // clear old feedback settings
+  sessionStorage.removeItem('feedbackUrl');
+  sessionStorage.removeItem('feedbackTimeout');
+
   try {
     const response = await fetch('/feedback/submit', {
       method: 'POST',
@@ -34,7 +39,12 @@ export const submitFeedback = async (feedback) => {
 
     if (response.ok) {
       const responseData = await response.json();
-      sessionStorage.setItem('redirectUrl', responseData.data?.session?.redirectUrl);
+      if (responseData.data?.session?.redirect_url) {
+        sessionStorage.setItem('redirectUrl', responseData.data?.session?.redirect_url);
+      }
+      if (responseData.data?.session?.redirect_timeout) {
+        sessionStorage.setItem('redirectTimeout', responseData.data?.session?.redirect_timeout);
+      }
       sessionStorage.removeItem('feedbackData');
     } else {
       console.error('Failed to submit feedback');
@@ -46,6 +56,10 @@ export const submitFeedback = async (feedback) => {
 
 export const getRedirectUrl = () => {
   return sessionStorage.getItem('redirectUrl');
+};
+
+export const getRedirectTimeout = () => {
+  return sessionStorage.getItem('redirectTimeout');
 };
 
 export const handleBeforeUnload = async () => {

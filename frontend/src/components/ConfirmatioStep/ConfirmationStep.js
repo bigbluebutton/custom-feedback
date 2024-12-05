@@ -9,8 +9,9 @@ const messages = defineMessages({
   }
 });
 
-const ConfirmationStep = ({ intl, getRedirectUrl }) => {
+const ConfirmationStep = ({ intl, getRedirectUrl, getRedirectTimeout }) => {
   useEffect(() => {
+    const redirectTimeout = getRedirectTimeout ? getRedirectTimeout() : null;
     const timer = setTimeout(() => {
       const redirectUrl = getRedirectUrl ? getRedirectUrl() : null;
       if (redirectUrl) {
@@ -18,7 +19,7 @@ const ConfirmationStep = ({ intl, getRedirectUrl }) => {
       } else {
         window.close();
       }
-    }, 10000);
+    }, redirectTimeout || 10000);
 
     return () => clearTimeout(timer);
   }, []);

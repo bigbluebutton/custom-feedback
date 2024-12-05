@@ -17,6 +17,8 @@ const API_PATH = process.env.API_PATH;
 const HOOKS_CREATE = process.env.HOOKS_CREATE || 'hooks/create';
 const HOOKS_DESTROY = process.env.HOOKS_DESTROY || 'hooks/destroy';
 const CALLBACK_PATH = process.env.CALLBACK_PATH;
+const REDIRECT_URL = process.env.REDIRECT_URL;
+const REDIRECT_TIMEOUT = process.env.REDIRECT_TIMEOUT;
 
 const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 
@@ -96,8 +98,13 @@ app.post('/feedback/webhook', async (req, res) => {
             institution_name: domain,
             institution_guid: meeting['external-meeting-id'],
             session_id: meeting['internal-meeting-id'],
-            redirect_url: meeting.metadata.feedbackredirecturl,
           };
+          if (meeting.metadata.feedbackredirecturl || REDIRECT_URL) {
+            sessionData.redirect_url = meeting.metadata.feedbackredirecturl || REDIRECT_URL;
+          }
+          if (REDIRECT_TIMEOUT) {
+            sessionData.redirect_timeout = REDIRECT_TIMEOUT;
+          }
 
           await redisClient.hSet(`session:${meeting['internal-meeting-id']}`, sessionData);
         } else if (eventType === 'user-joined') {
@@ -144,7 +151,7 @@ app.post('/feedback/submit', async (req, res) => {
         institution_name: sessionData.institution_name,
         institution_guid: sessionData.institution_guid,
         session_id: sessionData.session_id,
-        redirectUrl: sessionData.redirect_url,
+        redirect_url: sessionData.redirect_url,
       },
       device,
       user: {
