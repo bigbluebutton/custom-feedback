@@ -7,6 +7,8 @@ services:
       - "3009:3009"
     environment:
       - FEEDBACK_URL=
+      - REDIRECT_TIMEOUT=10000
+      - REDIRECT_URL=
       - SHARED_SECRET=
       - CHECKSUM_ALGORITHM=sha1
       - BASIC_URL=

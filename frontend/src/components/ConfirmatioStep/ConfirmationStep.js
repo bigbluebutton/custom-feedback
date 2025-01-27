@@ -9,11 +9,17 @@ const messages = defineMessages({
   }
 });
 
-const ConfirmationStep = ({ intl }) => {
+const ConfirmationStep = ({ intl, getRedirectUrl, getRedirectTimeout }) => {
   useEffect(() => {
+    const redirectTimeout = getRedirectTimeout ? getRedirectTimeout() : null;
     const timer = setTimeout(() => {
-      window.close();
-    }, 10000);
+      const redirectUrl = getRedirectUrl ? getRedirectUrl() : null;
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+      } else {
+        window.close();
+      }
+    }, redirectTimeout || 10000);
 
     return () => clearTimeout(timer);
   }, []);
