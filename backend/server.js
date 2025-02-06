@@ -93,15 +93,22 @@ app.post('/feedback/webhook', async (req, res) => {
 
         if (eventType === 'meeting-created') {
           const meeting = evt.data.attributes.meeting;
+          // mconf-institution-guid or external-meeting-id
+          const institutionGuid = meeting?.metadata?.['mconf-institution-guid']
+            || meeting['external-meeting-id'];
+          const institutionName = meeting?.metadata?.['mconf-institution-name']
+            || domain;
           const sessionData = {
             session_name: meeting.name,
-            institution_name: domain,
-            institution_guid: meeting['external-meeting-id'],
+            institution_name: institutionName,
+            institution_guid: institutionGuid,
             session_id: meeting['internal-meeting-id'],
           };
+
           if (meeting.metadata.feedbackredirecturl || REDIRECT_URL) {
             sessionData.redirect_url = meeting.metadata.feedbackredirecturl || REDIRECT_URL;
           }
+
           if (REDIRECT_TIMEOUT) {
             sessionData.redirect_timeout = REDIRECT_TIMEOUT;
           }
