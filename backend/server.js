@@ -116,11 +116,14 @@ app.post('/feedback/webhook', async (req, res) => {
           await redisClient.hSet(`session:${meeting['internal-meeting-id']}`, sessionData);
         } else if (eventType === 'user-joined') {
           const user = evt.data.attributes.user;
+          const userRedirectUrl = user.userdata?.['bbb_feedback_redirect_url'];
           const userData = {
             name: user.name,
             id: user['internal-user-id'],
             role: user.role,
           };
+
+          if (userRedirectUrl) userData.redirect_url = userRedirectUrl;
 
           await redisClient.hSet(`user:${user['internal-user-id']}`, userData);
         }
@@ -129,7 +132,11 @@ app.post('/feedback/webhook', async (req, res) => {
 
     res.status(200).send('Webhook received');
   } catch (error) {
-    logger.error("Error processing webhook:", error);
+    logger.error(`Error processing webhook: ${error?.message || 'Unknown error'}`, {
+      errorStack: error?.stack,
+      errorMessage: error?.message,
+      requestBody: req.body,
+    });
     res.status(500).send();
   }
 });
@@ -148,6 +155,8 @@ app.post('/feedback/submit', async (req, res) => {
 
     const sessionData = await redisClient.hGetAll(`session:${session.sessionId}`);
     const userData = await redisClient.hGetAll(`user:${user.userId}`);
+    // User redirect URL takes precedence over session redirect URL
+    const redirectUrl = userData.redirect_url || sessionData.redirect_url;
 
     logger.info(`Submitting feedback for userID: ${userData.id} meetingID: ${sessionData.session_id}`);
 
@@ -158,7 +167,7 @@ app.post('/feedback/submit', async (req, res) => {
         institution_name: sessionData.institution_name,
         institution_guid: sessionData.institution_guid,
         session_id: sessionData.session_id,
-        redirect_url: sessionData.redirect_url,
+        redirect_url: redirectUrl,
       },
       device,
       user: {
