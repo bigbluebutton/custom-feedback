@@ -7,13 +7,16 @@ import en from './locales/en.json';
 import es from './locales/es.json';
 
 const browserLocale = navigator.language;
+const params = new URLSearchParams(window.location.search);
+const urlLocale = params.get('locale');
+const userLocale = urlLocale || browserLocale;
 
-const messages = browserLocale.startsWith('pt') ? pt_BR :
-                 browserLocale.startsWith('es') ? es :
+const messages = userLocale.startsWith('pt') ? pt_BR :
+                 userLocale.startsWith('es') ? es :
                  en;
 
 ReactDOM.render(
-  <IntlProvider locale={browserLocale} messages={messages}>
+  <IntlProvider locale={userLocale} messages={messages}>
     <App />
   </IntlProvider>,
   document.getElementById('root')
