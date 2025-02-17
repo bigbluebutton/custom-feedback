@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+### v1.2.0
+
+* feat: feat: use locale from userdata if present
+* More detailed README file
+
 ### v1.1.0
 
 * feat: Use meta_feedbackredirecturl to redirect after feedback
