@@ -22,6 +22,8 @@ const REDIRECT_TIMEOUT = process.env.REDIRECT_TIMEOUT;
 
 const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 
+const usersLocales = {}
+
 
 if (!SHARED_SECRET || !BASIC_URL) {
   logger.error('SHARED_SECRET, and BASIC_URL must be defined in the environment variables.');
@@ -46,7 +48,7 @@ async function createHook() {
   const checksum = Utils.checksumAPI(fullUrl, SHARED_SECRET, CHECKSUM_ALGORITHM);
   const urlWithChecksum = `${fullUrl}&checksum=${checksum}`;
 
-  logger.info('Final URL with checksum:', { urlWithChecksum });
+  logger.info(`Final URL with checksum: ${urlWithChecksum}`);
 
   request.get(urlWithChecksum, (error, response, body) => {
     if (!error && response.statusCode === 200) {
@@ -79,7 +81,17 @@ async function destroyHook() {
   }
 }
 
-app.use('/feedback', express.static(path.resolve('./public')));
+app.use('/feedback', (req, res, next) => {
+  const userLocale = usersLocales[req.query.userId];
+  if (userLocale && !req.query.locale) {
+    req.query.locale = userLocale;
+    const queryString = new URLSearchParams(req.query).toString();
+    const newUrl = `${req.baseUrl}${req.path}?${queryString}`;
+    logger.debug(`Redirecting to ${newUrl}`);
+    return res.redirect(newUrl);
+  }
+  next();
+}, express.static(path.resolve('./public')));
 
 app.post('/feedback/webhook', async (req, res) => {
   try {
@@ -124,6 +136,11 @@ app.post('/feedback/webhook', async (req, res) => {
           };
 
           if (userRedirectUrl) userData.redirect_url = userRedirectUrl;
+
+          const overrideDefaultLocale = user.userdata?.['bbb_override_default_locale'];
+          if (overrideDefaultLocale) {
+            usersLocales[user['internal-user-id']] = overrideDefaultLocale;
+          }
 
           await redisClient.hSet(`user:${user['internal-user-id']}`, userData);
         }
