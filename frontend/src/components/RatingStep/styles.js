@@ -17,6 +17,10 @@ const Box = styled.div`
   text-align: center;
 `;
 
+const EndedTitle = styled.h2`
+  font-size: 20px;
+`;
+
 const Title = styled.h2`
   font-size: 24px;
   margin-bottom: 24px;
@@ -52,6 +56,7 @@ const styles = {
   Container,
   Box,
   Title,
+  EndedTitle,
   Stars,
   Button,
   ButtonContainer,
