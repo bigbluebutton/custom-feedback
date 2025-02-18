@@ -30,12 +30,16 @@ const RatingStep = ({ onNext, intl }) => {
   };
 
   const handleLeave = () => {
-    onNext(null, {  });
+    onNext(null, {});
   };
+
+  const params = new URLSearchParams(window.location.search);
+  const endReason = params.get('reason');
 
   return (
     <Styled.Container>
       <Styled.Box>
+        {endReason && <Styled.EndedTitle>{endReason}</Styled.EndedTitle>}
         <Styled.Title>{intl.formatMessage(messages.ratingTitle)}</Styled.Title>
         <p>{intl.formatMessage(messages.ratingSubtitle)}</p>
         <Styled.Stars>
