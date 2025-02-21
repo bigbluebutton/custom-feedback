@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+### v1.3.0
+
+* feat: show endReason from url when available
+
 ### v1.2.0
 
 * feat: feat: use locale from userdata if present
