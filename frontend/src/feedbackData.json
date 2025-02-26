@@ -57,7 +57,7 @@
         },
         "type": "radio",
         "next": "audioProblem",
-        "key": "feedback.problem",
+        "key": "problem",
         "value": "audio"
       },
       {
@@ -66,7 +66,7 @@
         },
         "type": "radio",
         "next": "cameraProblem",
-        "key": "feedback.problem",
+        "key": "problem",
         "value": "camera"
       },
       {
@@ -75,7 +75,7 @@
         },
         "type": "radio",
         "next": "connectionProblem",
-        "key": "feedback.problem",
+        "key": "problem",
         "value": "connection"
       },
       {
@@ -84,7 +84,7 @@
         },
         "type": "radio",
         "next": "smartphoneProblem",
-        "key": "feedback.problem",
+        "key": "problem",
         "value": "smartphone"
       },
       {
@@ -93,7 +93,7 @@
         },
         "type": "radio",
         "next": "microphoneProblem",
-        "key": "feedback.problem",
+        "key": "problem",
         "value": "microphone"
       },
       {
@@ -102,7 +102,7 @@
         },
         "type": "radio",
         "next": "multiuserProblem",
-        "key": "feedback.problem",
+        "key": "problem",
         "value": "multiuser"
       },
       {
@@ -111,7 +111,7 @@
         },
         "type": "radio",
         "next": "browserProblem",
-        "key": "feedback.problem",
+        "key": "problem",
         "value": "browser"
       },
       {
@@ -120,7 +120,7 @@
         },
         "type": "radio",
         "next": "whiteboardProblem",
-        "key": "feedback.problem",
+        "key": "problem",
         "value": "whiteboard"
       },
       {
@@ -129,7 +129,7 @@
         },
         "type": "radio",
         "next": "interfaceProblem",
-        "key": "feedback.problem",
+        "key": "problem",
         "value": "interface"
       },
       {
@@ -138,7 +138,7 @@
         },
         "type": "radio",
         "next": "fileUploadProblem",
-        "key": "feedback.problem",
+        "key": "problem",
         "value": "fileupload"
       },
       {
@@ -147,7 +147,7 @@
         },
         "type": "radio",
         "next": "audioCaptionsProblem",
-        "key": "feedback.problem",
+        "key": "problem",
         "value": "audioCaptions"
       },
       {
@@ -156,12 +156,12 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem",
+        "key": "problem",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.problem_described"
+        "key": "problem_described"
       }
     ]
   },
@@ -177,7 +177,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "soundquality"
       },
       {
@@ -186,7 +186,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "hearothers"
       },
       {
@@ -195,7 +195,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "audiosync"
       },
       {
@@ -204,12 +204,12 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.problem_described"
+        "key": "problem_described"
       }
     ]
   },
@@ -225,7 +225,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "activation"
       },
       {
@@ -234,7 +234,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "seeothers"
       },
       {
@@ -243,7 +243,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "imagequality"
       },
       {
@@ -252,12 +252,12 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.problem_described"
+        "key": "problem_described"
       }
     ]
   },
@@ -273,7 +273,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "instability"
       },
       {
@@ -282,7 +282,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "freeze"
       },
       {
@@ -291,7 +291,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "data"
       },
       {
@@ -300,12 +300,12 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.problem_described"
+        "key": "problem_described"
       }
     ]
   },
@@ -321,7 +321,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "performance"
       },
       {
@@ -330,7 +330,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "screenshare"
       },
       {
@@ -339,7 +339,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "conferenceJoin"
       },
       {
@@ -348,12 +348,12 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.problem_described"
+        "key": "problem_described"
       }
     ]
   },
@@ -369,7 +369,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "activation"
       },
       {
@@ -378,7 +378,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "deviceidentification"
       },
       {
@@ -387,7 +387,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "echo"
       },
       {
@@ -396,12 +396,12 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.problem_described"
+        "key": "problem_described"
       }
     ]
   },
@@ -417,7 +417,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "simultaneoususe"
       },
       {
@@ -426,7 +426,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "breakoutroomreturn"
       },
       {
@@ -435,7 +435,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "mutedbreakoutroomreturn"
       },
       {
@@ -444,12 +444,12 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.problem_described"
+        "key": "problem_described"
       }
     ]
   },
@@ -465,7 +465,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "browserincompatibility"
       },
       {
@@ -474,7 +474,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "slowness"
       },
       {
@@ -483,7 +483,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "screenshare"
       },
       {
@@ -492,12 +492,12 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.problem_described"
+        "key": "problem_described"
       }
     ]
   },
@@ -513,7 +513,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "erasertool"
       },
       {
@@ -522,7 +522,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "buckettool"
       },
       {
@@ -531,7 +531,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "textedition"
       },
       {
@@ -540,12 +540,12 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.problem_described"
+        "key": "problem_described"
       }
     ]
   },
@@ -561,7 +561,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "micselect"
       },
       {
@@ -570,7 +570,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "raisehandshortcut"
       },
       {
@@ -579,7 +579,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "changestatus"
       },
       {
@@ -588,12 +588,12 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.problem_described"
+        "key": "problem_described"
       }
     ]
   },
@@ -609,7 +609,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "presentationformatting"
       },
       {
@@ -618,7 +618,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "presentationsize"
       },
       {
@@ -627,7 +627,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "chatfileupload"
       },
       {
@@ -636,12 +636,12 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.problem_described"
+        "key": "problem_described"
       }
     ]
   },
@@ -657,7 +657,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "position"
       },
       {
@@ -666,7 +666,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "difficultyEnabling"
       },
       {
@@ -675,7 +675,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "correctness"
       },
       {
@@ -684,12 +684,12 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.problem_detailed",
+        "key": "problem_detailed",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.problem_described"
+        "key": "problem_described"
       }
     ]
   },
@@ -705,7 +705,7 @@
         },
         "type": "radio",
         "next": "wish",
-        "key": "feedback.like",
+        "key": "like",
         "value": "whiteboard"
       },
       {
@@ -714,7 +714,7 @@
         },
         "type": "radio",
         "next": "wish",
-        "key": "feedback.like",
+        "key": "like",
         "value": "multimediasharing"
       },
       {
@@ -723,7 +723,7 @@
         },
         "type": "radio",
         "next": "wish",
-        "key": "feedback.like",
+        "key": "like",
         "value": "installfree"
       },
       {
@@ -732,7 +732,7 @@
         },
         "type": "radio",
         "next": "wish",
-        "key": "feedback.like",
+        "key": "like",
         "value": "audioCaptions"
       },
       {
@@ -741,12 +741,12 @@
         },
         "type": "radio",
         "next": "wish",
-        "key": "feedback.like",
+        "key": "like",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.like_described"
+        "key": "like_described"
       }
     ]
   },
@@ -762,7 +762,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.wish",
+        "key": "wish",
         "value": "moreusers"
       },
       {
@@ -771,7 +771,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.wish",
+        "key": "wish",
         "value": "chatinteractions"
       },
       {
@@ -780,7 +780,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.wish",
+        "key": "wish",
         "value": "whiteboardtools"
       },
       {
@@ -789,7 +789,7 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.wish",
+        "key": "wish",
         "value": "accessibilityTools"
       },
       {
@@ -798,12 +798,12 @@
         },
         "type": "radio",
         "next": "email",
-        "key": "feedback.wish",
+        "key": "wish",
         "value": "other"
       },
       {
         "type": "textArea",
-        "key": "feedback.wish_described"
+        "key": "wish_described"
       }
     ]
   },
