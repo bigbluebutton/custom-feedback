@@ -14,6 +14,7 @@ const SHARED_SECRET = process.env.SHARED_SECRET;
 const CHECKSUM_ALGORITHM = 'sha1';
 const BASIC_URL = process.env.BASIC_URL;
 const API_PATH = process.env.API_PATH;
+const REGISTER_HOOKS = process.env.REGISTER_HOOKS || false;
 const HOOKS_CREATE = process.env.HOOKS_CREATE || 'hooks/create';
 const HOOKS_DESTROY = process.env.HOOKS_DESTROY || 'hooks/destroy';
 const CALLBACK_PATH = process.env.CALLBACK_PATH;
@@ -47,6 +48,7 @@ async function createHook() {
 
   const checksum = Utils.checksumAPI(fullUrl, SHARED_SECRET, CHECKSUM_ALGORITHM);
   const urlWithChecksum = `${fullUrl}&checksum=${checksum}`;
+  let success;
 
   logger.info(`Final URL with checksum: ${urlWithChecksum}`);
 
@@ -56,11 +58,18 @@ async function createHook() {
       if (hookIdMatch) {
         storedHookId = hookIdMatch[1];
         logger.info(`Hook created with ID: ${storedHookId}`);
+        success = true;
       } else {
         logger.error('Failed to parse hook ID');
+        success = false;
       }
     } else {
       logger.error('Failed to create hook', error);
+      success = false;
+    }
+    if (!success) {
+      logger.error("No webhooks, exiting!");
+      process.exit(1);
     }
   });
 }
@@ -230,17 +239,18 @@ app.post('/feedback/submit', async (req, res) => {
 
 app.listen(port, async () => {
   logger.info(`Server listening on port ${port}`);
-  await createHook();
+  if (REGISTER_HOOKS) {
+    await createHook();
+  }
 });
 
-process.on('SIGINT', async () => {
+const destroyBeforeExit = async () => {
   logger.info('Shutting down server...');
-  await destroyHook();
+  if (REGISTER_HOOK) {
+    await destroyHook();
+  }
   process.exit(0);
-});
+};
 
-process.on('SIGTERM', async () => {
-  logger.info('Shutting down server...');
-  await destroyHook();
-  process.exit(0);
-});
+process.on('SIGINT', destroyBeforeExit);
+process.on('SIGTERM', destroyBeforeExit);
