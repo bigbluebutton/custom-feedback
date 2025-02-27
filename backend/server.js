@@ -199,11 +199,15 @@ app.post('/feedback/submit', async (req, res) => {
     const cleanFeedback = JSON.parse(JSON.stringify(completeFeedback, (key, value) => value === undefined ? undefined : value));
     const logLevel = logger.level;
 
-    console.log(`${new Date().toISOString()} custom-feedback [${logLevel}] : CUSTOM FEEDBACK LOG: ${JSON.stringify(cleanFeedback)}`);
+    if (cleanFeedback.rating) {
+      console.log(`${new Date().toISOString()} custom-feedback [${logLevel}] : CUSTOM FEEDBACK LOG: ${JSON.stringify(cleanFeedback)}`);
+    } else {
+      return logger.info(`Not logging feedback without rating`);
+    }
+
+    await redisClient.set(feedbackKey, JSON.stringify(completeFeedback), { EX: 3600 });
 
     if (FEEDBACK_URL) {
-      await redisClient.set(feedbackKey, JSON.stringify(completeFeedback), { EX: 3600 });
-
       request.post(
         FEEDBACK_URL,
         { json: completeFeedback },
