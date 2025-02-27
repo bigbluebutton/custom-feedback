@@ -18,3 +18,4 @@ services:
       - LOG_STDOUT=true
       - PORT=3009
       - REDIS_HOST=localhost
+      - REGISTER_HOOKS=false

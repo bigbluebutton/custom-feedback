@@ -48,6 +48,7 @@ async function createHook() {
 
   const checksum = Utils.checksumAPI(fullUrl, SHARED_SECRET, CHECKSUM_ALGORITHM);
   const urlWithChecksum = `${fullUrl}&checksum=${checksum}`;
+  let success;
 
   logger.info(`Final URL with checksum: ${urlWithChecksum}`);
 
@@ -57,11 +58,18 @@ async function createHook() {
       if (hookIdMatch) {
         storedHookId = hookIdMatch[1];
         logger.info(`Hook created with ID: ${storedHookId}`);
+        success = true;
       } else {
         logger.error('Failed to parse hook ID');
+        success = false;
       }
     } else {
       logger.error('Failed to create hook', error);
+      success = false;
+    }
+    if (!success) {
+      logger.error("No webhooks, exiting!");
+      process.exit(1);
     }
   });
 }
