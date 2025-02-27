@@ -14,6 +14,7 @@ const SHARED_SECRET = process.env.SHARED_SECRET;
 const CHECKSUM_ALGORITHM = 'sha1';
 const BASIC_URL = process.env.BASIC_URL;
 const API_PATH = process.env.API_PATH;
+const REGISTER_HOOKS = process.env.REGISTER_HOOKS || false;
 const HOOKS_CREATE = process.env.HOOKS_CREATE || 'hooks/create';
 const HOOKS_DESTROY = process.env.HOOKS_DESTROY || 'hooks/destroy';
 const CALLBACK_PATH = process.env.CALLBACK_PATH;
@@ -230,17 +231,18 @@ app.post('/feedback/submit', async (req, res) => {
 
 app.listen(port, async () => {
   logger.info(`Server listening on port ${port}`);
-  await createHook();
+  if (REGISTER_HOOKS) {
+    await createHook();
+  }
 });
 
-process.on('SIGINT', async () => {
+const destroyBeforeExit = async () => {
   logger.info('Shutting down server...');
-  await destroyHook();
+  if (REGISTER_HOOK) {
+    await destroyHook();
+  }
   process.exit(0);
-});
+};
 
-process.on('SIGTERM', async () => {
-  logger.info('Shutting down server...');
-  await destroyHook();
-  process.exit(0);
-});
+process.on('SIGINT', destroyBeforeExit);
+process.on('SIGTERM', destroyBeforeExit);
