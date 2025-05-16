@@ -174,26 +174,37 @@ app.post('/feedback/submit', async (req, res) => {
     const feedbackKey = `feedback:${session.sessionId}:${user.userId}`;
     const existingFeedback = await redisClient.get(feedbackKey);
 
-    if (existingFeedback) {
-      logger.warn(`Feedback already submitted for userID: ${user.userId} sessionID: ${session.sessionId}`);
-      return res.status(400).json({ status: 'error', message: 'Feedback already submitted' });
-    }
-
     const sessionData = await redisClient.hGetAll(`session:${session.sessionId}`);
     const userData = await redisClient.hGetAll(`user:${user.userId}`);
     // User redirect URL takes precedence over session redirect URL
     const redirectUrl = userData.redirect_url || sessionData.redirect_url;
+
+    const isFeedbackEmpty = Object.keys(feedback).length === 0 && !rating;
+    const essentialData = {
+      session: { redirect_url: redirectUrl },
+    }
+
+    if (isFeedbackEmpty) {
+      // Feedback was skipped, but we have to provide to the client the redirect url
+      logger.info('No rating and feedback is empty, probably skipped.');
+      return res.json({ status: 'success', data: essentialData });
+    } 
+
+    if (existingFeedback) {
+      logger.warn(`Feedback already submitted for userID: ${user.userId} sessionID: ${session.sessionId}`);
+      return res.status(400).json({ status: 'error', message: 'Feedback already submitted' });
+    }
 
     logger.info(`Submitting feedback for userID: ${userData.id} meetingID: ${sessionData.session_id}`);
 
     const completeFeedback = {
       rating,
       session: {
+        ...essentialData.session,
         session_name: sessionData.session_name,
         institution_name: sessionData.institution_name,
         institution_guid: sessionData.institution_guid,
         session_id: sessionData.session_id,
-        redirect_url: redirectUrl,
       },
       device,
       user: {

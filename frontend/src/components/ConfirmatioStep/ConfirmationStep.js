@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import Styled from './styles';
 import { defineMessages, injectIntl } from 'react-intl';
 
@@ -22,7 +22,7 @@ const ConfirmationStep = ({ intl, getRedirectUrl, getRedirectTimeout }) => {
     }, redirectTimeout || 10000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [getRedirectTimeout, getRedirectUrl]);
 
   return (
     <Styled.Container>
