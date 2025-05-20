@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+### v1.5.1
+
+* fix: client not redirected when feedback is directly skipped
+
+### v1.5.0
+
+* feat(hooks): If using registered hooks and it fails, exit
+* fix(hooks): Option to not register hooks (for permanent hooks)
+
+### v1.4.0
+
+* fix: Don't send feedback with no rating and don't send duplicated feedback
+* fix(form): drop the feedback prefix in some form answers
+
 ### v1.3.0
 
 * feat: show endReason from url when available
