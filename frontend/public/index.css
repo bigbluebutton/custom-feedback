@@ -1,0 +1,8 @@
+body {
+  margin: 0;
+  font-family: 'Source Sans Pro', Arial, sans-serif;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-background, #102133);
+}

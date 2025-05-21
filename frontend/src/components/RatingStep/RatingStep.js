@@ -1,14 +1,10 @@
-import React, { useState } from 'react';
-import { FaStar } from 'react-icons/fa';
+import { useState } from 'react';
 import { defineMessages, injectIntl } from 'react-intl';
 import feedbackData from '../../feedbackData.json';
 import Styled from './styles';
+import { colorGray, colorPrimary } from '../../ui/palette';
 
 const messages = defineMessages({
-  ratingTitle: {
-    id: 'app.customFeedback.rating.feedbackEvaluation',
-    description: 'Feedback Evaluation'
-  },
   ratingSubtitle: {
     id: 'app.customFeedback.rating.subtitle',
     description: 'We would love to know how your experience was with the platform (optional)'
@@ -16,6 +12,10 @@ const messages = defineMessages({
   leaveButton: {
     id: 'app.customFeedback.defaultButtons.leave',
     description: 'Leave'
+  },
+  next: {
+    id: 'app.customFeedback.defaultButtons.next',
+    description: 'Button label to continue to the next feedback step',
   }
 });
 
@@ -25,42 +25,56 @@ const RatingStep = ({ onNext, intl }) => {
 
   const handleRatingChange = (value) => {
     setRating(value);
-    const nextStep = feedbackData.rating[value].next;
-    onNext(nextStep, { rating: value });
   };
 
   const handleLeave = () => {
-    onNext(null, {});
+    onNext(null, { });
   };
+
+  const nextStep = () => {
+    const nextStep = feedbackData.rating[rating].next;
+    onNext(nextStep, { rating });
+  }
 
   const params = new URLSearchParams(window.location.search);
   const endReason = params.get('reason');
 
   return (
-    <Styled.Container>
-      <Styled.Box>
-        {endReason && <Styled.EndedTitle>{endReason}</Styled.EndedTitle>}
-        <Styled.Title>{intl.formatMessage(messages.ratingTitle)}</Styled.Title>
-        <p>{intl.formatMessage(messages.ratingSubtitle)}</p>
-        <Styled.Stars>
-          {[...Array(11).keys()].slice(1).map(i => (
-            <FaStar
+    <>
+      {endReason && <Styled.EndedTitle>{endReason}</Styled.EndedTitle>}
+      <Styled.Description>{intl.formatMessage(messages.ratingSubtitle)}</Styled.Description>
+      <Styled.Stars
+        onMouseLeave={() => setHover(null)}
+      >
+        {[...Array(1 + 10).keys()].slice(1).map(i => (
+          i <= (hover || rating) ?
+          ( <Styled.FilledStar
               key={i}
-              size={30}
-              color={i <= (hover || rating) ? "#ffc107" : "#e4e5e9"}
+              size={32}
+              color={colorPrimary}
               onMouseEnter={() => setHover(i)}
-              onMouseLeave={() => setHover(null)}
               onClick={() => handleRatingChange(i)}
             />
-          ))}
-        </Styled.Stars>
-        <Styled.ButtonContainer>
-          <Styled.Button onClick={handleLeave}>
-            {intl.formatMessage(messages.leaveButton)}
-          </Styled.Button>
-        </Styled.ButtonContainer>
-      </Styled.Box>
-    </Styled.Container>
+          ) : (
+            <Styled.OutlinedStar
+              key={i}
+              size={32}
+              color={colorGray}
+              onMouseEnter={() => setHover(i)}
+              onClick={() => handleRatingChange(i)}
+            />
+          )
+        ))}
+      </Styled.Stars>
+      <Styled.ButtonContainer>
+        <Styled.Button onClick={handleLeave} ghosted="true">
+          {intl.formatMessage(messages.leaveButton)}
+        </Styled.Button>
+        <Styled.Button onClick={nextStep} disabled={!rating}>
+          {intl.formatMessage(messages.next)}
+        </Styled.Button>
+      </Styled.ButtonContainer>
+    </>
   );
 };
 

@@ -1,6 +1,7 @@
 { 
   "app.customFeedback.confirmation.message": "Obrigado pelo seu feedback! A janela fechará em breve",
-  "app.customFeedback.defaultButtons.next": "Próximo",
+  "app.customFeedback.feedbackTitle": "Feedback de Final de Sessão",
+  "app.customFeedback.defaultButtons.next": "Continuar",
   "app.customFeedback.defaultButtons.nextDesc": "Passar para a próxima etapa do feedback",
   "app.customFeedback.defaultButtons.skip": "Pular",
   "app.customFeedback.defaultButtons.skipDesc": "Pular o feedback",
@@ -8,10 +9,10 @@
   "app.customFeedback.defaultButtons.endDesc": "Finalizar o feedback",
   "app.customFeedback.defaultButtons.leave": "Sair",
   "app.customFeedback.defaultButtons.leaveDesc": "Sair da reunião sem deixar uma avaliação",
+  "app.customFeedback.defaultButtons.send": "Enviar",
   "app.customFeedback.invalidEmail": "Email inválido",
   "app.customFeedback.rating.leftConference": "Você saiu da conferência",
-  "app.customFeedback.rating.subtitle": "Adoraríamos saber como foi sua experiência com a plataforma (opcional)",
-  "app.customFeedback.rating.feedbackEvaluation": "Avaliação de feedback",
+  "app.customFeedback.rating.subtitle": "Adoraríamos saber como foi sua experiência com a plataforma! É opcional, sem obrigação!",
   "app.customFeedback.rating.send": "Enviar",
   "app.customFeedback.like.title": "O que você mais gostou?",
   "app.customFeedback.like.interactiveWhiteboard": "O quadro branco interativo",
@@ -23,9 +24,8 @@
   "app.customFeedback.wish.chatInteracions": "Interação no chat (reações e envio de arquivos...)",
   "app.customFeedback.wish.whiteboardTools": "Ferramentas no quadro branco (editor de texto, borracha...)",
   "app.customFeedback.wish.accessibilityTools": "Mais ferramentas de acessibilidade",
-  "app.customFeedback.email.thank": "Obrigado pelas suas respostas",
-  "app.customFeedback.email.contact": "Gostaria de deixar seu e-mail para contato?",
-  "app.customFeedback.email.placeholder": "E-mail (opcional)",
+  "app.customFeedback.email.thank": "Valeu por compartilhar! Se quiser, deixe seu e-mail aqui para contato — é opcional.",
+  "app.customFeedback.email.placeholder": "seuemail@exemplo.com",
   "app.customFeedback.redirection.thank": "Obrigado pelas suas respostas",
   "app.customFeedback.redirection.notice": "Você está sendo redirecionado",
   "app.customFeedback.problem.title": "Se você teve algum problema, onde foi?",
@@ -84,6 +84,6 @@
   "app.customFeedback.audioCaptionsProblem.position": "Posição das legendas na tela",
   "app.customFeedback.audioCaptionsProblem.difficultyEnabling": "Dificuldade para ativar o recurso",
   "app.customFeedback.audioCaptionsProblem.correctness": "Fidelidade da legenda com o que é falado",
-  "app.customFeedback.other": "Outro:"
+  "app.customFeedback.other": "Outro:",
+  "app.customFeedback.describeProblem": "Descreva aqui."
 }
-

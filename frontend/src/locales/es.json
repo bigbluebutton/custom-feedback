@@ -1,6 +1,7 @@
 { 
   "app.customFeedback.confirmation.message": "¡Gracias por tus comentarios! La ventana se cerrará en breve.",
-  "app.customFeedback.defaultButtons.next": "Siguiente",
+  "app.customFeedback.feedbackTitle": "Comentarios al Final de la Sesión",
+  "app.customFeedback.defaultButtons.next": "Continuar",
   "app.customFeedback.defaultButtons.nextDesc": "Avanzar al siguiente paso del feedback",
   "app.customFeedback.defaultButtons.skip": "Saltar",
   "app.customFeedback.defaultButtons.skipDesc": "Saltar el feedback",
@@ -8,10 +9,10 @@
   "app.customFeedback.defaultButtons.endDesc": "Terminar el feedback",
   "app.customFeedback.defaultButtons.leave": "Salir",
   "app.customFeedback.defaultButtons.leaveDesc": "Salir de la reunión sin dejar un feedback",
+  "app.customFeedback.defaultButtons.send": "Enviar",
   "app.customFeedback.invalidEmail": "Email inválido",
   "app.customFeedback.rating.leftConference": "Has salido de la conferencia",
-  "app.customFeedback.rating.subtitle": "Nos encantaría saber cómo fue tu experiencia con la plataforma (opcional)",
-  "app.customFeedback.rating.feedbackEvaluation": "Evaluación de feedback",
+  "app.customFeedback.rating.subtitle": "¡Nos encantaría saber cómo fue tu experiencia con la plataforma! Es opcional, sin compromiso.",
   "app.customFeedback.rating.send": "Enviar",
   "app.customFeedback.like.title": "¿Qué es lo que más te gustó?",
   "app.customFeedback.like.interactiveWhiteboard": "El pizarrón interactivo",
@@ -23,9 +24,8 @@
   "app.customFeedback.wish.chatInteracions": "Interacciones en el chat (reacciones, envío de archivos, etc.)",
   "app.customFeedback.wish.whiteboardTools": "Herramientas en el pizarrón (editor de texto, borrador, etc.)",
   "app.customFeedback.wish.accessibilityTools": "Más herramientas de accesibilidad",
-  "app.customFeedback.email.thank": "Gracias por tus respuestas",
-  "app.customFeedback.email.contact": "¿Te gustaría dejar tu email para contacto?",
-  "app.customFeedback.email.placeholder": "Email (opcional)",
+  "app.customFeedback.email.thank": "¡Gracias por compartir! Si quieres, deja tu correo aquí para contacto — es opcional.",
+  "app.customFeedback.email.placeholder": "tucorreo@ejemplo.com",
   "app.customFeedback.redirection.thank": "Gracias por tus respuestas",
   "app.customFeedback.redirection.notice": "Estás siendo redirigido",
   "app.customFeedback.problem.title": "Si tuviste algún problema, ¿dónde fue?",
@@ -84,6 +84,6 @@
   "app.customFeedback.audioCaptionsProblem.position": "Posición de los subtítulos en la pantalla",
   "app.customFeedback.audioCaptionsProblem.difficultyEnabling": "Dificultad para activar la función",
   "app.customFeedback.audioCaptionsProblem.correctness": "Exactitud de los subtítulos con lo que se dice",
-  "app.customFeedback.other": "Otro:"
+  "app.customFeedback.other": "Otro:",
+  "app.custemFeedback.describeProblem": "Describe aquí"
 }
-

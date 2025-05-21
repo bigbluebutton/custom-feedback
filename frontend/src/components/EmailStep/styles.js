@@ -1,4 +1,11 @@
 import styled from 'styled-components';
+import {
+  colorGray,
+  btnPrimaryColor,
+  btnPrimaryBg,
+  btnPrimaryDisabledBg,
+  defaultBorderColor,
+} from '../../ui/palette';
 
 const Container = styled.div`
   display: flex;
@@ -6,7 +13,6 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
-  font-family: 'Nunito Sans', sans-serif;
 `;
 
 const Box = styled.div`
@@ -19,35 +25,36 @@ const Box = styled.div`
 
 const Title = styled.h2`
   font-size: 24px;
-  margin-bottom: 24px;
 `;
 
 const Input = styled.input`
-  width: 100%;
-  padding: 10px;
-  margin-top: 16px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  text-align: center;
+  display: flex;
+  padding: 16px;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+  border-radius: 16px;
+  border: 1px solid ${defaultBorderColor};
+  font-size: 16px;
 `;
 
 const ButtonContainer = styled.div`
   display: flex;
-  justify-content: center;
-  margin-top: 8px;
+  justify-content: flex-end;
+  gap: 24px;
 `;
 
 const Button = styled.button`
-  padding: 10px 20px;
+  padding: 8px 16px;
   font-size: 16px;
   cursor: pointer;
-  background-color: #007bff;
-  color: white;
+  background-color: ${({ ghosted }) => ghosted ? 'transparent' : btnPrimaryBg };
+  color: ${({ ghosted }) => ghosted ? colorGray : btnPrimaryColor };
+  ${({ ghosted }) => ghosted && 'text-decoration: underline' };
   border: none;
-  border-radius: 5px;
+  border-radius: 16px;
   &:disabled {
-    background-color: #ccc;
+    background-color: ${btnPrimaryDisabledBg};
     cursor: not-allowed;
   }
 `;

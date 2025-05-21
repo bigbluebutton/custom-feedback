@@ -1,5 +1,6 @@
 {
   "rating": {
+    "progress": "01/04",
     "0": 
     {
       "next": "problem"
@@ -49,7 +50,7 @@
     "titleLabel":{
       "id": "app.customFeedback.problem.title"
     },
-    "progress": "1/2",
+    "progress": "02/04",
     "options":[
       {
         "textLabel":{
@@ -169,7 +170,7 @@
     "titleLabel":{
       "id": "app.customFeedback.audioProblem.title"
     },
-    "progress": "2/2",
+    "progress": "03/04",
     "options":[
       {
         "textLabel":{
@@ -217,7 +218,7 @@
     "titleLabel":{
       "id": "app.customFeedback.cameraProblem.title"
     },
-    "progress": "2/2",
+    "progress": "03/04",
     "options":[
       {
         "textLabel":{
@@ -265,7 +266,7 @@
     "titleLabel":{
       "id": "app.customFeedback.connectionProblem.title"
     },
-    "progress": "2/2",
+    "progress": "03/04",
     "options":[
       {
         "textLabel":{
@@ -313,7 +314,7 @@
     "titleLabel":{
       "id": "app.customFeedback.smartphoneProblem.title"
     },
-    "progress": "2/2",
+    "progress": "03/04",
     "options":[
       {
         "textLabel":{
@@ -361,7 +362,7 @@
     "titleLabel":{
       "id": "app.customFeedback.microphoneProblem.title"
     },
-    "progress": "2/2",
+    "progress": "03/04",
     "options":[
       {
         "textLabel":{
@@ -409,7 +410,7 @@
     "titleLabel":{
       "id": "app.customFeedback.multiuserProblem.title"
     },
-    "progress": "2/2",
+    "progress": "03/04",
     "options":[
       {
         "textLabel":{
@@ -457,7 +458,7 @@
     "titleLabel":{
       "id": "app.customFeedback.browserProblem.title"
     },
-    "progress": "2/2",
+    "progress": "03/04",
     "options":[
       {
         "textLabel":{
@@ -505,7 +506,7 @@
     "titleLabel":{
       "id": "app.customFeedback.whiteboardProblem.title"
     },
-    "progress": "2/2",
+    "progress": "03/04",
     "options":[
       {
         "textLabel":{
@@ -553,7 +554,7 @@
     "titleLabel":{
       "id": "app.customFeedback.interfaceProblem.title"
     },
-    "progress": "2/2",
+    "progress": "03/04",
     "options":[
       {
         "textLabel":{
@@ -601,7 +602,7 @@
     "titleLabel":{
       "id": "app.customFeedback.fileUploadProblem.title"
     },
-    "progress": "2/2",
+    "progress": "03/04",
     "options":[
       {
         "textLabel":{
@@ -649,7 +650,7 @@
     "titleLabel":{
       "id": "app.customFeedback.audioCaptionsProblem.title"
     },
-    "progress": "2/2",
+    "progress": "03/04",
     "options":[
       {
         "textLabel":{
@@ -697,7 +698,7 @@
     "titleLabel":{
       "id": "app.customFeedback.like.title"
     },
-    "progress": "1/2",
+    "progress": "02/04",
     "options":[
       {
         "textLabel":{
@@ -754,7 +755,7 @@
     "titleLabel":{
       "id": "app.customFeedback.wish.title"
     },
-    "progress": "2/2",
+    "progress": "03/04",
     "options":[
       {
         "textLabel":{
@@ -809,15 +810,10 @@
   },
   "email": {
     "titleLabel":{
-      "id": "app.customFeedback.redirection.thank"
+      "id": "app.customFeedback.email.thank"
     },
+    "progress": "04/04",
     "options":[
-      {
-        "textLabel":{
-          "id": "app.customFeedback.email.contact"
-        },
-        "type": "paragraph"
-      },
       {
         "type": "email",
         "placeholderLabel":{
