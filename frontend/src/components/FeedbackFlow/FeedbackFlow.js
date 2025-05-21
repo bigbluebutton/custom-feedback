@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { injectIntl, defineMessages } from 'react-intl';
 import { getDeviceInfo, getURLParams, submitFeedback, handleBeforeUnload, getRedirectUrl, getRedirectTimeout } from '../service';
 import RatingStep from '../RatingStep/RatingStep';
@@ -18,7 +18,7 @@ const messages = defineMessages({
 const FeedbackFlow = ({ intl }) => {
   const [currentStep, setCurrentStep] = useState('rating');
   const [isValidSession, setIsValidSession] = useState(true);
-  const [feedback, setFeedback] = useState({
+  const feedback = useRef({
     session: {},
     device: getDeviceInfo(),
     user: {},
@@ -40,21 +40,21 @@ const FeedbackFlow = ({ intl }) => {
       return;
     }
 
-    setFeedback(prev => ({
-      ...prev,
+    feedback.current = {
+      ...feedback.current,
       session: { sessionId },
       user: { userId }
-    }));
+    };
 
     const savedFeedback = sessionStorage.getItem('feedbackData');
     if (savedFeedback) {
-      setFeedback(JSON.parse(savedFeedback));
+      feedback.current = JSON.parse(savedFeedback);
     }
   }, []);
 
   const handleNext = (nextStep, data) => {
-    setFeedback(prev => {
-      let updatedFeedback = { ...prev };
+    const updatedFeedback = () => {
+      let updatedFeedback = { ...feedback.current };
   
       if (data.hasOwnProperty('rating')) {
         updatedFeedback = { ...updatedFeedback, rating: data.rating };
@@ -67,14 +67,15 @@ const FeedbackFlow = ({ intl }) => {
       sessionStorage.setItem('feedbackData', JSON.stringify(updatedFeedback));
 
       return updatedFeedback;
-    });
+    };
+
+    feedback.current = updatedFeedback();
   
     if (!nextStep) {
-      submitFeedback(feedback);
-      setCurrentStep(nextStep);
-    } else {
-      setCurrentStep(nextStep);
+      submitFeedback(feedback.current);
     }
+
+    setCurrentStep(nextStep);
   };
 
   const renderStep = () => {
