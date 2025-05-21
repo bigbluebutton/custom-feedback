@@ -1,6 +1,7 @@
 { 
   "app.customFeedback.confirmation.message": "Thank you for your feedback! The window will close shortly",
-  "app.customFeedback.defaultButtons.next": "Next",
+  "app.customFeedback.feedbackTitle": "End-of-Session Feedback",
+  "app.customFeedback.defaultButtons.next": "Continue",
   "app.customFeedback.defaultButtons.nextDesc": "Proceed to the next step of the feedback",
   "app.customFeedback.defaultButtons.skip": "Skip",
   "app.customFeedback.defaultButtons.skipDesc": "Skip the feedback",
@@ -8,10 +9,10 @@
   "app.customFeedback.defaultButtons.endDesc": "Finish the feedback",
   "app.customFeedback.defaultButtons.leave": "Leave",
   "app.customFeedback.defaultButtons.leaveDesc": "Leave the meeting without providing feedback",
+  "app.customFeedback.defaultButtons.send": "Submit",
   "app.customFeedback.invalidEmail": "Invalid email",
   "app.customFeedback.rating.leftConference": "You left the conference",
-  "app.customFeedback.rating.subtitle": "We would love to know how your experience was with the platform (optional)",
-  "app.customFeedback.rating.feedbackEvaluation": "Feedback Evaluation",
+  "app.customFeedback.rating.subtitle": "We’d love to know how your experience with the platform was! It’s optional, no obligation!",
   "app.customFeedback.rating.send": "Send",
   "app.customFeedback.like.title": "What did you like the most?",
   "app.customFeedback.like.interactiveWhiteboard": "The interactive whiteboard",
@@ -23,9 +24,8 @@
   "app.customFeedback.wish.chatInteracions": "Chat interactions (reactions, file sharing, etc.)",
   "app.customFeedback.wish.whiteboardTools": "Whiteboard tools (text editor, eraser, etc.)",
   "app.customFeedback.wish.accessibilityTools": "More accessibility tools",
-  "app.customFeedback.email.thank": "Thank you for your responses",
-  "app.customFeedback.email.contact": "Would you like to leave your email for contact?",
-  "app.customFeedback.email.placeholder": "Email (optional)",
+  "app.customFeedback.email.thank": "Thanks for sharing! If you’d like, leave your email here for contact — it’s optional.",
+  "app.customFeedback.email.placeholder": "youremail@example.com",
   "app.customFeedback.redirection.thank": "Thank you for your responses",
   "app.customFeedback.redirection.notice": "You are being redirected",
   "app.customFeedback.problem.title": "If you had any problems, where was it?",
@@ -84,6 +84,6 @@
   "app.customFeedback.audioCaptionsProblem.position": "Captions position on the screen",
   "app.customFeedback.audioCaptionsProblem.difficultyEnabling": "Difficulty enabling the feature",
   "app.customFeedback.audioCaptionsProblem.correctness": "Accuracy of captions with what is spoken",
-  "app.customFeedback.other": "Other:"
+  "app.customFeedback.other": "Other:",
+  "app.customFeedback.describeProblem": "Describe it here."
 }
-

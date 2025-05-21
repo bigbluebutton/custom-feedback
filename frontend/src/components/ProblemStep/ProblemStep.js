@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { injectIntl } from 'react-intl';
+import { defineMessages, injectIntl } from 'react-intl';
 import Styled from './styles';
+
+const messages = defineMessages({
+  describeProblem: {
+    id: 'app.customFeedback.describeProblem',
+  },
+  skip: {
+    id: 'app.customFeedback.defaultButtons.skip',
+  },
+  continue: {
+    id: 'app.customFeedback.defaultButtons.next',
+  },
+});
 
 const ProblemStep = ({ onNext, stepData, intl }) => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -12,6 +24,7 @@ const ProblemStep = ({ onNext, stepData, intl }) => {
   }, [stepData]);
 
   const handleOptionChange = (option) => {
+    console.log(option);
     setSelectedOption(option);
     if (option.value !== 'other') {
       setTextValue('');
@@ -37,42 +50,44 @@ const ProblemStep = ({ onNext, stepData, intl }) => {
   };
 
   return (
-    <Styled.Container>
-      <Styled.Box>
-        <Styled.Title>{intl.formatMessage({ id: stepData.titleLabel.id })}</Styled.Title>
-        {stepData.options.map((option, index) => (
-          <Styled.Option key={index}>
-            {option.type === 'radio' ? (
-              <div>
-                <input
-                  type="radio"
-                  id={option.value}
-                  name={`problem-${stepData.titleLabel.id}`}
-                  value={option.value}
-                  checked={selectedOption ? selectedOption.value === option.value : false}
-                  onChange={() => handleOptionChange(option)}
-                />
-                <label htmlFor={option.value}>{intl.formatMessage({ id: option.textLabel.id })}</label>
-              </div>
-            ) : (
-              <Styled.TextArea
-                value={textValue}
-                onChange={handleTextChange}
-                disabled={!selectedOption || selectedOption.value !== 'other'}
+    <Styled.OptionsWrapper>
+      {stepData.options.map((option, index) => (
+        <Styled.Option key={index}>
+          {option.type === 'radio' ? (
+            <Styled.ClicableArea>
+              <Styled.RadioButton
+                type="radio"
+                id={option.value}
+                name={`problem-${stepData.titleLabel.id}`}
+                value={option.value}
+                checked={selectedOption ? selectedOption.value === option.value : false}
+                onChange={() => handleOptionChange(option)}
               />
-            )}
-          </Styled.Option>
-        ))}
-        <Styled.ButtonContainer>
-          <Styled.Button onClick={handleLeave} style={{ backgroundColor: '#ccc' }}>
-            {intl.formatMessage({ id: 'app.customFeedback.defaultButtons.leave' })}
-          </Styled.Button>
-          <Styled.Button onClick={handleSubmit} disabled={!selectedOption}>
-            {intl.formatMessage({ id: 'app.customFeedback.defaultButtons.next' })}
-          </Styled.Button>
-        </Styled.ButtonContainer>
-      </Styled.Box>
-    </Styled.Container>
+              <Styled.Label htmlFor={option.value}>{intl.formatMessage({ id: option.textLabel.id })}</Styled.Label>
+            </Styled.ClicableArea>
+          ) : (
+            <Styled.TextArea
+              value={textValue}
+              onFocus={() => handleOptionChange({value: 'other'})}
+              onClick={() => handleOptionChange({value: 'other'})}
+              onChange={(selectedOption || selectedOption?.value === 'other')
+                ? handleTextChange
+                : () => {}
+              }
+              placeholder={intl.formatMessage(messages.describeProblem)}
+            />
+          )}
+        </Styled.Option>
+      ))}
+      <Styled.ButtonContainer>
+        <Styled.Button onClick={handleLeave} ghosted="true">
+          {intl.formatMessage(messages.skip)}
+        </Styled.Button>
+        <Styled.Button onClick={handleSubmit} disabled={!selectedOption}>
+          {intl.formatMessage(messages.continue)}
+        </Styled.Button>
+      </Styled.ButtonContainer>
+    </Styled.OptionsWrapper>
   );
 };
 

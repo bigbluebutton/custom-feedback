@@ -1,0 +1,10 @@
+export const colorWhite = 'var(--color-white, #FFF)';
+export const colorGray = 'var(--color-gray, #717C91)';
+export const colorTextLight = `var(--color-text-light, ${colorGray})`;
+export const colorTextDefault = `var(--color-text-default, #393C48)`;
+export const colorBackground = 'var(--color-background, #102133)';
+export const colorPrimary = 'var(--color-primary, #0F70D7)';
+export const btnPrimaryBg = `var(--btn-primary-bg, ${colorPrimary})`;
+export const btnPrimaryColor = `var(--btn-primary-color, ${colorWhite})`;
+export const btnPrimaryDisabledBg = 'var(--btn-primary-disabled-bg, #ccc)';
+export const defaultBorderColor = `var(--default-border-color, #B0BDC9)`;

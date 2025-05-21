@@ -25,11 +25,9 @@ const ConfirmationStep = ({ intl, getRedirectUrl, getRedirectTimeout }) => {
   }, [getRedirectTimeout, getRedirectUrl]);
 
   return (
-    <Styled.Container>
-      <Styled.Box>
-        <Styled.Title>{intl.formatMessage(messages.confirmationMessage)}</Styled.Title>
-      </Styled.Box>
-    </Styled.Container>
+    <>
+      <Styled.Description>{intl.formatMessage(messages.confirmationMessage)}<Styled.Dots/></Styled.Description>
+    </>
   );
 };
 

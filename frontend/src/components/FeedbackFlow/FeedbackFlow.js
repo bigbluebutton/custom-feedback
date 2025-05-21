@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { injectIntl, defineMessages } from 'react-intl';
 import { getDeviceInfo, getURLParams, submitFeedback, handleBeforeUnload, getRedirectUrl, getRedirectTimeout } from '../service';
 import RatingStep from '../RatingStep/RatingStep';
 import ProblemStep from '../ProblemStep/ProblemStep';
 import EmailStep from '../EmailStep/EmailStep';
 import ConfirmationStep from '../ConfirmatioStep/ConfirmationStep';
 import feedbackData from '../../feedbackData.json';
+import Styled from './styles';
 
-const FeedbackFlow = () => {
+const messages = defineMessages({
+  feedbackTitle: {
+    id: 'app.customFeedback.feedbackTitle',
+    description: 'Feedback Evaluation Title',
+  },
+});
+
+const FeedbackFlow = ({ intl }) => {
   const [currentStep, setCurrentStep] = useState('rating');
   const [isValidSession, setIsValidSession] = useState(true);
   const [feedback, setFeedback] = useState({
@@ -77,7 +86,7 @@ const FeedbackFlow = () => {
       case 'rating':
         return <RatingStep onNext={handleNext} />;
       case 'problem':
-        return <ProblemStep key="problem" onNext={handleNext} stepData={feedbackData.problem} />;
+        return <ProblemStep intl={intl} key="problem" onNext={handleNext} stepData={feedbackData.problem} />;
       case 'audioProblem':
       case 'cameraProblem':
       case 'connectionProblem':
@@ -102,11 +111,23 @@ const FeedbackFlow = () => {
     }
   };
 
+  const isStepValid = feedbackData && currentStep;
+  const hasTitle = isStepValid && Object.keys(feedbackData[currentStep]).includes("titleLabel"); 
+
   return (
-    <div>
-      {renderStep()}
-    </div>
+    <Styled.Container>
+      <Styled.Box>
+        <Styled.TitleWrapper>
+          <Styled.Title>{intl.formatMessage(messages.feedbackTitle)}</Styled.Title>
+          {isStepValid && <Styled.Progress>{feedbackData[currentStep].progress}</Styled.Progress>}
+        </Styled.TitleWrapper> 
+        {hasTitle && (
+          <Styled.StepTitle>{intl.formatMessage(feedbackData[currentStep].titleLabel)}</Styled.StepTitle>
+        )}
+        {renderStep()}
+      </Styled.Box>
+    </Styled.Container>
   );
 };
 
-export default FeedbackFlow;
+export default injectIntl(FeedbackFlow);
