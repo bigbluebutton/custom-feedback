@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+### v1.6.0
+
+* feat: enhance UI and generalize steps
+* feat: add Italian localization
+* fix: tweaks for larger devices
+* fix: user-typed answers were not submitted with feedback
+* build: npm audit fix on backend and frontend
+
 ### v1.5.1
 
 * fix: client not redirected when feedback is directly skipped
