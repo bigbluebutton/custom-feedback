@@ -1,5 +1,6 @@
-{ 
+{
   "app.customFeedback.confirmation.message": "¡Gracias por tus comentarios! La ventana se cerrará en breve.",
+  "app.customFeedback.skipped.message": "Tu sesión ha finalizado. Ya puedes cerrar esta ventana.",
   "app.customFeedback.feedbackTitle": "Comentarios al Final de la Sesión",
   "app.customFeedback.defaultButtons.next": "Continuar",
   "app.customFeedback.defaultButtons.nextDesc": "Avanzar al siguiente paso del feedback",
