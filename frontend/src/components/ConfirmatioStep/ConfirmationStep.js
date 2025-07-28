@@ -8,32 +8,34 @@ const messages = defineMessages({
     description: 'Thank you for your feedback! The window will close shortly.'
   },
   skippedMessage: {
-    id: 'app.customFeedback.skipped.message',
-    description: 'Your session has ended. You may now close this window.'
+    id: 'app.customFeedback.windowWillClose',
+    description: 'The window will close shortly.'
   }
 });
 
-const ConfirmationStep = ({ intl, getRedirectUrl, getRedirectTimeout, isSkipped }) => {
+const ConfirmationStep = ({ intl, getRedirectUrl, getRedirectTimeout, endReason, isSkipped }) => {
   useEffect(() => {
-    const redirectTimeout = getRedirectTimeout ? getRedirectTimeout() : null;
+    const redirectTimeout = getRedirectTimeout ? getRedirectTimeout() : 10000;
     const timer = setTimeout(() => {
       const redirectUrl = getRedirectUrl ? getRedirectUrl() : null;
       if (redirectUrl) {
         window.location.href = redirectUrl;
-      } else if (!isSkipped) {
-        window.close();
+      } else {
+        if (!isSkipped) {
+            window.close();
+        }
       }
-    }, redirectTimeout || 10000);
+    }, redirectTimeout);
 
     return () => clearTimeout(timer);
   }, [getRedirectTimeout, getRedirectUrl, isSkipped]);
 
   const message = isSkipped ? messages.skippedMessage : messages.confirmationMessage;
-  const showDots = !isSkipped;
 
   return (
     <>
-      <Styled.Description>{intl.formatMessage(message)}{showDots && <Styled.Dots/>}</Styled.Description>
+      {endReason && <Styled.EndedTitle>{endReason}</Styled.EndedTitle>}
+      <Styled.Description>{intl.formatMessage(message)}<Styled.Dots/></Styled.Description>
     </>
   );
 };

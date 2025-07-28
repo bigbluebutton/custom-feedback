@@ -92,21 +92,28 @@ async function destroyHook() {
 }
 
 app.use('/feedback', async (req, res, next) => {
-  const { userId, meetingId } = req.query;
+  const { userId, meetingId, reason } = req.query;
 
   if (userId && meetingId && !req.query.skipped) {
     const userData = await redisClient.hGetAll(`user:${userId}`);
     const sessionData = await redisClient.hGetAll(`session:${meetingId}`);
-
+    
     if (userData.ask_for_feedback === 'false') {
       const finalRedirectUrl = userData.redirect_url || sessionData.redirect_url || '';
+      const redirectTimeout = sessionData.redirect_timeout || REDIRECT_TIMEOUT || '10000';
+
       const params = new URLSearchParams({
         meetingId: req.query.meetingId,
         userId: req.query.userId,
         skipped: 'true',
         redirectUrl: finalRedirectUrl,
+        redirectTimeout: redirectTimeout,
       });
 
+      if (reason) {
+        params.set('reason', reason);
+      }
+      
       if (req.query.locale) {
         params.set('locale', req.query.locale);
       }

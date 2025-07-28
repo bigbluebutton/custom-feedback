@@ -19,6 +19,8 @@ const FeedbackFlow = ({ intl }) => {
   const [currentStep, setCurrentStep] = useState('rating');
   const [isValidSession, setIsValidSession] = useState(true);
   const [isSkipped, setIsSkipped] = useState(false);
+  const [endReason, setEndReason] = useState(null);
+
   const feedback = useRef({
     session: {},
     device: getDeviceInfo(),
@@ -40,12 +42,21 @@ const FeedbackFlow = ({ intl }) => {
     const userId = params.get('userId');
     const skipped = params.get('skipped') === 'true';
     const finalRedirectUrl = params.get('redirectUrl');
+    const redirectTimeout = params.get('redirectTimeout');
+    const reason = params.get('reason');
+
+    if (reason) {
+      setEndReason(reason);
+    }
 
     if (skipped) {
       setIsSkipped(true);
       setCurrentStep('confirmation');
       if (finalRedirectUrl) {
         sessionStorage.setItem('redirectUrl', finalRedirectUrl);
+      }
+      if (redirectTimeout) {
+        sessionStorage.setItem('redirectTimeout', redirectTimeout);
       }
       return;
     }
@@ -123,20 +134,22 @@ const FeedbackFlow = ({ intl }) => {
         return <EmailStep key="email" onNext={handleNext} stepData={feedbackData.email} />;
       case 'confirmation':
       default:
-        return <ConfirmationStep isSkipped={isSkipped} getRedirectUrl={getRedirectUrl} getRedirectTimeout={getRedirectTimeout} />;
+        return <ConfirmationStep isSkipped={isSkipped} endReason={endReason} getRedirectUrl={getRedirectUrl} getRedirectTimeout={getRedirectTimeout} />;
     }
   };
 
   const isStepValid = feedbackData && currentStep && feedbackData[currentStep];
-  const hasTitle = isStepValid && Object.keys(feedbackData[currentStep]).includes("titleLabel");
+  const hasTitle = isStepValid && Object.keys(feedbackData[currentStep]).includes("titleLabel"); 
 
   return (
     <Styled.Container>
       <Styled.Box>
-        <Styled.TitleWrapper>
-          <Styled.Title>{intl.formatMessage(messages.feedbackTitle)}</Styled.Title>
-          {isStepValid && !isSkipped && <Styled.Progress>{feedbackData[currentStep].progress}</Styled.Progress>}
-        </Styled.TitleWrapper> 
+        {!isSkipped && (
+          <Styled.TitleWrapper>
+            <Styled.Title>{intl.formatMessage(messages.feedbackTitle)}</Styled.Title>
+            {isStepValid && <Styled.Progress>{feedbackData[currentStep].progress}</Styled.Progress>}
+          </Styled.TitleWrapper>
+        )}
         {hasTitle && !isSkipped && (
           <Styled.StepTitle>{intl.formatMessage(feedbackData[currentStep].titleLabel)}</Styled.StepTitle>
         )}

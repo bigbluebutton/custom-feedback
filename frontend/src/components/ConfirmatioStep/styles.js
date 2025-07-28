@@ -1,5 +1,14 @@
 import styled, { keyframes } from 'styled-components';
 
+const EndedTitle = styled.span`
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  display: block;
+  margin-bottom: 16px;
+`;
+
 const Description = styled.div`
   font-size: 16px;
   font-style: normal;
@@ -25,6 +34,7 @@ const Dots = styled.span`
 `;
 
 const styles = {
+  EndedTitle,
   Description,
   dotAnimation,
   Dots,
