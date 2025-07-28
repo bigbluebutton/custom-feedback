@@ -15,17 +15,15 @@ const messages = defineMessages({
 
 const ConfirmationStep = ({ intl, getRedirectUrl, getRedirectTimeout, endReason, isSkipped }) => {
   useEffect(() => {
-    const redirectTimeout = getRedirectTimeout ? getRedirectTimeout() : 10000;
+    const redirectTimeout = getRedirectTimeout ? getRedirectTimeout() : null;
     const timer = setTimeout(() => {
       const redirectUrl = getRedirectUrl ? getRedirectUrl() : null;
       if (redirectUrl) {
         window.location.href = redirectUrl;
       } else {
-        if (!isSkipped) {
-            window.close();
-        }
+        window.close();
       }
-    }, redirectTimeout);
+    }, redirectTimeout || 10000);
 
     return () => clearTimeout(timer);
   }, [getRedirectTimeout, getRedirectUrl, isSkipped]);

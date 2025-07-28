@@ -100,7 +100,7 @@ app.use('/feedback', async (req, res, next) => {
     
     if (userData.ask_for_feedback === 'false') {
       const finalRedirectUrl = userData.redirect_url || sessionData.redirect_url || '';
-      const redirectTimeout = sessionData.redirect_timeout || REDIRECT_TIMEOUT || '10000';
+      const redirectTimeout = sessionData.redirect_timeout || REDIRECT_TIMEOUT;
 
       const params = new URLSearchParams({
         meetingId: req.query.meetingId,
@@ -262,9 +262,9 @@ app.post('/feedback/submit', async (req, res) => {
     const logLevel = logger.level;
 
     if (cleanFeedback.rating) {
-        console.log(`${new Date().toISOString()} custom-feedback [${logLevel}] : CUSTOM FEEDBACK LOG: ${JSON.stringify(cleanFeedback)}`);
+      console.log(`${new Date().toISOString()} custom-feedback [${logLevel}] : CUSTOM FEEDBACK LOG: ${JSON.stringify(cleanFeedback)}`);
     } else {
-        return logger.info(`Not logging feedback without rating`);
+      return logger.info(`Not logging feedback without rating`);
     }
 
     await redisClient.set(feedbackKey, JSON.stringify(completeFeedback), { EX: 3600 });
