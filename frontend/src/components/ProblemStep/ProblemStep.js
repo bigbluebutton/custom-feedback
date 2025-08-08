@@ -17,6 +17,7 @@ const messages = defineMessages({
 const ProblemStep = ({ onNext, stepData, intl }) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [textValue, setTextValue] = useState('');
+  const hasTitle = Object.keys(stepData).includes("titleLabel"); 
 
   useEffect(() => {
     setSelectedOption(null);
@@ -50,35 +51,44 @@ const ProblemStep = ({ onNext, stepData, intl }) => {
   };
 
   return (
-    <Styled.OptionsWrapper>
-      {stepData.options.map((option, index) => (
-        <Styled.Option key={index}>
-          {option.type === 'radio' ? (
-            <Styled.ClicableArea>
-              <Styled.RadioButton
-                type="radio"
-                id={option.value}
-                name={`problem-${stepData.titleLabel.id}`}
-                value={option.value}
-                checked={selectedOption ? selectedOption.value === option.value : false}
-                onChange={() => handleOptionChange(option)}
-              />
-              <Styled.Label htmlFor={option.value}>{intl.formatMessage({ id: option.textLabel.id })}</Styled.Label>
-            </Styled.ClicableArea>
-          ) : (
-            <Styled.TextArea
-              value={textValue}
-              onFocus={() => handleOptionChange({value: 'other'})}
-              onClick={() => handleOptionChange({value: 'other'})}
-              onChange={(selectedOption || selectedOption?.value === 'other')
-                ? handleTextChange
-                : () => {}
-              }
-              placeholder={intl.formatMessage(messages.describeProblem)}
-            />
+    <Styled.ProblemWrapper>
+      <Styled.TitleOptionsWrapper>
+        {hasTitle && (
+          <Styled.StepTitle>{intl.formatMessage(stepData.titleLabel)}</Styled.StepTitle>
+        )}
+        <Styled.OptionsWrapper>
+          {stepData.options.map((option, index) =>
+            option.type === 'radio' ? (
+              <Styled.Option key={index}>
+                <Styled.ClicableArea>
+                  <Styled.RadioButton
+                    type="radio"
+                    id={option.value}
+                    name={`problem-${stepData.titleLabel.id}`}
+                    value={option.value}
+                    checked={selectedOption ? selectedOption.value === option.value : false}
+                    onChange={() => handleOptionChange(option)}
+                  />
+                  <Styled.Label htmlFor={option.value}>{intl.formatMessage({ id: option.textLabel.id })}</Styled.Label>
+                </Styled.ClicableArea>
+              </Styled.Option>
+            ) : null
           )}
-        </Styled.Option>
-      ))}
+        </Styled.OptionsWrapper>
+        {stepData.options.find((option) => option.type === 'textArea') && (
+          <Styled.TextArea
+            name="other"
+            value={textValue}
+            onFocus={() => handleOptionChange({value: 'other'})}
+            onClick={() => handleOptionChange({value: 'other'})}
+            onChange={(selectedOption || selectedOption?.value === 'other')
+              ? handleTextChange
+              : () => {}
+            }
+            placeholder={intl.formatMessage(messages.describeProblem)}
+          />
+        )}
+      </Styled.TitleOptionsWrapper>
       <Styled.ButtonContainer>
         <Styled.Button onClick={handleLeave} ghosted="true">
           {intl.formatMessage(messages.skip)}
@@ -87,7 +97,7 @@ const ProblemStep = ({ onNext, stepData, intl }) => {
           {intl.formatMessage(messages.continue)}
         </Styled.Button>
       </Styled.ButtonContainer>
-    </Styled.OptionsWrapper>
+    </Styled.ProblemWrapper>
   );
 };
 

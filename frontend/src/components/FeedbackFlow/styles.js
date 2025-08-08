@@ -59,20 +59,12 @@ const Progress = styled.div`
   align-content: center;
 `;
 
-const StepTitle = styled.div`
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-`;
-
 const styles = {
   Container,
   Box,
   TitleWrapper,
   Title,
   Progress,
-  StepTitle,
 }
 
 export default styles;
