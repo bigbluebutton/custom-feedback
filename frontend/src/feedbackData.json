@@ -117,12 +117,12 @@
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.problem.appGallery"
+          "id": "app.customFeedback.problem.appsGallery"
         },
         "type": "radio",
-        "next": "appGalleryProblem",
+        "next": "appsGalleryProblem",
         "key": "problem",
-        "value": "appGallery"
+        "value": "appsGallery"
       },
       {
         "textLabel":{
@@ -475,15 +475,15 @@
       }
     ]
   },
-  "appGalleryProblem": {
+  "appsGalleryProblem": {
     "titleLabel":{
-      "id": "app.customFeedback.appGalleryProblem.title"
+      "id": "app.customFeedback.appsGalleryProblem.title"
     },
     "progress": "03/04",
     "options":[
       {
         "textLabel":{
-          "id": "app.customFeedback.appGalleryProblem.findFeature"
+          "id": "app.customFeedback.appsGalleryProblem.findFeature"
         },
         "type": "radio",
         "next": "email",
@@ -492,7 +492,7 @@
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.appGalleryProblem.appFeaturePinUnpin"
+          "id": "app.customFeedback.appsGalleryProblem.appFeaturePinUnpin"
         },
         "type": "radio",
         "next": "email",
@@ -501,7 +501,7 @@
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.appGalleryProblem.appUnusable"
+          "id": "app.customFeedback.appsGalleryProblem.appUnusable"
         },
         "type": "radio",
         "next": "email",
@@ -510,7 +510,7 @@
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.appGalleryProblem.appPinThree"
+          "id": "app.customFeedback.appsGalleryProblem.appPinThree"
         },
         "type": "radio",
         "next": "email",
