@@ -5,6 +5,7 @@ import request from 'request';
 import path from 'path';
 import Utils from './utils.js';
 import pino from 'pino';
+import { URLSearchParams } from 'url';
 
 const app = express();
 const port = process.env.PORT || 3009;
@@ -90,7 +91,38 @@ async function destroyHook() {
   }
 }
 
-app.use('/feedback', (req, res, next) => {
+app.use('/feedback', async (req, res, next) => {
+  const { userId, meetingId, reason } = req.query;
+
+  if (userId && meetingId && !req.query.skipped) {
+    const userData = await redisClient.hGetAll(`user:${userId}`);
+    const sessionData = await redisClient.hGetAll(`session:${meetingId}`);
+    
+    if (userData.ask_for_feedback === 'false') {
+      const finalRedirectUrl = userData.redirect_url || sessionData.redirect_url || '';
+      const redirectTimeout = sessionData.redirect_timeout || REDIRECT_TIMEOUT;
+
+      const params = new URLSearchParams({
+        meetingId: req.query.meetingId,
+        userId: req.query.userId,
+        skipped: 'true',
+        redirectUrl: finalRedirectUrl,
+        redirectTimeout: redirectTimeout,
+      });
+
+      if (reason) {
+        params.set('reason', reason);
+      }
+      
+      if (req.query.locale) {
+        params.set('locale', req.query.locale);
+      }
+
+      logger.info(`Feedback skipped for user ${userId}, redirecting to confirmation screen.`);
+      return res.redirect(`/feedback?${params.toString()}`);
+    }
+  }
+
   const userLocale = usersLocales[req.query.userId];
   if (userLocale && !req.query.locale) {
     req.query.locale = userLocale;
@@ -101,6 +133,7 @@ app.use('/feedback', (req, res, next) => {
   }
   next();
 }, express.static(path.resolve('./public')));
+
 
 app.post('/feedback/webhook', async (req, res) => {
   try {
@@ -138,6 +171,10 @@ app.post('/feedback/webhook', async (req, res) => {
         } else if (eventType === 'user-joined') {
           const user = evt.data.attributes.user;
           const userRedirectUrl = user.userdata?.['bbb_feedback_redirect_url'];
+          const askForFeedback = user.userdata?.['bbb_ask_for_feedback_on_logout'];
+          
+          logger.info("USERDATA received for user " + user['internal-user-id'], user.userdata);
+
           const userData = {
             name: user.name,
             id: user['internal-user-id'],
@@ -145,6 +182,11 @@ app.post('/feedback/webhook', async (req, res) => {
           };
 
           if (userRedirectUrl) userData.redirect_url = userRedirectUrl;
+
+          if (askForFeedback !== undefined) {
+            userData.ask_for_feedback = askForFeedback;
+            logger.info(`ask_for_feedback for user ${user['internal-user-id']} is ${askForFeedback}`);
+          }
 
           const overrideDefaultLocale = user.userdata?.['bbb_override_default_locale'];
           if (overrideDefaultLocale) {
@@ -257,7 +299,7 @@ app.listen(port, async () => {
 
 const destroyBeforeExit = async () => {
   logger.info('Shutting down server...');
-  if (REGISTER_HOOK) {
+  if (REGISTER_HOOKS) {
     await destroyHook();
   }
   process.exit(0);

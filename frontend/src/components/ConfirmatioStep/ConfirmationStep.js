@@ -6,10 +6,14 @@ const messages = defineMessages({
   confirmationMessage: {
     id: 'app.customFeedback.confirmation.message',
     description: 'Thank you for your feedback! The window will close shortly.'
+  },
+  skippedMessage: {
+    id: 'app.customFeedback.windowWillClose',
+    description: 'The window will close shortly.'
   }
 });
 
-const ConfirmationStep = ({ intl, getRedirectUrl, getRedirectTimeout }) => {
+const ConfirmationStep = ({ intl, getRedirectUrl, getRedirectTimeout, endReason, isSkipped }) => {
   useEffect(() => {
     const redirectTimeout = getRedirectTimeout ? getRedirectTimeout() : null;
     const timer = setTimeout(() => {
@@ -22,11 +26,14 @@ const ConfirmationStep = ({ intl, getRedirectUrl, getRedirectTimeout }) => {
     }, redirectTimeout || 10000);
 
     return () => clearTimeout(timer);
-  }, [getRedirectTimeout, getRedirectUrl]);
+  }, [getRedirectTimeout, getRedirectUrl, isSkipped]);
+
+  const message = isSkipped ? messages.skippedMessage : messages.confirmationMessage;
 
   return (
     <>
-      <Styled.Description>{intl.formatMessage(messages.confirmationMessage)}<Styled.Dots/></Styled.Description>
+      {endReason && <Styled.EndedTitle>{endReason}</Styled.EndedTitle>}
+      <Styled.Description>{intl.formatMessage(message)}<Styled.Dots/></Styled.Description>
     </>
   );
 };

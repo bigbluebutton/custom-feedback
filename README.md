@@ -24,13 +24,13 @@ At the end of the feedback process, the HTTP server receives the feedback data a
 
     docker-compose up
 
-Changes the docker-compose.yml to fit your use caser:
+Changes the docker-compose.yml to fit your use case. **Note:** Ensure there are no spaces between the variable name and the equals sign (e.g., `VAR=value`, not `VAR = value`).
 
     FEEDBACK_URL (optional)
       Where to submit the feedback object. With no URL results will be exclusivelly logged
 
-   SHARED_SECRET
-     Your server's shared secret used to register web hooks
+    SHARED_SECRET
+      Your server's shared secret used to register web hooks
 
     BASIC_URL
       Domain of your server without the /bigbluebutton/
@@ -56,7 +56,7 @@ Changes the docker-compose.yml to fit your use caser:
 After spinning up the back-end server you'll need to drop this nginx file on your server:
 
 ```
-/usr/share/local/bigbluebutton/feedback.nginx
+/usr/share/bigbluebutton/feedback.nginx
 
 location /feedback {
         proxy_pass http://localhost:3009/feedback;
