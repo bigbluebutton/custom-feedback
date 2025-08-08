@@ -99,33 +99,6 @@
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.problem.multiUser"
-        },
-        "type": "radio",
-        "next": "multiuserProblem",
-        "key": "problem",
-        "value": "multiuser"
-      },
-      {
-        "textLabel":{
-          "id": "app.customFeedback.problem.browser"
-        },
-        "type": "radio",
-        "next": "browserProblem",
-        "key": "problem",
-        "value": "browser"
-      },
-      {
-        "textLabel":{
-          "id": "app.customFeedback.problem.whiteboard"
-        },
-        "type": "radio",
-        "next": "whiteboardProblem",
-        "key": "problem",
-        "value": "whiteboard"
-      },
-      {
-        "textLabel":{
           "id": "app.customFeedback.problem.interface"
         },
         "type": "radio",
@@ -144,12 +117,12 @@
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.problem.audioCaptions"
+          "id": "app.customFeedback.problem.appGallery"
         },
         "type": "radio",
-        "next": "audioCaptionsProblem",
+        "next": "appGalleryProblem",
         "key": "problem",
-        "value": "audioCaptions"
+        "value": "appGallery"
       },
       {
         "textLabel":{
@@ -406,150 +379,6 @@
       }
     ]
   },
-  "multiuserProblem": {
-    "titleLabel":{
-      "id": "app.customFeedback.multiuserProblem.title"
-    },
-    "progress": "03/04",
-    "options":[
-      {
-        "textLabel":{
-          "id": "app.customFeedback.multiuserProblem.simultaneousUse"
-        },
-        "type": "radio",
-        "next": "email",
-        "key": "problem_detailed",
-        "value": "simultaneoususe"
-      },
-      {
-        "textLabel":{
-          "id": "app.customFeedback.multiuserProblem.breakoutRoomReturn"
-        },
-        "type": "radio",
-        "next": "email",
-        "key": "problem_detailed",
-        "value": "breakoutroomreturn"
-      },
-      {
-        "textLabel":{
-          "id": "app.customFeedback.multiuserProblem.mutedBreakoutRoomReturn"
-        },
-        "type": "radio",
-        "next": "email",
-        "key": "problem_detailed",
-        "value": "mutedbreakoutroomreturn"
-      },
-      {
-        "textLabel":{
-          "id": "app.customFeedback.other"
-        },
-        "type": "radio",
-        "next": "email",
-        "key": "problem_detailed",
-        "value": "other"
-      },
-      {
-        "type": "textArea",
-        "key": "problem_described"
-      }
-    ]
-  },
-  "browserProblem": {
-    "titleLabel":{
-      "id": "app.customFeedback.browserProblem.title"
-    },
-    "progress": "03/04",
-    "options":[
-      {
-        "textLabel":{
-          "id": "app.customFeedback.browserProblem.browserIncompatibility"
-        },
-        "type": "radio",
-        "next": "email",
-        "key": "problem_detailed",
-        "value": "browserincompatibility"
-      },
-      {
-        "textLabel":{
-          "id": "app.customFeedback.browserProblem.slowness"
-        },
-        "type": "radio",
-        "next": "email",
-        "key": "problem_detailed",
-        "value": "slowness"
-      },
-      {
-        "textLabel":{
-          "id": "app.customFeedback.browserProblem.screenshare"
-        },
-        "type": "radio",
-        "next": "email",
-        "key": "problem_detailed",
-        "value": "screenshare"
-      },
-      {
-        "textLabel":{
-          "id": "app.customFeedback.other"
-        },
-        "type": "radio",
-        "next": "email",
-        "key": "problem_detailed",
-        "value": "other"
-      },
-      {
-        "type": "textArea",
-        "key": "problem_described"
-      }
-    ]
-  },
-  "whiteboardProblem": {
-    "titleLabel":{
-      "id": "app.customFeedback.whiteboardProblem.title"
-    },
-    "progress": "03/04",
-    "options":[
-      {
-        "textLabel":{
-          "id": "app.customFeedback.whiteboardProblem.eraseTool"
-        },
-        "type": "radio",
-        "next": "email",
-        "key": "problem_detailed",
-        "value": "erasertool"
-      },
-      {
-        "textLabel":{
-          "id": "app.customFeedback.whiteboardProblem.bucketTool"
-        },
-        "type": "radio",
-        "next": "email",
-        "key": "problem_detailed",
-        "value": "buckettool"
-      },
-      {
-        "textLabel":{
-          "id": "app.customFeedback.whiteboardProblem.textEdition"
-        },
-        "type": "radio",
-        "next": "email",
-        "key": "problem_detailed",
-        "value": "textedition"
-      },
-      {
-        "textLabel":{
-          "id": "app.customFeedback.other"
-        },
-        "type": "radio",
-        "next": "email",
-        "key": "problem_detailed",
-        "value": "other"
-      },
-      {
-        "type": "textArea",
-        "key": "problem_described"
-      }
-    ]
-  },
   "interfaceProblem": {
     "titleLabel":{
       "id": "app.customFeedback.interfaceProblem.title"
@@ -558,30 +387,30 @@
     "options":[
       {
         "textLabel":{
-          "id": "app.customFeedback.interfaceProblem.micSelect"
+          "id": "app.customFeedback.interfaceProblem.findFeature"
         },
         "type": "radio",
         "next": "email",
         "key": "problem_detailed",
-        "value": "micselect"
+        "value": "findFeature"
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.interfaceProblem.raiseHandShortcut"
+          "id": "app.customFeedback.interfaceProblem.cantRead"
         },
         "type": "radio",
         "next": "email",
         "key": "problem_detailed",
-        "value": "raisehandshortcut"
+        "value": "cantRead"
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.interfaceProblem.changeStatus"
+          "id": "app.customFeedback.interfaceProblem.cantSeeOptions"
         },
         "type": "radio",
         "next": "email",
         "key": "problem_detailed",
-        "value": "changestatus"
+        "value": "cantSeeOptions"
       },
       {
         "textLabel":{
@@ -606,30 +435,30 @@
     "options":[
       {
         "textLabel":{
-          "id": "app.customFeedback.fileUploadProblem.presentationFormatting"
+          "id": "app.customFeedback.fileUploadProblem.presentationUpload"
         },
         "type": "radio",
         "next": "email",
         "key": "problem_detailed",
-        "value": "presentationformatting"
+        "value": "presentationUpload"
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.fileUploadProblem.presentationSize"
+          "id": "app.customFeedback.fileUploadProblem.presentationHidden"
         },
         "type": "radio",
         "next": "email",
         "key": "problem_detailed",
-        "value": "presentationsize"
+        "value": "presentationHidden"
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.fileUploadProblem.chatFileUpload"
+          "id": "app.customFeedback.fileUploadProblem.presentationCameras"
         },
         "type": "radio",
         "next": "email",
         "key": "problem_detailed",
-        "value": "chatfileupload"
+        "value": "presentationCameras"
       },
       {
         "textLabel":{
@@ -646,38 +475,47 @@
       }
     ]
   },
-  "audioCaptionsProblem": {
+  "appGalleryProblem": {
     "titleLabel":{
-      "id": "app.customFeedback.audioCaptionsProblem.title"
+      "id": "app.customFeedback.appGalleryProblem.title"
     },
     "progress": "03/04",
     "options":[
       {
         "textLabel":{
-          "id": "app.customFeedback.audioCaptionsProblem.position"
+          "id": "app.customFeedback.appGalleryProblem.findFeature"
         },
         "type": "radio",
         "next": "email",
         "key": "problem_detailed",
-        "value": "position"
+        "value": "findFeature"
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.audioCaptionsProblem.difficultyEnabling"
+          "id": "app.customFeedback.appGalleryProblem.appFeaturePinUnpin"
         },
         "type": "radio",
         "next": "email",
         "key": "problem_detailed",
-        "value": "difficultyEnabling"
+        "value": "appFeaturePinUnpin"
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.audioCaptionsProblem.correctness"
+          "id": "app.customFeedback.appGalleryProblem.appUnusable"
         },
         "type": "radio",
         "next": "email",
         "key": "problem_detailed",
-        "value": "correctness"
+        "value": "appUnusable"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.appGalleryProblem.appPinThree"
+        },
+        "type": "radio",
+        "next": "email",
+        "key": "problem_detailed",
+        "value": "appPinThree"
       },
       {
         "textLabel":{
@@ -702,15 +540,6 @@
     "options":[
       {
         "textLabel":{
-          "id": "app.customFeedback.like.interactiveWhiteboard"
-        },
-        "type": "radio",
-        "next": "wish",
-        "key": "like",
-        "value": "whiteboard"
-      },
-      {
-        "textLabel":{
           "id": "app.customFeedback.like.multimediaSharing"
         },
         "type": "radio",
@@ -729,12 +558,39 @@
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.like.audioCaptions"
+          "id": "app.customFeedback.like.newInterface"
         },
         "type": "radio",
         "next": "wish",
         "key": "like",
-        "value": "audioCaptions"
+        "value": "newInterface"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.like.engagementPanel"
+        },
+        "type": "radio",
+        "next": "wish",
+        "key": "like",
+        "value": "engagementPanel"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.like.chatInteraction"
+        },
+        "type": "radio",
+        "next": "wish",
+        "key": "like",
+        "value": "chatInteraction"
+      },
+      {
+        "textLabel":{
+          "id": "app.customFeedback.like.appsGallery"
+        },
+        "type": "radio",
+        "next": "wish",
+        "key": "like",
+        "value": "appsGallery"
       },
       {
         "textLabel":{
@@ -759,30 +615,21 @@
     "options":[
       {
         "textLabel":{
-          "id": "app.customFeedback.wish.moreUsers"
+          "id": "app.customFeedback.wish.sessionTranscription"
         },
         "type": "radio",
         "next": "email",
         "key": "wish",
-        "value": "moreusers"
+        "value": "sessionTranscription"
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.wish.chatInteracions"
+          "id": "app.customFeedback.wish.improvedPoll"
         },
         "type": "radio",
         "next": "email",
         "key": "wish",
-        "value": "chatinteractions"
-      },
-      {
-        "textLabel":{
-          "id": "app.customFeedback.wish.whiteboardTools"
-        },
-        "type": "radio",
-        "next": "email",
-        "key": "wish",
-        "value": "whiteboardtools"
+        "value": "improvedPoll"
       },
       {
         "textLabel":{

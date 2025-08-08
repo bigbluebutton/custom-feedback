@@ -87,19 +87,15 @@ const FeedbackFlow = ({ intl }) => {
       case 'rating':
         return <RatingStep onNext={handleNext} />;
       case 'problem':
-        return <ProblemStep intl={intl} key="problem" onNext={handleNext} stepData={feedbackData.problem} />;
       case 'audioProblem':
       case 'cameraProblem':
       case 'connectionProblem':
       case 'smartphoneProblem':
       case 'microphoneProblem':
-      case 'multiuserProblem':
-      case 'browserProblem':
-      case 'whiteboardProblem':
       case 'interfaceProblem':
       case 'fileUploadProblem':
       case 'audioCaptionsProblem':
-        return <ProblemStep key={currentStep} onNext={handleNext} stepData={feedbackData[currentStep]} />;
+        return <ProblemStep intl={intl} key={currentStep} onNext={handleNext} stepData={feedbackData[currentStep]} />;
       case 'like':
         return <ProblemStep key="like" onNext={handleNext} stepData={feedbackData.like} />;
       case 'wish':
