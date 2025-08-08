@@ -21,6 +21,8 @@ const HOOKS_DESTROY = process.env.HOOKS_DESTROY || 'hooks/destroy';
 const CALLBACK_PATH = process.env.CALLBACK_PATH;
 const REDIRECT_URL = process.env.REDIRECT_URL;
 const REDIRECT_TIMEOUT = process.env.REDIRECT_TIMEOUT;
+const REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS = process.env.REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS || 3600;
+const KEY_PREFIX = 'feedback';
 
 const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
 
@@ -95,8 +97,8 @@ app.use('/feedback', async (req, res, next) => {
   const { userId, meetingId, reason } = req.query;
 
   if (userId && meetingId && !req.query.skipped) {
-    const userData = await redisClient.hGetAll(`user:${userId}`);
-    const sessionData = await redisClient.hGetAll(`session:${meetingId}`);
+    const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
+    const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
     
     if (userData.ask_for_feedback === 'false') {
       const finalRedirectUrl = userData.redirect_url || sessionData.redirect_url || '';
@@ -167,7 +169,11 @@ app.post('/feedback/webhook', async (req, res) => {
             sessionData.redirect_timeout = REDIRECT_TIMEOUT;
           }
 
-          await redisClient.hSet(`session:${meeting['internal-meeting-id']}`, sessionData);
+          await Utils.hSetWithExpiration(
+            redisClient,
+            `${KEY_PREFIX}:session:${meeting['internal-meeting-id']}`,
+            sessionData,
+          );
         } else if (eventType === 'user-joined') {
           const user = evt.data.attributes.user;
           const userRedirectUrl = user.userdata?.['bbb_feedback_redirect_url'];
@@ -193,7 +199,11 @@ app.post('/feedback/webhook', async (req, res) => {
             usersLocales[user['internal-user-id']] = overrideDefaultLocale;
           }
 
-          await redisClient.hSet(`user:${user['internal-user-id']}`, userData);
+          await Utils.hSetWithExpiration(
+            redisClient,
+            `${KEY_PREFIX}:user:${user['internal-user-id']}`,
+            userData
+          );
         }
       }
     }
@@ -210,14 +220,13 @@ app.post('/feedback/webhook', async (req, res) => {
 });
 
 app.post('/feedback/submit', async (req, res) => {
+  const { session, user, feedback, device, rating } = req.body;
   try {
-    const { session, user, feedback, device, rating } = req.body;
-
-    const feedbackKey = `feedback:${session.sessionId}:${user.userId}`;
+    const feedbackKey = `${KEY_PREFIX}:${session.sessionId}:${user.userId}`;
     const existingFeedback = await redisClient.get(feedbackKey);
 
-    const sessionData = await redisClient.hGetAll(`session:${session.sessionId}`);
-    const userData = await redisClient.hGetAll(`user:${user.userId}`);
+    const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${session.sessionId}`);
+    const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${user.userId}`);
     // User redirect URL takes precedence over session redirect URL
     const redirectUrl = userData.redirect_url || sessionData.redirect_url;
 
@@ -267,7 +276,7 @@ app.post('/feedback/submit', async (req, res) => {
       return logger.info(`Not logging feedback without rating`);
     }
 
-    await redisClient.set(feedbackKey, JSON.stringify(completeFeedback), { EX: 3600 });
+    await redisClient.set(feedbackKey, JSON.stringify(completeFeedback), { EX: REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS });
 
     if (FEEDBACK_URL) {
       request.post(
@@ -283,9 +292,11 @@ app.post('/feedback/submit', async (req, res) => {
       logger.debug('No FEEDBACK_URL set, logging feedback to syslog only.');
     }
 
+    await Utils.redisStaleKeysCleanup(redisClient, user.userId, session.sessionId);
     res.json({ status: 'success', data: completeFeedback });
   } catch (error) {
     logger.error('Error submitting feedback:', error);
+    await Utils.redisStaleKeysCleanup(redisClient, user.userId, session.sessionId);
     res.status(500).send();
   }
 });
