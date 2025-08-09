@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { injectIntl, defineMessages } from 'react-intl';
-import { getDeviceInfo, getURLParams, submitFeedback, handleBeforeUnload, getRedirectUrl, getRedirectTimeout } from '../service';
+import { getDeviceInfo, submitFeedback, handleBeforeUnload, getRedirectUrl, getRedirectTimeout } from '../service';
 import RatingStep from '../RatingStep/RatingStep';
 import ProblemStep from '../ProblemStep/ProblemStep';
 import EmailStep from '../EmailStep/EmailStep';
@@ -138,8 +138,7 @@ const FeedbackFlow = ({ intl }) => {
     }
   };
 
-  const isStepValid = feedbackData && currentStep && feedbackData[currentStep];
-  const hasTitle = isStepValid && Object.keys(feedbackData[currentStep]).includes("titleLabel"); 
+  const isStepValid = feedbackData && currentStep && feedbackData[currentStep] && isValidSession;
 
   return (
     <Styled.Container>
@@ -149,9 +148,6 @@ const FeedbackFlow = ({ intl }) => {
             <Styled.Title>{intl.formatMessage(messages.feedbackTitle)}</Styled.Title>
             {isStepValid && <Styled.Progress>{feedbackData[currentStep].progress}</Styled.Progress>}
           </Styled.TitleWrapper>
-        )}
-        {hasTitle && !isSkipped && (
-          <Styled.StepTitle>{intl.formatMessage(feedbackData[currentStep].titleLabel)}</Styled.StepTitle>
         )}
         {renderStep()}
       </Styled.Box>

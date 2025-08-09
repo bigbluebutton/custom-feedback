@@ -1,4 +1,3 @@
-
 import styled from 'styled-components';
 import {
   btnPrimaryBg,
@@ -7,6 +6,18 @@ import {
   colorGray,
   defaultBorderColor,
 } from '../../ui/palette';
+
+const ProblemWrapper = styled.div`
+  display: flex;
+  flex-flow: column;
+  gap: 24px;
+`;
+
+const TitleOptionsWrapper = styled.div`
+  display: flex;
+  flex-flow: column;
+  gap: 16px;
+`;
 
 const OptionsWrapper = styled.div`
   display: flex;
@@ -23,13 +34,11 @@ const Option = styled.div`
 const TextArea = styled.textarea`
   width: 100%;
   padding: 16px;
-  margin-top: 16px;
   box-sizing: border-box;
   border: 1px solid ${defaultBorderColor};
   border-radius: 16px;
   resize: none;
   align-items: center;
-  font-family: 'Source Sans Pro', Arial, sans-serif;
   min-height: 56px;
   font-size: 16px;
   font-style: normal;
@@ -76,7 +85,16 @@ const Button = styled.button`
   }
 `;
 
+const StepTitle = styled.div`
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+`;
+
 const styles = {
+  ProblemWrapper,
+  TitleOptionsWrapper,
   OptionsWrapper,
   Option,
   TextArea,
@@ -85,6 +103,7 @@ const styles = {
   RadioButton,
   ButtonContainer,
   Button,
+  StepTitle,
 };
 
 export default styles;

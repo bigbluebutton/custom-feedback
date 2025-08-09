@@ -1,6 +1,12 @@
+body,
+button,
+input,
+textarea {
+  font-family: 'Source Sans Pro', Arial, sans-serif;
+}
+
 body {
   margin: 0;
-  font-family: 'Source Sans Pro', Arial, sans-serif;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
