@@ -1,4 +1,3 @@
-import React from 'react';
 import ReactDOM from 'react-dom';
 import { IntlProvider } from 'react-intl';
 import App from './App';
@@ -15,10 +14,9 @@ const messages = userLocale.startsWith('pt') ? pt_BR :
                  userLocale.startsWith('es') ? es :
                  en;
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
   <IntlProvider locale={userLocale} messages={messages}>
     <App />
-  </IntlProvider>,
-  document.getElementById('root')
+  </IntlProvider>
 );
-

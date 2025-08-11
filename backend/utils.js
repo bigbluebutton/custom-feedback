@@ -1,7 +1,10 @@
 import url from "url";
 import crypto from "crypto";
 
+const activeKeys = [];
+
 const apiPath = process.env.API_PATH || '/bigbluebutton/api/';
+const REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS = process.env.REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS || 3600;
 
 /**
  * queryFromUrl - Returns the query string from a URL string while preserving
@@ -162,6 +165,47 @@ const sortBy = (key) => (a, b) => {
   return 0;
 };
 
+/**
+ * hSetWithExpiration - Adds an entry to the redis hash table and
+ * assign an expiration time to that key
+ * @param {import("redis").RedisClientType} redisClient - A connected Redis client instance.
+ * @param {string} key - the key to store the value
+ * @param {string} field - the field to be store
+ * @param {number} [expire_seconds] - the expiration time in seconds
+ */
+
+const hSetWithExpiration = async (redisClient, key, field, expire_seconds=REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS) => {
+  activeKeys.push(key);
+  await redisClient.multi()
+    .hSet(key, field)
+    .expire(key, expire_seconds)
+    .exec();
+}
+
+/**
+ * redisStaleKeysCleanup - Removes keys from the hash table for that given userId and sessionId.
+ * @param {import("redis").RedisClientType} redisClient - A connected Redis client instance
+ * @param {string} userId - the userId present on the stale keys to be removed
+ * @param {string} sessionId  - the sessionId on the stale keys to be removed
+ */
+const redisStaleKeysCleanup = async (redisClient, userId, sessionId) => {
+  const { keysToDelete, keysToKeep } = activeKeys.reduce((acc, key) => {
+    // searches for the keys containing userId or sessionId 
+    // Keys have the following format:
+    // - feedback:session:<sessionId>
+    // - feedback:user:<userId>
+    if (key.includes(userId) || key.includes(sessionId)) {
+      acc.keysToDelete.push(key);
+    } else {
+      acc.keysToKeep.push(key);
+    }
+    return acc;
+  }, { keysToDelete: [], keysToKeep: [] });
+
+  await Promise.all(keysToDelete.map(key => redisClient.del(key)));
+  activeKeys.splice(0, activeKeys.length, ...keysToKeep);
+}
+
 export default {
   ipFromRequest,
   shaHex,
@@ -169,4 +213,6 @@ export default {
   isUrlChecksumValid,
   isEmpty,
   sortBy,
+  hSetWithExpiration,
+  redisStaleKeysCleanup,
 };
