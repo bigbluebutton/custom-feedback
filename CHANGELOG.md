@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+### v1.7.0
+
+* feat: add support for 'ask_for_feedback_on_logout' parameter
+* feat: update feedback questions/answers
+* fix: changes to include end reason and redirect timeout
+* fix: styles adjustments & remove progress indicador on error screen
+* fix(backend): handle Redis hash keys with expiration and cleanup
+* fix: replaces deprecated `ReactDOM.render`
+* build(frontend): npm audit fix
+
 ### v1.6.0
 
 * feat: enhance UI and generalize steps
