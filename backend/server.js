@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { createClient } from 'redis';
-import request from 'request';
+import fetch from 'node-fetch';
 import path from 'path';
 import Utils from './utils.js';
 import pino from 'pino';
@@ -55,8 +55,10 @@ async function createHook() {
 
   logger.info(`Final URL with checksum: ${urlWithChecksum}`);
 
-  request.get(urlWithChecksum, (error, response, body) => {
-    if (!error && response.statusCode === 200) {
+  try {
+    const response = await fetch(urlWithChecksum);
+    if (response.ok) {
+      const body = await response.text();
       const hookIdMatch = body.match(/<hookID>([^<]+)<\/hookID>/);
       if (hookIdMatch) {
         storedHookId = hookIdMatch[1];
@@ -67,14 +69,18 @@ async function createHook() {
         success = false;
       }
     } else {
-      logger.error('Failed to create hook', error);
+      logger.error('Failed to create hook', response.statusText);
       success = false;
     }
-    if (!success) {
-      logger.error("No webhooks, exiting!");
-      process.exit(1);
-    }
-  });
+  } catch (error) {
+    logger.error('Failed to create hook', error);
+    success = false;
+  }
+
+  if (!success) {
+    logger.error("No webhooks, exiting!");
+    process.exit(1);
+  }
 }
 
 async function destroyHook() {
@@ -83,13 +89,16 @@ async function destroyHook() {
     const checksum = Utils.checksumAPI(destroyUrl, SHARED_SECRET, CHECKSUM_ALGORITHM);
     const fullUrl = `${destroyUrl}&checksum=${checksum}`;
 
-    request.get(fullUrl, (error, res) => {
-      if (!error && res.statusCode === 200) {
+    try {
+      const response = await fetch(fullUrl);
+      if (response.ok) {
         logger.info(`Hook with ID: ${storedHookId} destroyed`);
       } else {
-        logger.error('Failed to destroy hook', error);
+        logger.error('Failed to destroy hook', response.statusText);
       }
-    });
+    } catch (error) {
+      logger.error('Failed to destroy hook', error);
+    }
   }
 }
 
@@ -99,7 +108,7 @@ app.use('/feedback', async (req, res, next) => {
   if (userId && meetingId && !req.query.skipped) {
     const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
     const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
-    
+
     if (userData.ask_for_feedback === 'false') {
       const finalRedirectUrl = userData.redirect_url || sessionData.redirect_url || '';
       const redirectTimeout = sessionData.redirect_timeout || REDIRECT_TIMEOUT;
@@ -115,7 +124,7 @@ app.use('/feedback', async (req, res, next) => {
       if (reason) {
         params.set('reason', reason);
       }
-      
+
       if (req.query.locale) {
         params.set('locale', req.query.locale);
       }
@@ -178,7 +187,7 @@ app.post('/feedback/webhook', async (req, res) => {
           const user = evt.data.attributes.user;
           const userRedirectUrl = user.userdata?.['bbb_feedback_redirect_url'];
           const askForFeedback = user.userdata?.['bbb_ask_for_feedback_on_logout'];
-          
+
           logger.info("USERDATA received for user " + user['internal-user-id'], user.userdata);
 
           const userData = {
@@ -239,7 +248,7 @@ app.post('/feedback/submit', async (req, res) => {
       // Feedback was skipped, but we have to provide to the client the redirect url
       logger.info('No rating and feedback is empty, probably skipped.');
       return res.json({ status: 'success', data: essentialData });
-    } 
+    }
 
     if (existingFeedback) {
       logger.warn(`Feedback already submitted for userID: ${user.userId} sessionID: ${session.sessionId}`);
@@ -279,15 +288,21 @@ app.post('/feedback/submit', async (req, res) => {
     await redisClient.set(feedbackKey, JSON.stringify(completeFeedback), { EX: REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS });
 
     if (FEEDBACK_URL) {
-      request.post(
-        FEEDBACK_URL,
-        { json: completeFeedback },
-        (error, response) => {
-          if (error || response.statusCode !== 200) {
-            logger.error('Failed to send feedback to FEEDBACK_URL', error);
-          }
+      try {
+        const response = await fetch(FEEDBACK_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(completeFeedback),
+        });
+
+        if (!response.ok) {
+          logger.error('Failed to send feedback to FEEDBACK_URL', response.statusText);
         }
-      );
+      } catch (error) {
+        logger.error('Failed to send feedback to FEEDBACK_URL', error);
+      }
     } else {
       logger.debug('No FEEDBACK_URL set, logging feedback to syslog only.');
     }
