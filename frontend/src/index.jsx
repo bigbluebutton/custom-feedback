@@ -1,4 +1,4 @@
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import { IntlProvider } from 'react-intl';
 import App from './App';
 import pt_BR from './locales/pt_BR.json';
