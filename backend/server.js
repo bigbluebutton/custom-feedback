@@ -1,7 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { createClient } from 'redis';
-import fetch from 'node-fetch';
 import path from 'path';
 import Utils from './utils.js';
 import pino from 'pino';
