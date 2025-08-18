@@ -1,5 +1,5 @@
 # Etapa 1: Build do Frontend
-FROM node:20-alpine AS build-frontend
+FROM node:22-alpine AS build-frontend
 
 # Defina o diretório de trabalho
 WORKDIR /usr/src/app/frontend
@@ -17,7 +17,7 @@ COPY frontend/ .
 RUN npm run build
 
 # Etapa 2: Configuração do Backend
-FROM node:20-alpine AS build-backend
+FROM node:22-alpine AS build-backend
 
 # Defina o diretório de trabalho
 WORKDIR /usr/src/app/backend
