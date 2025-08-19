@@ -4,7 +4,7 @@ import crypto from "crypto";
 const activeKeys = [];
 
 const apiPath = process.env.API_PATH || '/bigbluebutton/api/';
-const REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS = process.env.REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS || 3600;
+const REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS = process.env.REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS || 24 * 3600;
 
 /**
  * queryFromUrl - Returns the query string from a URL string while preserving
