@@ -182,6 +182,11 @@ app.post('/feedback/webhook', async (req, res) => {
             `${KEY_PREFIX}:session:${meeting['internal-meeting-id']}`,
             sessionData,
           );
+        } else if (eventType === 'meeting-ended') {
+          const meeting = evt.data.attributes.meeting;
+          const sessionId = meeting['internal-meeting-id'];
+
+          await Utils.redisStaleKeysCleanup(redisClient, sessionId);
         } else if (eventType === 'user-joined') {
           const user = evt.data.attributes.user;
           const userRedirectUrl = user.userdata?.['bbb_feedback_redirect_url'];
@@ -306,11 +311,11 @@ app.post('/feedback/submit', async (req, res) => {
       logger.debug('No FEEDBACK_URL set, logging feedback to syslog only.');
     }
 
-    await Utils.redisStaleKeysCleanup(redisClient, user.userId, session.sessionId);
+    await Utils.redisStaleKeysCleanup(redisClient, user.userId);
     res.json({ status: 'success', data: completeFeedback });
   } catch (error) {
     logger.error('Error submitting feedback:', error);
-    await Utils.redisStaleKeysCleanup(redisClient, user.userId, session.sessionId);
+    await Utils.redisStaleKeysCleanup(redisClient, user.userId);
     res.status(500).send();
   }
 });
