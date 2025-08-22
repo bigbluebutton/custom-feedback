@@ -183,18 +183,20 @@ const hSetWithExpiration = async (redisClient, key, field, expire_seconds=REDIS_
 }
 
 /**
- * redisStaleKeysCleanup - Removes keys from the hash table for that given userId and sessionId.
+ * redisStaleKeysCleanup - Removes keys from the hash table for a given keyId.
  * @param {import("redis").RedisClientType} redisClient - A connected Redis client instance
- * @param {string} userId - the userId present on the stale keys to be removed
- * @param {string} sessionId  - the sessionId on the stale keys to be removed
+ * @param {string} keyId - The keyId to be removed. A keyId is a unique identifier
+ *                         present at the end of keys (e.g. `feedback:<key>:<keyId>`).
  */
-const redisStaleKeysCleanup = async (redisClient, userId, sessionId) => {
+const redisStaleKeysCleanup = async (redisClient, keyId) => {
+  if (!keyId) return;
+
   const { keysToDelete, keysToKeep } = activeKeys.reduce((acc, key) => {
-    // searches for the keys containing userId or sessionId 
+    // searches for the keys containing the keyId
     // Keys have the following format:
-    // - feedback:session:<sessionId>
-    // - feedback:user:<userId>
-    if (key.includes(userId) || key.includes(sessionId)) {
+    // - feedback:session:<keyId>
+    // - feedback:user:<keyId>
+    if (key.includes(keyId)) {
       acc.keysToDelete.push(key);
     } else {
       acc.keysToKeep.push(key);

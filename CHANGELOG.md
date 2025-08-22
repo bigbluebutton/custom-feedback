@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+### UNRELEASED
+
+* fix: missing institution fields from feedbacks
+
 ### v1.7.0
 
 * feat: add support for 'ask_for_feedback_on_logout' parameter
