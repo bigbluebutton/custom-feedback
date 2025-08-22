@@ -2,8 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-### UNRELEASED
+### v1.8.0
 
+* feat: migrate to Vite and Node.js' native Fetch API
+* fix(backend): extend default expiration of redis hash keys
 * fix: missing institution fields from feedbacks
 
 ### v1.7.0
