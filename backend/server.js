@@ -41,6 +41,7 @@ redisClient.on('error', (err) => logger.error('Redis Client Error', err));
 
 await redisClient.connect();
 
+app.use(bodyParser.text({ type: 'application/json' }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -233,7 +234,23 @@ app.post('/feedback/webhook', async (req, res) => {
 });
 
 app.post('/feedback/submit', async (req, res) => {
-  const { session, user, feedback, device, rating } = req.body;
+  let body = req.body;
+  if (typeof req.body === 'string') {
+    try {
+      body = JSON.parse(req.body);
+    } catch (e) {
+      logger.error('Error parsing feedback body:', e);
+      return res.status(400).send();
+    }
+  }
+
+  const { session, user, feedback, device, rating } = body;
+
+  if (!session || !user) {
+    logger.warn('Received feedback submission with missing session or user.', body);
+    return res.status(400).json({ status: 'error', message: 'Missing session or user information' });
+  }
+
   try {
     const feedbackKey = `${KEY_PREFIX}:${session.sessionId}:${user.userId}`;
     const existingFeedback = await redisClient.get(feedbackKey);
@@ -243,7 +260,7 @@ app.post('/feedback/submit', async (req, res) => {
     // User redirect URL takes precedence over session redirect URL
     const redirectUrl = userData.redirect_url || sessionData.redirect_url;
 
-    const isFeedbackEmpty = Object.keys(feedback).length === 0 && !rating;
+    const isFeedbackEmpty = (!feedback || Object.keys(feedback).length === 0) && (rating === undefined || rating === null);
     const essentialData = {
       session: { redirect_url: redirectUrl },
     }
@@ -259,7 +276,7 @@ app.post('/feedback/submit', async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Feedback already submitted' });
     }
 
-    logger.info(`Submitting feedback for userID: ${userData.id} meetingID: ${sessionData.session_id}`);
+    logger.info(`Submitting feedback for userID: ${userData.id || user.userId} meetingID: ${sessionData.session_id || session.sessionId}`);
 
     const completeFeedback = {
       rating,
@@ -283,7 +300,7 @@ app.post('/feedback/submit', async (req, res) => {
     const cleanFeedback = JSON.parse(JSON.stringify(completeFeedback, (key, value) => value === undefined ? undefined : value));
     const logLevel = logger.level;
 
-    if (cleanFeedback.rating) {
+    if (cleanFeedback.rating !== undefined && cleanFeedback.rating !== null) {
       console.log(`${new Date().toISOString()} custom-feedback [${logLevel}] : CUSTOM FEEDBACK LOG: ${JSON.stringify(cleanFeedback)}`);
     } else {
       return logger.info(`Not logging feedback without rating`);
