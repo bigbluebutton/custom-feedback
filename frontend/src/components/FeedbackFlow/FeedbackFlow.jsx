@@ -78,25 +78,24 @@ const FeedbackFlow = ({ intl }) => {
     }
   }, []);
 
+  const updateFeedback = (data) => {
+    let updatedFeedbackData = { ...feedback.current };
+
+    if (data.hasOwnProperty('rating')) {
+      updatedFeedbackData = { ...updatedFeedbackData, rating: data.rating };
+    } else if (data.hasOwnProperty('email')) {
+      updatedFeedbackData.user.email = data.email;
+    } else {
+      updatedFeedbackData.feedback = { ...updatedFeedbackData.feedback, ...data };
+    }
+
+    feedback.current = updatedFeedbackData;
+    sessionStorage.setItem('feedbackData', JSON.stringify(updatedFeedbackData));
+  };
+
   const handleNext = (nextStep, data) => {
-    const updatedFeedback = () => {
-      let updatedFeedback = { ...feedback.current };
-  
-      if (data.hasOwnProperty('rating')) {
-        updatedFeedback = { ...updatedFeedback, rating: data.rating };
-      } else if (data.hasOwnProperty('email')) {
-        updatedFeedback.user.email = data.email;
-      } else {
-        updatedFeedback.feedback = { ...updatedFeedback.feedback, ...data };
-      }
-  
-      sessionStorage.setItem('feedbackData', JSON.stringify(updatedFeedback));
+    updateFeedback(data);
 
-      return updatedFeedback;
-    };
-
-    feedback.current = updatedFeedback();
-  
     if (!nextStep) {
       submitFeedback(feedback.current);
     }
@@ -111,7 +110,7 @@ const FeedbackFlow = ({ intl }) => {
 
     switch (currentStep) {
       case 'rating':
-        return <RatingStep onNext={handleNext} />;
+        return <RatingStep onNext={handleNext} onUpdate={updateFeedback} />;
       case 'problem':
       case 'audioProblem':
       case 'cameraProblem':

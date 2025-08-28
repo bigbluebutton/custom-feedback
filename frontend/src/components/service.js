@@ -65,7 +65,9 @@ export const getRedirectTimeout = () => {
 export const handleBeforeUnload = async () => {
   const savedFeedback = sessionStorage.getItem('feedbackData');
   if (savedFeedback) {
-    await submitFeedback(JSON.parse(savedFeedback));
+    const feedback = JSON.parse(savedFeedback);
+    const blob = new Blob([JSON.stringify(feedback)], { type: 'application/json; charset=UTF-8' });
+    navigator.sendBeacon('/feedback/submit', blob);
     sessionStorage.removeItem('feedbackData');
   }
 };

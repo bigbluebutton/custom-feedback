@@ -19,16 +19,18 @@ const messages = defineMessages({
   }
 });
 
-const RatingStep = ({ onNext, intl }) => {
+const RatingStep = ({ onNext, onUpdate, intl }) => {
   const [rating, setRating] = useState(null);
   const [hover, setHover] = useState(null);
 
   const handleRatingChange = (value) => {
     setRating(value);
+    onUpdate({ rating: value });
   };
 
   const handleLeave = () => {
-    onNext(null, { });
+    const data = rating ? { rating } : {};
+    onNext(null, data);
   };
 
   const nextStep = () => {
