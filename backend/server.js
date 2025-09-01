@@ -198,6 +198,7 @@ app.post('/feedback/webhook', async (req, res) => {
           const userData = {
             name: user.name,
             id: user['internal-user-id'],
+            external_id: user['external-user-id'],
             role: user.role,
           };
 
@@ -291,6 +292,7 @@ app.post('/feedback/submit', async (req, res) => {
       user: {
         name: userData.name,
         id: userData.id,
+        external_id: userData.external_id,
         role: userData.role,
         email: user.email
       },
