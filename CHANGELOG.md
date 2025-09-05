@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+### v1.9.0
+
+* feat: capture feedback rating on page leave or unload
+* feat: add external user ID to feedback reports
+
 ### v1.8.0
 
 * feat: migrate to Vite and Node.js' native Fetch API
