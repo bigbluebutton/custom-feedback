@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-### UNRELEASED
+### v1.10.0
 
 * feat: add audio/camera/screenShareBridge info to feedbacks
 * fix: missing institution fields in feedbacks submitted after meeting end
