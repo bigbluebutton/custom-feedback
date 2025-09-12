@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 * feat: add audio/camera/screenShareBridge info to feedbacks
 * fix: missing institution fields in feedbacks submitted after meeting end
 * fix: use ISO timestamps in backend logs
+* build(frontend): vite@v7.1.5
 
 ### v1.9.0
 
