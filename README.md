@@ -73,8 +73,7 @@ The correct value should be https://YOUR_BBB_HOST/feedback?userId=%%USERID%%&mee
 
 ## Customizing the feedback form
 
-Consult the example JSON feedback form for more details: https://github.com/mconf/custom-feedback/blob/master/frontend/src/feedbackData.json
-
+Consult the example JSON feedback form for more details: [feedbackData.json](frontend/src/feedbackData.json).
 
 ## License
 
