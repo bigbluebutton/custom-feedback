@@ -23,7 +23,10 @@ const REDIRECT_TIMEOUT = process.env.REDIRECT_TIMEOUT;
 const REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS = process.env.REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS || 3600;
 const KEY_PREFIX = 'feedback';
 
-const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
+const logger = pino({
+  level: process.env.LOG_LEVEL || 'info',
+  timestamp: pino.stdTimeFunctions.isoTime,
+});
 
 const usersLocales = {}
 

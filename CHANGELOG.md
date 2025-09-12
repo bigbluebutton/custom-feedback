@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 * feat: add audio/camera/screenShareBridge info to feedbacks
 * fix: missing institution fields in feedbacks submitted after meeting end
+* fix: use ISO timestamps in backend logs
 
 ### v1.9.0
 
