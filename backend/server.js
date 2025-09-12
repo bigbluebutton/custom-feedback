@@ -168,6 +168,9 @@ app.post('/feedback/webhook', async (req, res) => {
             institution_name: institutionName,
             institution_guid: institutionGuid,
             session_id: meeting['internal-meeting-id'],
+            audioBridge: meeting?.audioBridge,
+            cameraBridge: meeting?.cameraBridge,
+            screenShareBridge: meeting?.screenShareBridge,
           };
 
           if (meeting.metadata.feedbackredirecturl || REDIRECT_URL) {
@@ -283,10 +286,13 @@ app.post('/feedback/submit', async (req, res) => {
       rating,
       session: {
         ...essentialData.session,
+        session_id: sessionData.session_id,
         session_name: sessionData.session_name,
         institution_name: sessionData.institution_name,
         institution_guid: sessionData.institution_guid,
-        session_id: sessionData.session_id,
+        audioBridge: sessionData?.audioBridge,
+        cameraBridge: sessionData?.cameraBridge,
+        screenShareBridge: sessionData?.screenShareBridge,
       },
       device,
       user: {

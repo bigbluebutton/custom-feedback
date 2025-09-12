@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+### UNRELEASED
+
+* feat: add audio/camera/screenShareBridge info to feedbacks
+
 ### v1.9.0
 
 * feat: capture feedback rating on page leave or unload
