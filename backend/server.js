@@ -158,16 +158,19 @@ app.post('/feedback/webhook', async (req, res) => {
 
         if (eventType === 'meeting-created') {
           const meeting = evt.data.attributes.meeting;
+          const intMeetingId = meeting['internal-meeting-id'];
+          const extMeetingId = meeting['external-meeting-id'];
           // mconf-institution-guid or external-meeting-id
           const institutionGuid = meeting?.metadata?.['mconf-institution-guid']
-            || meeting['external-meeting-id'];
+            || extMeetingId;
           const institutionName = meeting?.metadata?.['mconf-institution-name']
             || domain;
           const sessionData = {
             session_name: meeting.name,
             institution_name: institutionName,
             institution_guid: institutionGuid,
-            session_id: meeting['internal-meeting-id'],
+            session_id: intMeetingId,
+            external_meeting_id: extMeetingId,
             audioBridge: meeting?.audioBridge,
             cameraBridge: meeting?.cameraBridge,
             screenShareBridge: meeting?.screenShareBridge,
@@ -181,22 +184,27 @@ app.post('/feedback/webhook', async (req, res) => {
             sessionData.redirect_timeout = REDIRECT_TIMEOUT;
           }
 
+          logger.info(`Meeting created: intId=${intMeetingId} extId=${extMeetingId}`, {
+            sessionData,
+          });
+
           await Utils.hSetWithExpiration(
             redisClient,
             `${KEY_PREFIX}:session:${meeting['internal-meeting-id']}`,
-            sessionData,
+            sessionData, {
+              // Meeting entries should die by expiration since we cannot
+              // reliably delete it on meeting-ended without affecting
+              // unsubmitted feedbacks.
+              trackActiveKeys: false,
+            },
           );
-        } else if (eventType === 'meeting-ended') {
-          const meeting = evt.data.attributes.meeting;
-          const sessionId = meeting['internal-meeting-id'];
-
-          await Utils.redisStaleKeysCleanup(redisClient, sessionId);
         } else if (eventType === 'user-joined') {
           const user = evt.data.attributes.user;
           const userRedirectUrl = user.userdata?.['bbb_feedback_redirect_url'];
           const askForFeedback = user.userdata?.['bbb_ask_for_feedback_on_logout'];
+          const intUserId = user['internal-user-id'];
 
-          logger.info("USERDATA received for user " + user['internal-user-id'], user.userdata);
+          logger.info(`USERDATA received for user ${intUserId}`, { userdata: user.userdata });
 
           const userData = {
             name: user.name,

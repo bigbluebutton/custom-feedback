@@ -171,11 +171,23 @@ const sortBy = (key) => (a, b) => {
  * @param {import("redis").RedisClientType} redisClient - A connected Redis client instance.
  * @param {string} key - the key to store the value
  * @param {string} field - the field to be store
- * @param {number} [expire_seconds] - the expiration time in seconds
+ * @param {object} options - options object
+ * @param {number} options.expire_seconds - expiration time in seconds (default: 24 hours)
+ * @param {boolean} options.trackActiveKeys - whether to track the active keys for cleanup (default: true)
+ * @returns {Promise<void>}
+ * @public
  */
 
-const hSetWithExpiration = async (redisClient, key, field, expire_seconds=REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS) => {
-  activeKeys.push(key);
+const hSetWithExpiration = async (
+  redisClient,
+  key,
+  field, {
+    expire_seconds=REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS,
+    trackActiveKeys=true,
+  } = {},
+) => {
+  if (trackActiveKeys) activeKeys.push(key);
+
   await redisClient.multi()
     .hSet(key, field)
     .expire(key, expire_seconds)
