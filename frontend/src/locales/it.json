@@ -1,4 +1,4 @@
-{ 
+{
   "app.customFeedback.confirmation.message": "Grazie per il tuo feedback! La finestra si chiuderà a breve",
   "app.customFeedback.windowWillClose": "La finestra si chiuderà a breve",
   "app.customFeedback.feedbackTitle": "Feedback di fine sessione",
@@ -75,5 +75,17 @@
   "app.customFeedback.appsGallery.appUnusable": "Trovo difficile da usare",
   "app.customFeedback.appsGallery.appPinThree": "Vorrei ancorare più di 3 funzionalità",
   "app.customFeedback.other": "Altro:",
-  "app.customFeedback.describeProblem": "Descrivilo qui."
+  "app.customFeedback.describeProblem": "Descrivilo qui.",
+  "app.customFeedback.errors.max_participants_reason": "La riunione ha raggiunto il numero massimo di partecipanti.",
+  "app.customFeedback.errors.guest_deny": "Il tuo accesso come ospite a questa riunione è stato negato.",
+  "app.customFeedback.errors.meeting_ended": "La riunione è terminata.",
+  "app.customFeedback.errors.validate_token_failed_eject_reason": "Autenticazione fallita. Per favore, riprova.",
+  "app.customFeedback.errors.banned_user_rejoining_reason": "Sei stato bandito da questa riunione.",
+  "app.customFeedback.errors.duplicate_user_in_meeting_eject_reason": "Un utente con lo stesso nome è già nella riunione.",
+  "app.customFeedback.errors.checksumError": "Impossibile autenticare la richiesta. Per favore, riprova.",
+  "app.customFeedback.errors.invalidMeetingId": "La riunione a cui stai cercando di partecipare non esiste.",
+  "app.customFeedback.errors.meetingForciblyEnded": "Non puoi rientrare in una riunione che è stata terminata forzatamente.",
+  "app.customFeedback.errors.invalidPassword": "La password fornita non è corretta.",
+  "app.customFeedback.errors.mismatchCreateTime": "Le informazioni sulla riunione non sono aggiornate. Per favore, riprova.",
+  "app.customFeedback.errors.generic": "Impossibile partecipare alla riunione ({reason})."
 }

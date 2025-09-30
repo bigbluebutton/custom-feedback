@@ -13,13 +13,57 @@ const messages = defineMessages({
     id: 'app.customFeedback.feedbackTitle',
     description: 'Feedback Evaluation Title',
   },
+  'errors.max_participants_reason': {
+    id: 'app.customFeedback.errors.max_participants_reason',
+  },
+  'errors.guest_deny': {
+    id: 'app.customFeedback.errors.guest_deny',
+  },
+  'errors.meeting_ended': {
+    id: 'app.customFeedback.errors.meeting_ended',
+  },
+  'errors.validate_token_failed_eject_reason': {
+    id: 'app.customFeedback.errors.validate_token_failed_eject_reason',
+  },
+  'errors.banned_user_rejoining_reason': {
+    id: 'app.customFeedback.errors.banned_user_rejoining_reason',
+  },
+  'errors.duplicate_user_in_meeting_eject_reason': {
+    id: 'app.customFeedback.errors.duplicate_user_in_meeting_eject_reason',
+  },
+  'errors.checksumError': {
+    id: 'app.customFeedback.errors.checksumError',
+  },
+  'errors.invalidMeetingId': {
+    id: 'app.customFeedback.errors.invalidMeetingId',
+  },
+  'errors.meetingForciblyEnded': {
+    id: 'app.customFeedback.errors.meetingForciblyEnded',
+  },
+  'errors.invalidPassword': {
+    id: 'app.customFeedback.errors.invalidPassword',
+  },
+  'errors.mismatchCreateTime': {
+    id: 'app.customFeedback.errors.mismatchCreateTime',
+  },
+  'errors.generic': {
+    id: 'app.customFeedback.errors.generic',
+  },
 });
+
+const reasonKeyMap = {
+  maxParticipantsReached: 'max_participants_reason',
+  guestDeniedAccess: 'guest_deny',
+  idNotUnique: 'idNotUnique',
+  mismatchCreateTimeParam: 'mismatchCreateTime',
+};
 
 const FeedbackFlow = ({ intl }) => {
   const [currentStep, setCurrentStep] = useState('rating');
   const [isValidSession, setIsValidSession] = useState(true);
   const [isSkipped, setIsSkipped] = useState(false);
   const [endReason, setEndReason] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const feedback = useRef({
     session: {},
@@ -43,7 +87,19 @@ const FeedbackFlow = ({ intl }) => {
     const skipped = params.get('skipped') === 'true';
     const finalRedirectUrl = params.get('redirectUrl');
     const redirectTimeout = params.get('redirectTimeout');
-    const reason = params.get('reason');
+    let reason = params.get('reason');
+    const errorsParam = params.get('errors');
+
+    if (errorsParam) {
+      try {
+        const errors = JSON.parse(errorsParam);
+        if (Array.isArray(errors) && errors.length > 0 && errors[0].key) {
+          reason = errors[0].key;
+        }
+      } catch (e) {
+        console.error('Error parsing errors parameter:', e);
+      }
+    }
 
     if (reason) {
       setEndReason(reason);
@@ -63,6 +119,14 @@ const FeedbackFlow = ({ intl }) => {
 
     if (!sessionId || !userId) {
       setIsValidSession(false);
+      const mappedReason = reasonKeyMap[reason] || reason;
+      const messageKey = `errors.${mappedReason}`;
+
+      if (mappedReason && messages[messageKey]) {
+        setErrorMessage(intl.formatMessage(messages[messageKey]));
+      } else {
+        setErrorMessage(intl.formatMessage(messages['errors.generic'], { reason: reason || 'unknown_error' }));
+      }
       return;
     }
 
@@ -105,7 +169,7 @@ const FeedbackFlow = ({ intl }) => {
 
   const renderStep = () => {
     if (!isValidSession) {
-      return <div>Session or User ID is missing. Please try again.</div>;
+      return <div>{errorMessage}</div>;
     }
 
     switch (currentStep) {

@@ -75,5 +75,17 @@
   "app.customFeedback.appsGallery.appUnusable": "Acho difícil de usar",
   "app.customFeedback.appsGallery.appPinThree": "Vorrei fissare più di 3 funzionalità",
   "app.customFeedback.other": "Outro:",
-  "app.customFeedback.describeProblem": "Descreva aqui."
+  "app.customFeedback.describeProblem": "Descreva aqui.",
+  "app.customFeedback.errors.max_participants_reason": "O número máximo de participantes permitido para esta sessão foi atingido",
+  "app.customFeedback.errors.guest_deny": "Acesso de convidado à sessão foi negado.",
+  "app.customFeedback.errors.meeting_ended": "Esta sessão terminou",
+  "app.customFeedback.errors.validate_token_failed_eject_reason": "Falha na autenticação",
+  "app.customFeedback.errors.banned_user_rejoining_reason": "O usuário foi banido",
+  "app.customFeedback.errors.duplicate_user_in_meeting_eject_reason": "Usuário duplicado tentando entrar na sessão",
+  "app.customFeedback.errors.checksumError": "Não foi possível autenticar sua solicitação. Por favor, tente novamente.",
+  "app.customFeedback.errors.invalidMeetingId": "Reunião não encontrada.",
+  "app.customFeedback.errors.meetingForciblyEnded": "Você não pode entrar em uma sessão que já foi encerrada à força",
+  "app.customFeedback.errors.invalidPassword": "A senha informada está incorreta.",
+  "app.customFeedback.errors.mismatchCreateTime": "As informações da reunião estão desatualizadas. Por favor, tente novamente.",
+  "app.customFeedback.errors.generic": "Não foi possível entrar na reunião ({reason})."
 }
