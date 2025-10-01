@@ -1,4 +1,4 @@
-{ 
+{
   "app.customFeedback.confirmation.message": "Thank you for your feedback! The window will close shortly",
   "app.customFeedback.windowWillClose": "The window will close shortly",
   "app.customFeedback.feedbackTitle": "End-of-Session Feedback",
@@ -75,5 +75,17 @@
   "app.customFeedback.appsGallery.appUnusable": "I think it's difficult to use",
   "app.customFeedback.appsGallery.appPinThree": "I'd like to pin more than 3 features",
   "app.customFeedback.other": "Other:",
-  "app.customFeedback.describeProblem": "Describe it here."
+  "app.customFeedback.describeProblem": "Describe it here.",
+  "app.customFeedback.errors.max_participants_reason": "The maximum number of participants allowed for this session has been reached",
+  "app.customFeedback.errors.guest_deny": "Guest denied of joining the session.",
+  "app.customFeedback.errors.meeting_ended": "This session has ended",
+  "app.customFeedback.errors.validate_token_failed_eject_reason": "Authentication failed",
+  "app.customFeedback.errors.banned_user_rejoining_reason": "User has been banned",
+  "app.customFeedback.errors.duplicate_user_in_meeting_eject_reason": "Duplicate user trying to join session",
+  "app.customFeedback.errors.checksumError": "The request could not be authenticated. Please try again.",
+  "app.customFeedback.errors.invalidMeetingId": "Meeting not found.",
+  "app.customFeedback.errors.meetingForciblyEnded": "You cannot join a session that has already been forcibly ended",
+  "app.customFeedback.errors.invalidPassword": "The password you provided is incorrect.",
+  "app.customFeedback.errors.mismatchCreateTime": "The meeting information is outdated. Please try again.",
+  "app.customFeedback.errors.generic": "Could not join the meeting ({reason})."
 }

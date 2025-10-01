@@ -75,5 +75,17 @@
   "app.customFeedback.appsGallery.appUnusable": "Me resulta difícil de usar",
   "app.customFeedback.appsGallery.appPinThree": "Me gustaría anclar más de 3 funcionalidades",
   "app.customFeedback.other": "Otro:",
-  "app.customFeedback.describeProblem": "Describe aquí"
+  "app.customFeedback.describeProblem": "Describe aquí",
+  "app.customFeedback.errors.max_participants_reason": "È stato raggiunto il numero massimo di partecipanti consentito per questa sessione",
+  "app.customFeedback.errors.guest_deny": "Accesso ospite alla sessione negato.",
+  "app.customFeedback.errors.meeting_ended": "Questa sessione è terminata",
+  "app.customFeedback.errors.validate_token_failed_eject_reason": "Autenticazione fallita",
+  "app.customFeedback.errors.banned_user_rejoining_reason": "L'utente è stato bannato",
+  "app.customFeedback.errors.duplicate_user_in_meeting_eject_reason": "Utente duplicato che tenta di unirsi alla sessione",
+  "app.customFeedback.errors.checksumError": "Impossibile autenticare la richiesta. Per favore, riprova.",
+  "app.customFeedback.errors.invalidMeetingId": "Riunione non trovata.",
+  "app.customFeedback.errors.meetingForciblyEnded": "Non puoi unirti a una sessione che è già stata terminata forzatamente",
+  "app.customFeedback.errors.invalidPassword": "La password fornita non è corretta.",
+  "app.customFeedback.errors.mismatchCreateTime": "Le informazioni sulla riunione non sono aggiornate. Per favore, riprova.",
+  "app.customFeedback.errors.generic": "Impossibile partecipare alla riunione ({reason})."
 }
