@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+### v1.10.1
+
+* fix(frontend): improves error handling for invalid sessions
+
 ### v1.10.0
 
 * feat: add audio/camera/screenShareBridge info to feedbacks
