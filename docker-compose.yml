@@ -5,6 +5,7 @@ services:
     network_mode: host
     ports:
       - "3009:3009"
+      - "3099:3099"
     environment:
       - FEEDBACK_URL=
       - REDIRECT_TIMEOUT=10000
@@ -17,5 +18,6 @@ services:
       - LOG_LEVEL=info
       - LOG_STDOUT=true
       - PORT=3009
+      - METRICS_PORT=3099
       - REDIS_HOST=localhost
       - REGISTER_HOOKS=false
