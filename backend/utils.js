@@ -12,7 +12,7 @@ export const REASON_CODE_NOT_ELEGIBLE_FOR_FEEDBACK = [
   'banned_user_rejoining_reason',
 ];
 export const ERROR_CODE_NOT_ELEGIBLE_FOR_FEEDBACK = [
-  'checkssumError',
+  'checksumError',
   'invalidMeetingId',
   'meetingForciblyEnded',
   'invalidPassword',
