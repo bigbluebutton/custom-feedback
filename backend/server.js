@@ -2,7 +2,10 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { createClient } from 'redis';
 import path from 'path';
-import Utils from './utils.js';
+import Utils, {
+  ERROR_CODE_NOT_ELEGIBLE_FOR_FEEDBACK,
+  REASON_CODE_NOT_ELEGIBLE_FOR_FEEDBACK,
+} from './utils.js';
 import pino from 'pino';
 import { URLSearchParams } from 'url';
 
@@ -106,9 +109,40 @@ async function destroyHook() {
 }
 
 app.use('/feedback', async (req, res, next) => {
-  const { userId, meetingId, reason } = req.query;
+  const {
+    userId,
+    meetingId,
+    reason,
+    reasonCode,
+    skipped,
+    errors: rawErrors = [],
+    locale,
+  } = req.query;
 
-  if (userId && meetingId && !req.query.skipped) {
+  let errors = [];
+  try {
+    if (typeof rawErrors === 'string' && rawErrors.trim()) errors = JSON.parse(rawErrors);
+    else if (Array.isArray(rawErrors)) errors = rawErrors;
+  } catch (e) {
+    logger.error({ err: e, rawErrors }, 'Error parsing errors param');
+  }
+
+  logger.debug({ query: req.query, parsedErrors: errors }, 'Middleware: Processing feedback request');
+
+  // Reason/Error codes that justify skipping feedback even when user has a valid session
+  const hasSkipReason = REASON_CODE_NOT_ELEGIBLE_FOR_FEEDBACK.includes(reasonCode);
+  const hasSkipError = errors.some(({ key }) => ERROR_CODE_NOT_ELEGIBLE_FOR_FEEDBACK.includes(key));
+
+  if (!skipped && (hasSkipReason || hasSkipError)) {
+    const params = new URLSearchParams({ skipped: 'true' });
+    const message = reason || errors[0]?.message;
+    if (message) params.set('reason', message);
+
+    logger.info(`Forced feedback skip: ${hasSkipReason ? `reason code: ${reasonCode}` : `error code: ${errors[0].key}`}`);
+    return res.redirect(`/feedback?${params.toString()}`);
+  }
+
+  if (userId && meetingId && !skipped) {
     const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
     const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
 
@@ -117,8 +151,8 @@ app.use('/feedback', async (req, res, next) => {
       const redirectTimeout = sessionData.redirect_timeout || REDIRECT_TIMEOUT;
 
       const params = new URLSearchParams({
-        meetingId: req.query.meetingId,
-        userId: req.query.userId,
+        meetingId,
+        userId,
         skipped: 'true',
         redirectUrl: finalRedirectUrl,
         redirectTimeout: redirectTimeout,
@@ -128,8 +162,8 @@ app.use('/feedback', async (req, res, next) => {
         params.set('reason', reason);
       }
 
-      if (req.query.locale) {
-        params.set('locale', req.query.locale);
+      if (locale) {
+        params.set('locale', locale);
       }
 
       logger.info(`Feedback skipped for user ${userId}, redirecting to confirmation screen.`);
@@ -137,7 +171,7 @@ app.use('/feedback', async (req, res, next) => {
     }
   }
 
-  const userLocale = usersLocales[req.query.userId];
+  const userLocale = usersLocales[userId];
   if (userLocale && !req.query.locale) {
     req.query.locale = userLocale;
     const queryString = new URLSearchParams(req.query).toString();

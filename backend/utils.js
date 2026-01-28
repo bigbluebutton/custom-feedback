@@ -5,6 +5,21 @@ const activeKeys = [];
 
 const apiPath = process.env.API_PATH || '/bigbluebutton/api/';
 const REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS = process.env.REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS || 24 * 3600;
+export const REASON_CODE_NOT_ELEGIBLE_FOR_FEEDBACK = [
+  'max_participants_reason',
+  'system_requested_eject_reason',
+  'user_requested_eject_reason',
+  'banned_user_rejoining_reason',
+];
+export const ERROR_CODE_NOT_ELEGIBLE_FOR_FEEDBACK = [
+  'checksumError',
+  'invalidMeetingId',
+  'meetingForciblyEnded',
+  'invalidPassword',
+  'mismatchCreateTime',
+  'maxParticipantsReached',
+  'guestDeniedAccess',
+];
 
 /**
  * queryFromUrl - Returns the query string from a URL string while preserving
