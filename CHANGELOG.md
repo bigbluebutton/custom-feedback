@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ### UNRELEASED
 
 * feat: add early skip for specific reason/error codes
+* build(backend): express@4.22.1
+* build(backend): body-parser@1.20.4
 * build(frontend): react-router-dom@6.30.3
 * build(frontend): vite@7.1.12
 
