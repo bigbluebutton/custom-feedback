@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### UNRELEASED
 
 * feat: add early skip for specific reason/error codes
+* build(frontend): react-router-dom@6.30.3
 * build(frontend): vite@7.1.12
 
 ### v1.10.1
