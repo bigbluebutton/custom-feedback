@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+### UNRELEASED
+
+* feat: add early skip for specific reason/error codes
+* build(frontend): vite@7.1.12
+
 ### v1.10.1
 
 * fix(frontend): improves error handling for invalid sessions
