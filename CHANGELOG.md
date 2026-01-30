@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-### UNRELEASED
+### v1.11.0
 
 * feat: add early skip for specific reason/error codes
 * build(backend): express@4.22.1
