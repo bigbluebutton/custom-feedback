@@ -19,3 +19,5 @@ services:
       - PORT=3009
       - REDIS_HOST=localhost
       - REGISTER_HOOKS=false
+    volumes:
+      - /usr/share/bigbluebutton/feedback:/app/public-assets

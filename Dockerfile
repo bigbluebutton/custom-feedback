@@ -31,11 +31,16 @@ RUN npm install
 # Copie todos os arquivos do projeto para o diretório de trabalho
 COPY backend/ .
 
-# Copie os arquivos buildados do frontend para o backend
-COPY --from=build-frontend /usr/src/app/frontend/build ./public
+# Copie os arquivos buildados do frontend para um diretório temporário
+COPY --from=build-frontend /usr/src/app/frontend/build /app/built-assets
 
 # Exponha a porta em que a aplicação será executada
 EXPOSE 3009
 
-# Comando para iniciar a aplicação
-CMD ["npm", "start"]
+# Copie o entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Use o entrypoint script para copiar os assets e iniciar o servidor
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["node", "server.js"]
