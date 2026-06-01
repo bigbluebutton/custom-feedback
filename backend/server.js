@@ -8,9 +8,13 @@ import Utils, {
 } from './utils.js';
 import pino from 'pino';
 import { URLSearchParams } from 'url';
+import PrometheusScrapeAgent from './metrics/prometheus-agent.js';
+import metrics from './metrics/index.js';
 
 const app = express();
 const port = process.env.PORT || 3009;
+const metricsPort = process.env.METRICS_PORT || 3099;
+const metricsHost = '0.0.0.0';
 
 const FEEDBACK_URL = process.env.FEEDBACK_URL;
 const SHARED_SECRET = process.env.SHARED_SECRET;
@@ -31,8 +35,20 @@ const logger = pino({
   timestamp: pino.stdTimeFunctions.isoTime,
 });
 
-const usersLocales = {}
+const prometheusAgent = new PrometheusScrapeAgent(
+  metricsHost,
+  metricsPort,
+  {
+    prefix: 'feedback_app_',
+    collectDefaultMetrics: true,
+  },
+  logger
+);
+prometheusAgent.injectMetrics(metrics);
+prometheusAgent.start();
+logger.info(`Prometheus metrics server running at http://${metricsHost}:${metricsPort}/metrics`);
 
+const usersLocales = {}
 
 if (!SHARED_SECRET || !BASIC_URL) {
   logger.error('SHARED_SECRET, and BASIC_URL must be defined in the environment variables.');
@@ -62,6 +78,7 @@ async function createHook() {
   logger.info(`Final URL with checksum: ${urlWithChecksum}`);
 
   try {
+    prometheusAgent.increment('apiCallsTotal', { api: 'createHook' });
     const response = await fetch(urlWithChecksum);
     if (response.ok) {
       const body = await response.text();
@@ -72,14 +89,17 @@ async function createHook() {
         success = true;
       } else {
         logger.error('Failed to parse hook ID');
+        prometheusAgent.increment('apiCallErrorsTotal', { api: 'createHook' });
         success = false;
       }
     } else {
       logger.error('Failed to create hook', response.statusText);
+      prometheusAgent.increment('apiCallErrorsTotal', { api: 'createHook' });
       success = false;
     }
   } catch (error) {
     logger.error('Failed to create hook', error);
+    prometheusAgent.increment('apiCallErrorsTotal', { api: 'createHook' });
     success = false;
   }
 
@@ -96,14 +116,17 @@ async function destroyHook() {
     const fullUrl = `${destroyUrl}&checksum=${checksum}`;
 
     try {
+      prometheusAgent.increment('apiCallsTotal', { api: 'destroyHook' });
       const response = await fetch(fullUrl);
       if (response.ok) {
         logger.info(`Hook with ID: ${storedHookId} destroyed`);
       } else {
         logger.error('Failed to destroy hook', response.statusText);
+        prometheusAgent.increment('apiCallErrorsTotal', { api: 'destroyHook' });
       }
     } catch (error) {
       logger.error('Failed to destroy hook', error);
+      prometheusAgent.increment('apiCallErrorsTotal', { api: 'destroyHook' });
     }
   }
 }
@@ -189,6 +212,7 @@ app.post('/feedback/webhook', async (req, res) => {
     for (const evt of events) {
       if (evt.data.type === 'event') {
         const eventType = evt.data.id;
+        prometheusAgent.increment('webhookEventsTotal', { event_type: eventType });
 
         if (eventType === 'meeting-created') {
           const meeting = evt.data.attributes.meeting;
@@ -270,6 +294,7 @@ app.post('/feedback/webhook', async (req, res) => {
 
     res.status(200).send('Webhook received');
   } catch (error) {
+    prometheusAgent.increment('webhookErrorsTotal');
     logger.error(`Error processing webhook: ${error?.message || 'Unknown error'}`, {
       errorStack: error?.stack,
       errorMessage: error?.message,
@@ -286,6 +311,7 @@ app.post('/feedback/submit', async (req, res) => {
       body = JSON.parse(req.body);
     } catch (e) {
       logger.error('Error parsing feedback body:', e);
+      prometheusAgent.increment('feedbackFailuresTotal', { reason: 'invalid_body' });
       return res.status(400).send();
     }
   }
@@ -294,6 +320,7 @@ app.post('/feedback/submit', async (req, res) => {
 
   if (!session || !user) {
     logger.warn('Received feedback submission with missing session or user.', body);
+    prometheusAgent.increment('feedbackFailuresTotal', { reason: 'missing_session_or_user' });
     return res.status(400).json({ status: 'error', message: 'Missing session or user information' });
   }
 
@@ -314,11 +341,13 @@ app.post('/feedback/submit', async (req, res) => {
     if (isFeedbackEmpty) {
       // Feedback was skipped, but we have to provide to the client the redirect url
       logger.info('No rating and feedback is empty, probably skipped.');
+      prometheusAgent.increment('feedbackRegistrationsTotal', { source: 'skipped' });
       return res.json({ status: 'success', data: essentialData });
     }
 
     if (existingFeedback) {
       logger.warn(`Feedback already submitted for userID: ${user.userId} sessionID: ${session.sessionId}`);
+      prometheusAgent.increment('feedbackFailuresTotal', { reason: 'already_submitted' });
       return res.status(400).json({ status: 'error', message: 'Feedback already submitted' });
     }
 
@@ -352,14 +381,22 @@ app.post('/feedback/submit', async (req, res) => {
 
     if (cleanFeedback.rating !== undefined && cleanFeedback.rating !== null) {
       console.log(`${new Date().toISOString()} custom-feedback [${logLevel}] : CUSTOM FEEDBACK LOG: ${JSON.stringify(cleanFeedback)}`);
+
+      const source = device?.type || 'unknown';
+      prometheusAgent.increment('feedbackRegistrationsTotal', { source: source });
+      prometheusAgent.observe('feedbackRatingsHistogram', cleanFeedback.rating);
+
     } else {
-      return logger.info(`Not logging feedback without rating`);
+      logger.info(`Not logging feedback without rating`);
+      // without rating -> define unwknow
+      prometheusAgent.increment('feedbackRegistrationsTotal', { source: 'skipped_no_rating' });
     }
 
     await redisClient.set(feedbackKey, JSON.stringify(completeFeedback), { EX: REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS });
 
     if (FEEDBACK_URL) {
       try {
+        prometheusAgent.increment('apiCallsTotal', { api: 'submitFeedback' });
         const response = await fetch(FEEDBACK_URL, {
           method: 'POST',
           headers: {
@@ -370,9 +407,11 @@ app.post('/feedback/submit', async (req, res) => {
 
         if (!response.ok) {
           logger.error('Failed to send feedback to FEEDBACK_URL', response.statusText);
+          prometheusAgent.increment('apiCallErrorsTotal', { api: 'submitFeedback' });
         }
       } catch (error) {
         logger.error('Failed to send feedback to FEEDBACK_URL', error);
+        prometheusAgent.increment('apiCallErrorsTotal', { api: 'submitFeedback' });
       }
     } else {
       logger.debug('No FEEDBACK_URL set, logging feedback to syslog only.');
@@ -382,6 +421,7 @@ app.post('/feedback/submit', async (req, res) => {
     res.json({ status: 'success', data: completeFeedback });
   } catch (error) {
     logger.error('Error submitting feedback:', error);
+    prometheusAgent.increment('feedbackFailuresTotal', { reason: 'internal_error' });
     await Utils.redisStaleKeysCleanup(redisClient, user.userId);
     res.status(500).send();
   }
