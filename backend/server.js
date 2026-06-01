@@ -108,7 +108,7 @@ async function destroyHook() {
   }
 }
 
-app.use('/feedback', async (req, res, next) => {
+app.get('/feedback/check', async (req, res) => {
   const {
     userId,
     meetingId,
@@ -127,7 +127,7 @@ app.use('/feedback', async (req, res, next) => {
     logger.error({ err: e, rawErrors }, 'Error parsing errors param');
   }
 
-  logger.debug({ query: req.query, parsedErrors: errors }, 'Middleware: Processing feedback request');
+  logger.debug({ query: req.query, parsedErrors: errors }, 'Check: Processing feedback request');
 
   // Reason/Error codes that justify skipping feedback even when user has a valid session
   const hasSkipReason = REASON_CODE_NOT_ELEGIBLE_FOR_FEEDBACK.includes(reasonCode);
@@ -137,9 +137,8 @@ app.use('/feedback', async (req, res, next) => {
     const params = new URLSearchParams({ skipped: 'true' });
     const message = reason || errors[0]?.message;
     if (message) params.set('reason', message);
-
     logger.info(`Forced feedback skip: ${hasSkipReason ? `reason code: ${reasonCode}` : `error code: ${errors[0].key}`}`);
-    return res.redirect(`/feedback?${params.toString()}`);
+    return res.json({ redirect: `/feedback?${params.toString()}` });
   }
 
   if (userId && meetingId && !skipped) {
@@ -167,20 +166,18 @@ app.use('/feedback', async (req, res, next) => {
       }
 
       logger.info(`Feedback skipped for user ${userId}, redirecting to confirmation screen.`);
-      return res.redirect(`/feedback?${params.toString()}`);
+      return res.json({ redirect: `/feedback?${params.toString()}` });
     }
   }
 
   const userLocale = usersLocales[userId];
   if (userLocale && !req.query.locale) {
-    req.query.locale = userLocale;
-    const queryString = new URLSearchParams(req.query).toString();
-    const newUrl = `${req.baseUrl}${req.path}?${queryString}`;
-    logger.debug(`Redirecting to ${newUrl}`);
-    return res.redirect(newUrl);
+    logger.debug(`Returning locale override for user ${userId}: ${userLocale}`);
+    return res.json({ proceed: true, locale: userLocale });
   }
-  next();
-}, express.static(path.resolve('./public')));
+
+  return res.json({ proceed: true });
+});
 
 
 app.post('/feedback/webhook', async (req, res) => {

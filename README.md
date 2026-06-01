@@ -53,19 +53,41 @@ Changes the docker-compose.yml to fit your use case. **Note:** Ensure there are 
 
 ## Deploying to Production
 
-After spinning up the back-end server you'll need to drop this nginx file on your server:
+### 1. Build and start the container
 
+```bash
+docker compose up -d
 ```
-/usr/share/bigbluebutton/feedback.nginx
+
+On first start, the container copies the built static assets into the host directory `/usr/share/bigbluebutton/feedback/`. This directory is bind-mounted via `docker-compose.yml` and will be served directly by nginx.
+
+### 2. Configure nginx
+
+Copy the `feedback.nginx` file from this repository to `/etc/bigbluebutton/nginx/feedback.nginx` on the BBB host, then reload nginx:
+
+```bash
+sudo cp feedback.nginx /etc/bigbluebutton/nginx/feedback.nginx
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+The nginx configuration serves static assets (HTML, JS, CSS) directly from disk and proxies only API endpoints to the back-end:
+
+```nginx
+location = /feedback/check   { proxy_pass http://localhost:3009; }
+location = /feedback/submit  { proxy_pass http://localhost:3009; }
+location = /feedback/webhook { proxy_pass http://localhost:3009; }
 
 location /feedback {
-        proxy_pass http://localhost:3009/feedback;
+  root /usr/share/bigbluebutton;
+  try_files $uri /feedback/index.html;
 }
 ```
 
-Configure `bbb-web` to redirect logged out users to the custom feedback application after they leave the meeting:
+### 3. Configure bbb-web
 
-The correct value should be https://YOUR_BBB_HOST/feedback?userId=%%USERID%%&meetingId=%%MEETINGID%%
+Configure `bbb-web` to redirect logged-out users to the feedback application after they leave the meeting.
+
+The redirect URL should be `https://YOUR_BBB_HOST/feedback?userId=%%USERID%%&meetingId=%%MEETINGID%%`
 
 * Edit `logoutURL` in `/usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties`
 * Or create your meeting with `logoutURL`
