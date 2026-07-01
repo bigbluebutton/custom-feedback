@@ -1,7 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { createClient } from 'redis';
-import path from 'path';
 import Utils, {
   ERROR_CODE_NOT_ELEGIBLE_FOR_FEEDBACK,
   REASON_CODE_NOT_ELEGIBLE_FOR_FEEDBACK,
