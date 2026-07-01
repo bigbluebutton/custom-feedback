@@ -1,0 +1,8 @@
+location = /feedback/check   { proxy_pass http://localhost:3009; }
+location = /feedback/submit  { proxy_pass http://localhost:3009; }
+location = /feedback/webhook { proxy_pass http://localhost:3009; }
+
+location /feedback {
+  root /usr/share/bigbluebutton;
+  try_files $uri /feedback/index.html;
+}
