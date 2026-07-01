@@ -63,10 +63,10 @@ On first start, the container copies the built static assets into the host direc
 
 ### 2. Configure nginx
 
-Copy the `feedback.nginx` file from this repository to `/etc/bigbluebutton/nginx/feedback.nginx` on the BBB host, then reload nginx:
+Copy the `feedback.nginx` file from this repository to `/usr/share/bigbluebutton/nginx/feedback.nginx` on the BBB host, then reload nginx:
 
 ```bash
-sudo cp feedback.nginx /etc/bigbluebutton/nginx/feedback.nginx
+sudo cp feedback.nginx /usr/share/bigbluebutton/nginx/feedback.nginx
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
