@@ -97,6 +97,27 @@ The redirect URL should be `https://YOUR_BBB_HOST/feedback?userId=%%USERID%%&mee
 
 Consult the example JSON feedback form for more details: [feedbackData.json](frontend/src/feedbackData.json).
 
+## Customizing translations
+
+Locales are shipped as static JSON assets (not bundled into the app), so they can
+be overridden per deployment without rebuilding. They are served from
+`/usr/share/bigbluebutton/feedback/locales/<locale>.json` (e.g. `en.json`,
+`es.json`, `pt_BR.json`, `it.json`) and fetched by the client at runtime.
+
+To override a translation on a host:
+
+1. Edit the desired file under `/usr/share/bigbluebutton/feedback/locales/`, or add
+   a new `<locale>.json` (e.g. `es_MX.json`).
+2. No rebuild or restart is required — the client fetches the file on next load.
+
+The container **seeds** the default locale files only when they are missing, so
+your overrides survive container restarts and image upgrades. To reset a locale
+back to the shipped default, delete its file and restart the container.
+
+The client resolves the file to load from the browser/URL `locale`, falling back
+to the language default (e.g. `pt` -> `pt_BR`) and then to `en`. Missing keys in a
+translation fall back to English.
+
 ## License
 
 This project is licensed under the GNU Lesser General Public License v3.0 - see the [LICENSE](./LICENSE) file for details.
