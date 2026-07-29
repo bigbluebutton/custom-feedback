@@ -5,7 +5,7 @@ import RatingStep from '../RatingStep/RatingStep';
 import ProblemStep from '../ProblemStep/ProblemStep';
 import EmailStep from '../EmailStep/EmailStep';
 import ConfirmationStep from '../ConfirmatioStep/ConfirmationStep';
-import { useFeedbackData } from '../../feedbackData';
+import { DEFAULT_INITIAL_STEP, useFeedbackData } from '../../feedbackData';
 import Styled from './styles';
 
 const messages = defineMessages({
@@ -67,7 +67,6 @@ const STEP_COMPONENTS = {
 };
 
 const CONFIRMATION_STEP = 'confirmation';
-const DEFAULT_INITIAL_STEP = 'rating';
 
 const FeedbackFlow = ({ intl }) => {
   const feedbackData = useFeedbackData();
