@@ -36,6 +36,12 @@ export const fetchFeedbackData = async () => {
   return FALLBACK_FEEDBACK_DATA;
 };
 
+export const formatLabel = (intl, label, fallback) => {
+  if (label?.id) return intl.formatMessage(label);
+
+  return fallback ? intl.formatMessage(fallback) : '';
+};
+
 export const FeedbackDataContext = createContext(FALLBACK_FEEDBACK_DATA);
 
 export const useFeedbackData = () => useContext(FeedbackDataContext);

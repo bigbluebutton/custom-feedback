@@ -1,5 +1,6 @@
 import { defineMessages, injectIntl } from 'react-intl';
 import { useState } from 'react';
+import { formatLabel } from '../../feedbackData';
 import Styled from './styles';
 
 const messages = defineMessages({
@@ -16,7 +17,8 @@ const messages = defineMessages({
 const EmailStep = ({ onNext, stepData, intl }) => {
   const [email, setEmail] = useState('');
   const emailOption = stepData.options?.find((option) => option.type === 'email');
-  const emailLabel = intl.formatMessage(emailOption?.placeholderLabel || messages.emailPlaceholder);
+  const emailLabel = formatLabel(intl, emailOption?.placeholderLabel, messages.emailPlaceholder);
+  const title = formatLabel(intl, stepData.titleLabel);
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
@@ -35,8 +37,8 @@ const EmailStep = ({ onNext, stepData, intl }) => {
   return (
     <>
       <Styled.TitleInputWrapper>
-        {stepData.titleLabel && (
-          <Styled.StepTitle>{intl.formatMessage(stepData.titleLabel)}</Styled.StepTitle>
+        {title && (
+          <Styled.StepTitle>{title}</Styled.StepTitle>
         )}
         <Styled.Input
           type="email"

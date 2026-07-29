@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { defineMessages, injectIntl } from 'react-intl';
+import { formatLabel } from '../../feedbackData';
 import Styled from './styles';
 
 const messages = defineMessages({
@@ -23,10 +24,9 @@ const ProblemStep = ({ onNext, stepId, stepData, intl }) => {
   const options = stepData.options || [];
   const textAreaOption = options.find((option) => option.type === 'textArea');
   const radioOptions = options.filter((option) => option.type === 'radio');
-  const hasTitle = Boolean(stepData.titleLabel);
-  const title = hasTitle ? intl.formatMessage(stepData.titleLabel) : undefined;
+  const title = formatLabel(intl, stepData.titleLabel);
   const textAreaLabel = textAreaOption
-    ? intl.formatMessage(textAreaOption.placeholderLabel || messages.describeProblem)
+    ? formatLabel(intl, textAreaOption.placeholderLabel, messages.describeProblem)
     : undefined;
 
   const pairedOption = radioOptions.find((option) => option.value === FREE_TEXT_VALUE);
@@ -74,7 +74,7 @@ const ProblemStep = ({ onNext, stepId, stepData, intl }) => {
   return (
     <Styled.ProblemWrapper>
       <Styled.TitleOptionsWrapper>
-        {hasTitle && (
+        {title && (
           <Styled.StepTitle>{title}</Styled.StepTitle>
         )}
         <Styled.OptionsWrapper role="radiogroup" aria-label={title}>
@@ -90,7 +90,7 @@ const ProblemStep = ({ onNext, stepId, stepData, intl }) => {
                     checked={selectedOption ? selectedOption.value === option.value : false}
                     onChange={() => handleOptionChange(option)}
                   />
-                  <Styled.Label htmlFor={`${stepId}-${option.value}`}>{intl.formatMessage(option.textLabel)}</Styled.Label>
+                  <Styled.Label htmlFor={`${stepId}-${option.value}`}>{formatLabel(intl, option.textLabel) || option.value}</Styled.Label>
                 </Styled.ClicableArea>
               </Styled.Option>
             ) : null
