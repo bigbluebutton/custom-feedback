@@ -183,7 +183,7 @@ const FeedbackFlow = ({ intl }) => {
       return <div>{errorMessage}</div>;
     }
 
-    const stepData = feedbackData[currentStep];
+    const stepData = currentStep === CONFIRMATION_STEP ? null : feedbackData[currentStep];
     const StepComponent = stepData && STEP_COMPONENTS[stepData.type];
 
     if (!StepComponent) {
@@ -205,7 +205,7 @@ const FeedbackFlow = ({ intl }) => {
     );
   };
 
-  const isStepValid = feedbackData && currentStep && feedbackData[currentStep] && isValidSession;
+  const isStepValid = currentStep !== CONFIRMATION_STEP && feedbackData[currentStep] && isValidSession;
 
   return (
     <Styled.Container>
