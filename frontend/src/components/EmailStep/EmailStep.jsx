@@ -16,6 +16,7 @@ const messages = defineMessages({
 const EmailStep = ({ onNext, stepData, intl }) => {
   const [email, setEmail] = useState('');
   const emailOption = stepData.options?.find((option) => option.type === 'email');
+  const emailLabel = intl.formatMessage(emailOption?.placeholderLabel || messages.emailPlaceholder);
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
@@ -39,7 +40,8 @@ const EmailStep = ({ onNext, stepData, intl }) => {
         )}
         <Styled.Input
           type="email"
-          placeholder={intl.formatMessage(emailOption?.placeholderLabel || messages.emailPlaceholder)}
+          aria-label={emailLabel}
+          placeholder={emailLabel}
           value={email}
           onChange={handleEmailChange}
           onKeyDown={handleKeyDown}

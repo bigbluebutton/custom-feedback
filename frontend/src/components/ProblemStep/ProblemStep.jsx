@@ -24,6 +24,10 @@ const ProblemStep = ({ onNext, stepId, stepData, intl }) => {
   const textAreaOption = options.find((option) => option.type === 'textArea');
   const radioOptions = options.filter((option) => option.type === 'radio');
   const hasTitle = Boolean(stepData.titleLabel);
+  const title = hasTitle ? intl.formatMessage(stepData.titleLabel) : undefined;
+  const textAreaLabel = textAreaOption
+    ? intl.formatMessage(textAreaOption.placeholderLabel || messages.describeProblem)
+    : undefined;
 
   const pairedOption = radioOptions.find((option) => option.value === FREE_TEXT_VALUE);
   const freeTextOption = {
@@ -71,9 +75,9 @@ const ProblemStep = ({ onNext, stepId, stepData, intl }) => {
     <Styled.ProblemWrapper>
       <Styled.TitleOptionsWrapper>
         {hasTitle && (
-          <Styled.StepTitle>{intl.formatMessage(stepData.titleLabel)}</Styled.StepTitle>
+          <Styled.StepTitle>{title}</Styled.StepTitle>
         )}
-        <Styled.OptionsWrapper>
+        <Styled.OptionsWrapper role="radiogroup" aria-label={title}>
           {options.map((option, index) =>
             option.type === 'radio' ? (
               <Styled.Option key={index}>
@@ -95,6 +99,7 @@ const ProblemStep = ({ onNext, stepId, stepData, intl }) => {
         {textAreaOption && (
           <Styled.TextArea
             name={FREE_TEXT_VALUE}
+            aria-label={textAreaLabel}
             value={textValue}
             onFocus={() => handleOptionChange(freeTextOption)}
             onClick={() => handleOptionChange(freeTextOption)}
@@ -102,7 +107,7 @@ const ProblemStep = ({ onNext, stepId, stepData, intl }) => {
               ? handleTextChange
               : () => {}
             }
-            placeholder={intl.formatMessage(textAreaOption.placeholderLabel || messages.describeProblem)}
+            placeholder={textAreaLabel}
           />
         )}
       </Styled.TitleOptionsWrapper>
