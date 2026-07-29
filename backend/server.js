@@ -352,7 +352,8 @@ app.post('/feedback/submit', async (req, res) => {
     if (cleanFeedback.rating !== undefined && cleanFeedback.rating !== null) {
       console.log(`${new Date().toISOString()} custom-feedback [${logLevel}] : CUSTOM FEEDBACK LOG: ${JSON.stringify(cleanFeedback)}`);
     } else {
-      return logger.info(`Not logging feedback without rating`);
+      logger.info(`Not logging feedback without rating`);
+      return res.json({ status: 'success', data: essentialData });
     }
 
     await redisClient.set(feedbackKey, JSON.stringify(completeFeedback), { EX: REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS });
