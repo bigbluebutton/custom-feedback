@@ -81,11 +81,22 @@ location = /feedback/check   { proxy_pass http://localhost:3009; }
 location = /feedback/submit  { proxy_pass http://localhost:3009; }
 location = /feedback/webhook { proxy_pass http://localhost:3009; }
 
+location ~ ^/feedback/(feedbackData\.json|locales/) {
+  root /usr/share/bigbluebutton;
+  add_header Cache-Control "no-cache";
+  try_files $uri =404;
+}
+
 location /feedback {
   root /usr/share/bigbluebutton;
   try_files $uri /feedback/index.html;
 }
 ```
+
+The overridable assets — the form definition and the locale files — get an
+explicit `Cache-Control` because they are served unhashed from a stable URL:
+without it a browser picks its own freshness lifetime and can keep serving a
+copy from before an edit.
 
 ### 3. Configure bbb-web
 
