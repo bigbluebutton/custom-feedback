@@ -22,9 +22,15 @@ const ProblemStep = ({ onNext, stepId, stepData, intl }) => {
   const [textValue, setTextValue] = useState('');
   const options = stepData.options || [];
   const textAreaOption = options.find((option) => option.type === 'textArea');
+  const radioOptions = options.filter((option) => option.type === 'radio');
   const hasTitle = Boolean(stepData.titleLabel);
 
-  const freeTextOption = { value: FREE_TEXT_VALUE, next: textAreaOption?.next };
+  const pairedOption = radioOptions.find((option) => option.value === FREE_TEXT_VALUE);
+  const freeTextOption = {
+    key: pairedOption?.key,
+    value: FREE_TEXT_VALUE,
+    next: textAreaOption?.next ?? pairedOption?.next,
+  };
 
   useEffect(() => {
     setSelectedOption(null);
@@ -47,11 +53,11 @@ const ProblemStep = ({ onNext, stepId, stepData, intl }) => {
   };
 
   const handleSubmit = () => {
-    const radioOption = options.find((option) => option.type === 'radio');
+    const radioKey = selectedOption?.key || radioOptions[0]?.key;
     const data = {};
 
-    if (radioOption) {
-      data[radioOption.key] = selectedOption ? selectedOption.value : '';
+    if (radioKey) {
+      data[radioKey] = selectedOption ? selectedOption.value : '';
     }
 
     if (textAreaOption && textValue) {
