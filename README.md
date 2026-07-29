@@ -121,8 +121,11 @@ To customize the form on a host:
 2. No rebuild or restart is required — the client fetches the file on next load.
 
 The container **seeds** the default file only when it is missing, so your
-customizations survive container restarts and image upgrades. To reset the form
-back to the shipped default, delete the file and restart the container.
+customizations survive container restarts and image upgrades. The converse holds
+too: once the file is there it is never written again, so questions and fixes
+that ship with a later image do not reach it. Delete the file and restart the
+container to take the shipped default — to discard a customization, or after an
+upgrade whose release notes mention a change to the form.
 
 The whole form — steps, their order and their questions — is data. Step ids are
 arbitrary: what a step *looks like* comes from its `type`, and where it *goes*
@@ -136,7 +139,10 @@ removed without any code change.
   "rating": {
     "type": "rating",             // star scale; stars = highest score listed
     "progress": "01/04",          // free-form label shown next to the title
-    "1": { "next": "problem" },   // each score picks the step that follows it
+    "1": { "next": "problem" },   // every score needs its own entry: a score
+    "2": { "next": "problem" },   // the step does not list ends the form right
+    "3": { "next": "problem" },   // after the rating, so list them all
+    "4": { "next": "like" },
     "5": { "next": "like" }
   },
 
@@ -163,14 +169,15 @@ removed without any code change.
         "type": "textArea",
         "key": "problem_described",
         "placeholderLabel": { "id": "app.customFeedback.describeProblem" },  // optional
-        "next": "email"           // where typed free text goes; without it the form closes
+        "next": "email"           // optional: overrides where free text goes
       }
     ]
   },
 
   "email": {
-    "type": "email",              // e-mail input; lands in the payload as user.email
-    "progress": "04/04",
+    "type": "email",              // e-mail input; always lands in the payload
+    "progress": "04/04",          // as user.email, whatever `key` says
+    "titleLabel": { "id": "app.customFeedback.email.thank" },     // optional
     "options": [
       { "type": "email", "key": "user.email",
         "placeholderLabel": { "id": "app.customFeedback.email.placeholder" } }
@@ -184,9 +191,16 @@ Step `type` values are `rating`, `options` and `email` — a new *kind of input*
 `confirmation` is reserved for the closing step, and any step that is reached but
 not described in the file simply ends the form.
 
-Typing free text follows the text area's own `next`, not the one on the `other`
-radio it pairs with, so point both at the same step unless writing an answer is
-meant to end the form earlier.
+Typing free text counts as picking the `other` radio: it records `other` under
+that radio's `key` and follows its `next`. Give the text area its own `next`
+only to send a written answer somewhere else.
+
+A rating score the step does not list ends the form right after the rating, so
+give every score on the scale its own entry.
+
+`rating` and `email` are reserved key names — an answer recorded under `rating`
+overwrites the numeric score, and one recorded under `email` lands in `user.email`
+instead of the feedback body. Pick anything else.
 
 Labels are message ids resolved against the locale files, so adding a key under
 `/usr/share/bigbluebutton/feedback/locales/` (see the section below) translates a
@@ -209,8 +223,10 @@ To override a translation on a host:
 2. No rebuild or restart is required — the client fetches the file on next load.
 
 The container **seeds** the default locale files only when they are missing, so
-your overrides survive container restarts and image upgrades. To reset a locale
-back to the shipped default, delete its file and restart the container.
+your overrides survive container restarts and image upgrades. Seeding is per file,
+so a locale added by a later image still arrives — but an overridden file is never
+written again and does not pick up new or corrected strings. Delete a file and
+restart the container to take its shipped default back.
 
 The client resolves the file to load from the browser/URL `locale`, falling back
 to the language default (e.g. `pt` -> `pt_BR`) and then to `en`. Missing keys in a
