@@ -27,6 +27,19 @@ const Title = styled.h2`
   font-size: 24px;
 `;
 
+const TitleInputWrapper = styled.div`
+  display: flex;
+  flex-flow: column;
+  gap: 16px;
+`;
+
+const StepTitle = styled.div`
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+`;
+
 const Input = styled.input`
   display: flex;
   padding: 16px;
@@ -63,6 +76,8 @@ const styles = {
   Container,
   Box,
   Title,
+  TitleInputWrapper,
+  StepTitle,
   Input,
   Button,
   ButtonContainer,

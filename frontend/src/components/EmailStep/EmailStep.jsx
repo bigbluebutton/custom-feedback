@@ -33,13 +33,18 @@ const EmailStep = ({ onNext, stepData, intl }) => {
 
   return (
     <>
-      <Styled.Input
-        type="email"
-        placeholder={intl.formatMessage(emailOption?.placeholderLabel || messages.emailPlaceholder)}
-        value={email}
-        onChange={handleEmailChange}
-        onKeyDown={handleKeyDown}
-      />
+      <Styled.TitleInputWrapper>
+        {stepData.titleLabel && (
+          <Styled.StepTitle>{intl.formatMessage(stepData.titleLabel)}</Styled.StepTitle>
+        )}
+        <Styled.Input
+          type="email"
+          placeholder={intl.formatMessage(emailOption?.placeholderLabel || messages.emailPlaceholder)}
+          value={email}
+          onChange={handleEmailChange}
+          onKeyDown={handleKeyDown}
+        />
+      </Styled.TitleInputWrapper>
       <Styled.ButtonContainer>
         <Styled.Button onClick={handleSubmit}>
           {intl.formatMessage(messages.sendButton)}
