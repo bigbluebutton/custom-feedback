@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { defineMessages, injectIntl } from 'react-intl';
-import feedbackData from '../../feedbackData.json';
 import Styled from './styles';
 import { colorGray, colorPrimary } from '../../ui/palette';
+
+const DEFAULT_MAX_SCORE = 10;
 
 const messages = defineMessages({
   ratingSubtitle: {
@@ -19,9 +20,13 @@ const messages = defineMessages({
   }
 });
 
-const RatingStep = ({ onNext, onUpdate, intl }) => {
+const RatingStep = ({ onNext, onUpdate, stepData, intl }) => {
   const [rating, setRating] = useState(null);
   const [hover, setHover] = useState(null);
+
+  // The scale is however many scores the step maps.
+  const scores = Object.keys(stepData).filter((key) => /^\d+$/.test(key)).map(Number);
+  const maxScore = scores.length ? Math.max(...scores) : DEFAULT_MAX_SCORE;
 
   const handleRatingChange = (value) => {
     setRating(value);
@@ -34,7 +39,7 @@ const RatingStep = ({ onNext, onUpdate, intl }) => {
   };
 
   const nextStep = () => {
-    const nextStep = feedbackData.rating[rating].next;
+    const nextStep = stepData[rating]?.next;
     onNext(nextStep, { rating });
   }
 
@@ -48,7 +53,7 @@ const RatingStep = ({ onNext, onUpdate, intl }) => {
       <Styled.Stars
         onMouseLeave={() => setHover(null)}
       >
-        {[...Array(1 + 10).keys()].slice(1).map(i => (
+        {[...Array(maxScore).keys()].map(i => i + 1).map(i => (
           i <= (hover || rating) ?
           ( <Styled.FilledStar
               key={i}

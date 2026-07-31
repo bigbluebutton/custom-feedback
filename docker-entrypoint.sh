@@ -4,11 +4,13 @@ set -e
 if [ -d /app/built-assets ]; then
   mkdir -p /app/public-assets
 
-  # Update all built assets except locales. Those can be overridden at deploy
-  # time and should not be discarded.
+  # Update all built assets except the locales and the form definition. Those
+  # can be overridden at deploy time and should not be discarded.
   for entry in /app/built-assets/*; do
     name=$(basename "$entry")
-    [ "$name" = "locales" ] && continue
+    case "$name" in
+      locales|feedbackData.json) continue ;;
+    esac
     rm -rf "/app/public-assets/$name"
     cp -r "$entry" "/app/public-assets/$name"
   done
@@ -23,6 +25,11 @@ if [ -d /app/built-assets ]; then
     target="/app/public-assets/locales/$(basename "$f")"
     [ -e "$target" ] || cp "$f" "$target"
   done
+
+  # Same for the form definition. Delete it to reseed the default.
+  if [ -e /app/built-assets/feedbackData.json ] && [ ! -e /app/public-assets/feedbackData.json ]; then
+    cp /app/built-assets/feedbackData.json /app/public-assets/feedbackData.json
+  fi
 fi
 
 exec "$@"

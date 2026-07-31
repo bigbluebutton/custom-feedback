@@ -5,7 +5,7 @@ import RatingStep from '../RatingStep/RatingStep';
 import ProblemStep from '../ProblemStep/ProblemStep';
 import EmailStep from '../EmailStep/EmailStep';
 import ConfirmationStep from '../ConfirmatioStep/ConfirmationStep';
-import feedbackData from '../../feedbackData.json';
+import { DEFAULT_INITIAL_STEP, useFeedbackData } from '../../feedbackData';
 import Styled from './styles';
 
 const messages = defineMessages({
@@ -58,8 +58,19 @@ const reasonKeyMap = {
   mismatchCreateTimeParam: 'mismatchCreateTime',
 };
 
+// Each step in feedbackData.json declares the `type` that renders it, so only a
+// new kind of input needs an entry here.
+const STEP_COMPONENTS = {
+  rating: RatingStep,
+  options: ProblemStep,
+  email: EmailStep,
+};
+
+const CONFIRMATION_STEP = 'confirmation';
+
 const FeedbackFlow = ({ intl }) => {
-  const [currentStep, setCurrentStep] = useState('rating');
+  const feedbackData = useFeedbackData();
+  const [currentStep, setCurrentStep] = useState(feedbackData.initialStep || DEFAULT_INITIAL_STEP);
   const [isValidSession, setIsValidSession] = useState(true);
   const [isSkipped, setIsSkipped] = useState(false);
   const [endReason, setEndReason] = useState(null);
@@ -107,7 +118,7 @@ const FeedbackFlow = ({ intl }) => {
 
     if (skipped) {
       setIsSkipped(true);
-      setCurrentStep('confirmation');
+      setCurrentStep(CONFIRMATION_STEP);
       if (finalRedirectUrl) {
         sessionStorage.setItem('redirectUrl', finalRedirectUrl);
       }
@@ -164,7 +175,7 @@ const FeedbackFlow = ({ intl }) => {
       submitFeedback(feedback.current);
     }
 
-    setCurrentStep(nextStep || 'confirmation');
+    setCurrentStep(nextStep || CONFIRMATION_STEP);
   };
 
   const renderStep = () => {
@@ -172,32 +183,29 @@ const FeedbackFlow = ({ intl }) => {
       return <div>{errorMessage}</div>;
     }
 
-    switch (currentStep) {
-      case 'rating':
-        return <RatingStep onNext={handleNext} onUpdate={updateFeedback} />;
-      case 'problem':
-      case 'audioProblem':
-      case 'cameraProblem':
-      case 'connectionProblem':
-      case 'smartphoneProblem':
-      case 'microphoneProblem':
-      case 'interfaceProblem':
-      case 'fileUploadProblem':
-      case 'audioCaptionsProblem':
-        return <ProblemStep intl={intl} key={currentStep} onNext={handleNext} stepData={feedbackData[currentStep]} />;
-      case 'like':
-        return <ProblemStep key="like" onNext={handleNext} stepData={feedbackData.like} />;
-      case 'wish':
-        return <ProblemStep key="wish" onNext={handleNext} stepData={feedbackData.wish} />;
-      case 'email':
-        return <EmailStep key="email" onNext={handleNext} stepData={feedbackData.email} />;
-      case 'confirmation':
-      default:
-        return <ConfirmationStep isSkipped={isSkipped} endReason={endReason} getRedirectUrl={getRedirectUrl} getRedirectTimeout={getRedirectTimeout} />;
+    const stepData = currentStep === CONFIRMATION_STEP ? null : feedbackData[currentStep];
+    const StepComponent = stepData && STEP_COMPONENTS[stepData.type];
+
+    if (!StepComponent) {
+      if (currentStep !== CONFIRMATION_STEP) {
+        console.error(`Ending the flow: no renderer for step "${currentStep}" (type "${stepData?.type}")`);
+      }
+
+      return <ConfirmationStep isSkipped={isSkipped} endReason={endReason} getRedirectUrl={getRedirectUrl} getRedirectTimeout={getRedirectTimeout} />;
     }
+
+    return (
+      <StepComponent
+        key={currentStep}
+        stepId={currentStep}
+        stepData={stepData}
+        onNext={handleNext}
+        onUpdate={updateFeedback}
+      />
+    );
   };
 
-  const isStepValid = feedbackData && currentStep && feedbackData[currentStep] && isValidSession;
+  const isStepValid = currentStep !== CONFIRMATION_STEP && feedbackData[currentStep] && isValidSession;
 
   return (
     <Styled.Container>

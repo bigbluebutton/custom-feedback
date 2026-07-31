@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import { IntlProvider } from 'react-intl';
 import App from './App';
+import { FeedbackDataContext, fetchFeedbackData } from './feedbackData';
 
 const LOCALES_PATH = '/feedback/locales';
 const FALLBACK_LOCALE = 'en';
@@ -70,12 +71,17 @@ async function startApp() {
     console.error('Error checking feedback:', e);
   }
 
-  const { locale, messages } = await loadMessages(userLocale);
+  const [{ locale, messages }, feedbackData] = await Promise.all([
+    loadMessages(userLocale),
+    fetchFeedbackData(),
+  ]);
 
   const root = ReactDOM.createRoot(document.getElementById('root'));
   root.render(
     <IntlProvider locale={locale.replace(/_/g, '-')} messages={messages}>
-      <App />
+      <FeedbackDataContext.Provider value={feedbackData}>
+        <App />
+      </FeedbackDataContext.Provider>
     </IntlProvider>
   );
 }

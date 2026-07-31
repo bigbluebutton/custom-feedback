@@ -1,5 +1,7 @@
 {
+  "initialStep": "rating",
   "rating": {
+    "type": "rating",
     "progress": "01/04",
     "0": 
     {
@@ -47,6 +49,7 @@
     }
   },
   "problem": {
+    "type": "options",
     "titleLabel":{
       "id": "app.customFeedback.problem.title"
     },
@@ -135,11 +138,13 @@
       },
       {
         "type": "textArea",
-        "key": "problem_described"
+        "key": "problem_described",
+        "next": "email"
       }
     ]
   },
   "audioProblem": {
+    "type": "options",
     "titleLabel":{
       "id": "app.customFeedback.audioProblem.title"
     },
@@ -183,11 +188,13 @@
       },
       {
         "type": "textArea",
-        "key": "problem_described"
+        "key": "problem_described",
+        "next": "email"
       }
     ]
   },
   "cameraProblem": {
+    "type": "options",
     "titleLabel":{
       "id": "app.customFeedback.cameraProblem.title"
     },
@@ -231,11 +238,13 @@
       },
       {
         "type": "textArea",
-        "key": "problem_described"
+        "key": "problem_described",
+        "next": "email"
       }
     ]
   },
   "connectionProblem": {
+    "type": "options",
     "titleLabel":{
       "id": "app.customFeedback.connectionProblem.title"
     },
@@ -279,11 +288,13 @@
       },
       {
         "type": "textArea",
-        "key": "problem_described"
+        "key": "problem_described",
+        "next": "email"
       }
     ]
   },
   "smartphoneProblem": {
+    "type": "options",
     "titleLabel":{
       "id": "app.customFeedback.smartphoneProblem.title"
     },
@@ -327,11 +338,13 @@
       },
       {
         "type": "textArea",
-        "key": "problem_described"
+        "key": "problem_described",
+        "next": "email"
       }
     ]
   },
   "microphoneProblem": {
+    "type": "options",
     "titleLabel":{
       "id": "app.customFeedback.microphoneProblem.title"
     },
@@ -375,11 +388,13 @@
       },
       {
         "type": "textArea",
-        "key": "problem_described"
+        "key": "problem_described",
+        "next": "email"
       }
     ]
   },
   "interfaceProblem": {
+    "type": "options",
     "titleLabel":{
       "id": "app.customFeedback.interfaceProblem.title"
     },
@@ -423,11 +438,13 @@
       },
       {
         "type": "textArea",
-        "key": "problem_described"
+        "key": "problem_described",
+        "next": "email"
       }
     ]
   },
   "fileUploadProblem": {
+    "type": "options",
     "titleLabel":{
       "id": "app.customFeedback.fileUploadProblem.title"
     },
@@ -471,19 +488,21 @@
       },
       {
         "type": "textArea",
-        "key": "problem_described"
+        "key": "problem_described",
+        "next": "email"
       }
     ]
   },
   "appsGalleryProblem": {
+    "type": "options",
     "titleLabel":{
-      "id": "app.customFeedback.appsGalleryProblem.title"
+      "id": "app.customFeedback.appsGallery.title"
     },
     "progress": "03/04",
     "options":[
       {
         "textLabel":{
-          "id": "app.customFeedback.appsGalleryProblem.findFeature"
+          "id": "app.customFeedback.appsGallery.findFeature"
         },
         "type": "radio",
         "next": "email",
@@ -492,7 +511,7 @@
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.appsGalleryProblem.appFeaturePinUnpin"
+          "id": "app.customFeedback.appsGallery.appFeaturePinUnpin"
         },
         "type": "radio",
         "next": "email",
@@ -501,7 +520,7 @@
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.appsGalleryProblem.appUnusable"
+          "id": "app.customFeedback.appsGallery.appUnusable"
         },
         "type": "radio",
         "next": "email",
@@ -510,7 +529,7 @@
       },
       {
         "textLabel":{
-          "id": "app.customFeedback.appsGalleryProblem.appPinThree"
+          "id": "app.customFeedback.appsGallery.appPinThree"
         },
         "type": "radio",
         "next": "email",
@@ -528,11 +547,13 @@
       },
       {
         "type": "textArea",
-        "key": "problem_described"
+        "key": "problem_described",
+        "next": "email"
       }
     ]
   },
   "like": {
+    "type": "options",
     "titleLabel":{
       "id": "app.customFeedback.like.title"
     },
@@ -603,11 +624,13 @@
       },
       {
         "type": "textArea",
-        "key": "like_described"
+        "key": "like_described",
+        "next": "wish"
       }
     ]
   },
   "wish": {
+    "type": "options",
     "titleLabel":{
       "id": "app.customFeedback.wish.title"
     },
@@ -651,11 +674,13 @@
       },
       {
         "type": "textArea",
-        "key": "wish_described"
+        "key": "wish_described",
+        "next": "email"
       }
     ]
   },
   "email": {
+    "type": "email",
     "titleLabel":{
       "id": "app.customFeedback.email.thank"
     },
