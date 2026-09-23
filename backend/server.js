@@ -22,6 +22,7 @@ const HOOKS_DESTROY = process.env.HOOKS_DESTROY || 'hooks/destroy';
 const CALLBACK_PATH = process.env.CALLBACK_PATH;
 const REDIRECT_URL = process.env.REDIRECT_URL;
 const REDIRECT_TIMEOUT = process.env.REDIRECT_TIMEOUT;
+const FEEDBACK_MODERATOR_ONLY = (process.env.FEEDBACK_MODERATOR_ONLY || 'false') === 'true';
 const REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS = process.env.REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS || 3600;
 const KEY_PREFIX = 'feedback';
 
@@ -143,6 +144,17 @@ app.get('/feedback/check', async (req, res) => {
   if (userId && meetingId && !skipped) {
     const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
     const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
+
+    if (FEEDBACK_MODERATOR_ONLY && userData.role && userData.role !== 'MODERATOR') {
+      const finalRedirectUrl = userData.redirect_url || sessionData.redirect_url || REDIRECT_URL || '';
+
+      if (finalRedirectUrl) {
+        logger.info(`Non-moderator user ${userId} redirected immediately to ending URL (moderator-only feedback enabled).`);
+        return res.redirect(finalRedirectUrl);
+      }
+      // With no configured redirect URL fall through to the existing skip-confirmation
+      // flow below instead of stranding the user with a broken redirect.
+    }
 
     if (userData.ask_for_feedback === 'false') {
       const finalRedirectUrl = userData.redirect_url || sessionData.redirect_url || '';

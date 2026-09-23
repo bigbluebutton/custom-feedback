@@ -41,6 +41,12 @@ Changes the docker-compose.yml to fit your use case. **Note:** Ensure there are 
     REDIRECT_TIMEOUT
       default: 10000
 
+    FEEDBACK_MODERATOR_ONLY (optional)
+      default: false
+      When true, only users with role MODERATOR see the feedback form.
+      Other users are redirected immediately to the ending URL (REDIRECT_URL
+      or its per-session/per-user overrides), skipping the form entirely.
+
     LOG_LEVEL
       default: info
       valid values: error, debug, info, verbose
