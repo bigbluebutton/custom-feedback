@@ -22,6 +22,7 @@ const HOOKS_DESTROY = process.env.HOOKS_DESTROY || 'hooks/destroy';
 const CALLBACK_PATH = process.env.CALLBACK_PATH;
 const REDIRECT_URL = process.env.REDIRECT_URL;
 const REDIRECT_TIMEOUT = process.env.REDIRECT_TIMEOUT;
+const FEEDBACK_MODERATOR_ONLY = (process.env.FEEDBACK_MODERATOR_ONLY || 'false') === 'true';
 const REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS = process.env.REDIS_HASH_KEYS_EXPIRATION_IN_SECONDS || 3600;
 const KEY_PREFIX = 'feedback';
 
@@ -144,6 +145,35 @@ app.get('/feedback/check', async (req, res) => {
     const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
     const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
 
+    // userData.role is only present once the `user-joined` webhook has been processed
+    // and cached; if it's missing (expired TTL, restarted Redis, missed webhook) this
+    // check fails open and the user proceeds to the form, since feedback should never
+    // block logout.
+    if (FEEDBACK_MODERATOR_ONLY && userData.role && userData.role !== 'MODERATOR') {
+      const finalRedirectUrl = userData.redirect_url || sessionData.redirect_url || REDIRECT_URL || '';
+
+      if (finalRedirectUrl) {
+        logger.info(`Non-moderator user ${userId} redirected immediately to ending URL (moderator-only feedback enabled).`);
+        return res.json({ redirect: finalRedirectUrl });
+      }
+
+      const redirectTimeout = sessionData.redirect_timeout || REDIRECT_TIMEOUT;
+      const params = new URLSearchParams({
+        meetingId,
+        userId,
+        skipped: 'true',
+        redirectUrl: finalRedirectUrl,
+        redirectTimeout: redirectTimeout,
+      });
+
+      if (locale) {
+        params.set('locale', locale);
+      }
+
+      logger.info(`Non-moderator user ${userId} has no configured ending URL; falling back to the skip-confirmation screen (moderator-only feedback enabled).`);
+      return res.json({ redirect: `/feedback?${params.toString()}` });
+    }
+
     if (userData.ask_for_feedback === 'false') {
       const finalRedirectUrl = userData.redirect_url || sessionData.redirect_url || '';
       const redirectTimeout = sessionData.redirect_timeout || REDIRECT_TIMEOUT;
@@ -262,6 +292,21 @@ app.post('/feedback/webhook', async (req, res) => {
             redisClient,
             `${KEY_PREFIX}:user:${user['internal-user-id']}`,
             userData
+          );
+        } else if (eventType === 'user-role-changed') {
+          // Not forwarded by the currently deployed bbb-webhooks (v2.3.1)
+          // see README.md's FEEDBACK_MODERATOR_ONLY limitations. Kept ready so
+          // the cached role stays fresh as soon as that relay forwards this event.
+          const user = evt.data.attributes.user;
+          const intUserId = user['internal-user-id'];
+          const newRole = user.role;
+
+          logger.info(`User role changed: userId=${intUserId} newRole=${newRole}`);
+
+          await Utils.hSetWithExpiration(
+            redisClient,
+            `${KEY_PREFIX}:user:${intUserId}`,
+            { role: newRole },
           );
         }
       }
