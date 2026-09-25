@@ -43,9 +43,15 @@ Changes the docker-compose.yml to fit your use case. **Note:** Ensure there are 
 
     FEEDBACK_MODERATOR_ONLY (optional)
       default: false
-      When true, only users with role MODERATOR see the feedback form.
-      Other users are redirected immediately to the ending URL (REDIRECT_URL
-      or its per-session/per-user overrides), skipping the form entirely.
+      When true, non-moderators are redirected immediately to the ending URL
+      (REDIRECT_URL or its per-session/per-user overrides) instead of seeing
+      the feedback form; if no ending URL is configured they get the regular
+      skip-confirmation screen instead. Known limitations:
+      - Role is only known once the `user-joined` webhook has been cached;
+        if it's missing (expired TTL, restarted Redis, missed webhook) the
+        user proceeds to the form rather than being blocked.
+      - Role is captured at join time only. A viewer promoted to moderator
+        mid-session will still be treated as a non-moderator on logout.
 
     LOG_LEVEL
       default: info

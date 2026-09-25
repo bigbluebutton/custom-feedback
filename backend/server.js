@@ -145,15 +145,33 @@ app.get('/feedback/check', async (req, res) => {
     const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
     const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
 
+    // userData.role is only present once the `user-joined` webhook has been processed
+    // and cached; if it's missing (expired TTL, restarted Redis, missed webhook) this
+    // check fails open and the user proceeds to the form, since feedback should never
+    // block logout.
     if (FEEDBACK_MODERATOR_ONLY && userData.role && userData.role !== 'MODERATOR') {
       const finalRedirectUrl = userData.redirect_url || sessionData.redirect_url || REDIRECT_URL || '';
 
       if (finalRedirectUrl) {
         logger.info(`Non-moderator user ${userId} redirected immediately to ending URL (moderator-only feedback enabled).`);
-        return res.redirect(finalRedirectUrl);
+        return res.json({ redirect: finalRedirectUrl });
       }
-      // With no configured redirect URL fall through to the existing skip-confirmation
-      // flow below instead of stranding the user with a broken redirect.
+
+      const redirectTimeout = sessionData.redirect_timeout || REDIRECT_TIMEOUT;
+      const params = new URLSearchParams({
+        meetingId,
+        userId,
+        skipped: 'true',
+        redirectUrl: finalRedirectUrl,
+        redirectTimeout: redirectTimeout,
+      });
+
+      if (locale) {
+        params.set('locale', locale);
+      }
+
+      logger.info(`Non-moderator user ${userId} has no configured ending URL; falling back to the skip-confirmation screen (moderator-only feedback enabled).`);
+      return res.json({ redirect: `/feedback?${params.toString()}` });
     }
 
     if (userData.ask_for_feedback === 'false') {
