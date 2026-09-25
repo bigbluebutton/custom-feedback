@@ -293,6 +293,21 @@ app.post('/feedback/webhook', async (req, res) => {
             `${KEY_PREFIX}:user:${user['internal-user-id']}`,
             userData
           );
+        } else if (eventType === 'user-role-changed') {
+          // Not forwarded by the currently deployed bbb-webhooks (v2.3.1)
+          // see README.md's FEEDBACK_MODERATOR_ONLY limitations. Kept ready so
+          // the cached role stays fresh as soon as that relay forwards this event.
+          const user = evt.data.attributes.user;
+          const intUserId = user['internal-user-id'];
+          const newRole = user.role;
+
+          logger.info(`User role changed: userId=${intUserId} newRole=${newRole}`);
+
+          await Utils.hSetWithExpiration(
+            redisClient,
+            `${KEY_PREFIX}:user:${intUserId}`,
+            { role: newRole },
+          );
         }
       }
     }
