@@ -270,14 +270,23 @@ const isAllowedRedirectUrl = (rawUrl, allowedHosts) => {
  * hasNotEligibleError - Whether any entry of `errors` carries a `key` in
  * `notEligibleErrorCodes`. Entries that are not objects (e.g. a `null` from
  * a malformed `errors` query param, as in `?errors=[null]`) are treated as
- * non-matching instead of throwing.
+ * non-matching instead of throwing, and `errors` itself is treated as empty
+ * when it is not an array (e.g. `?errors=5` parses to a number).
  * @param {Array} errors - Parsed `errors` query param entries.
  * @param {Array<string>} notEligibleErrorCodes - Error codes that disqualify a user from feedback.
  * @returns {boolean}
  * @public
  */
 const hasNotEligibleError = (errors, notEligibleErrorCodes) =>
-  (errors || []).some((error) => notEligibleErrorCodes.includes(error?.key));
+  (Array.isArray(errors) ? errors : []).some((error) => notEligibleErrorCodes.includes(error?.key));
+
+/**
+ * isPlainObject - Whether `value` is a non-null, non-array object.
+ * @param {*} value - The value to check.
+ * @returns {boolean}
+ * @public
+ */
+const isPlainObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
  * firstErrorKey - Safe accessor for the `key` of the first `errors` entry.
@@ -306,6 +315,7 @@ export default {
   redisStaleKeysCleanup,
   isAllowedRedirectUrl,
   hasNotEligibleError,
+  isPlainObject,
   firstErrorKey,
   firstErrorMessage,
 };

@@ -368,7 +368,7 @@ app.post('/feedback/submit', async (req, res) => {
     }
   }
 
-  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+  if (!Utils.isPlainObject(body)) {
     logger.warn({ body }, 'Received feedback submission with a non-object body.');
     return res.status(400).json({ status: 'error', message: 'Invalid feedback body' });
   }

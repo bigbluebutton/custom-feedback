@@ -63,3 +63,70 @@ test('exact ?errors=[null] query param, once JSON-parsed, does not crash the ski
   assert.equal(Utils.hasNotEligibleError(errors, NOT_ELIGIBLE_ERROR_CODES), false);
   assert.doesNotThrow(() => Utils.firstErrorKey(errors));
 });
+
+// Regression tests for GET /feedback/check crashing when the errors query
+// param parses to valid JSON that is not an array, e.g. ?errors=5 or
+// ?errors={"a":1}.
+
+test('hasNotEligibleError does not throw and returns false when errors is a number', () => {
+  assert.doesNotThrow(() => Utils.hasNotEligibleError(5, NOT_ELIGIBLE_ERROR_CODES));
+  assert.equal(Utils.hasNotEligibleError(5, NOT_ELIGIBLE_ERROR_CODES), false);
+});
+
+test('hasNotEligibleError does not throw and returns false when errors is a plain object', () => {
+  assert.doesNotThrow(() => Utils.hasNotEligibleError({ a: 1 }, NOT_ELIGIBLE_ERROR_CODES));
+  assert.equal(Utils.hasNotEligibleError({ a: 1 }, NOT_ELIGIBLE_ERROR_CODES), false);
+});
+
+// Regression tests for POST /feedback/submit crashing when the JSON body
+// parses to something other than a plain object, e.g. a literal null.
+
+test('isPlainObject returns false for null', () => {
+  assert.equal(Utils.isPlainObject(null), false);
+});
+
+test('isPlainObject returns false for an array', () => {
+  assert.equal(Utils.isPlainObject([]), false);
+});
+
+test('isPlainObject returns false for a string, number or undefined', () => {
+  assert.equal(Utils.isPlainObject('hello'), false);
+  assert.equal(Utils.isPlainObject(5), false);
+  assert.equal(Utils.isPlainObject(undefined), false);
+});
+
+test('isPlainObject returns true for a plain object', () => {
+  assert.equal(Utils.isPlainObject({ session: {}, user: {} }), true);
+});
+
+// Regression test for POST /feedback/webhook failing to write a
+// meeting-created/user-joined event to redis when an optional field
+// (e.g. audioBridge) is missing and lands as undefined, which the redis
+// client rejects as an invalid hSet argument.
+
+test('hSetWithExpiration strips undefined fields before calling hSet', async () => {
+  const calls = [];
+  const fakeMulti = {
+    hSet(key, field) {
+      calls.push(['hSet', key, field]);
+      return fakeMulti;
+    },
+    expire(key, seconds) {
+      calls.push(['expire', key, seconds]);
+      return fakeMulti;
+    },
+    async exec() {
+      calls.push(['exec']);
+    },
+  };
+  const fakeRedisClient = { multi: () => fakeMulti };
+
+  await Utils.hSetWithExpiration(
+    fakeRedisClient,
+    'feedback:session:abc',
+    { session_name: 'Test', audioBridge: undefined, cameraBridge: undefined },
+  );
+
+  const hSetCall = calls.find(([op]) => op === 'hSet');
+  assert.deepEqual(hSetCall[2], { session_name: 'Test' });
+});
