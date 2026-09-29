@@ -2,6 +2,7 @@ import ReactDOM from 'react-dom/client';
 import { IntlProvider } from 'react-intl';
 import App from './App';
 import { FeedbackDataContext, fetchFeedbackData } from './feedbackData';
+import { setRedirectUrl, setRedirectTimeout } from './components/service';
 
 const LOCALES_PATH = '/feedback/locales';
 const FALLBACK_LOCALE = 'en';
@@ -65,6 +66,16 @@ async function startApp() {
       }
       if (check.locale) {
         userLocale = check.locale;
+      }
+      // The backend is the only party that can validate a redirectUrl
+      // against the operator's allowlist, so this is the only place that
+      // gets to persist one for ConfirmationStep to use later. FeedbackFlow
+      // must not read redirectUrl/redirectTimeout straight off the URL.
+      if (Object.prototype.hasOwnProperty.call(check, 'redirectUrl')) {
+        setRedirectUrl(check.redirectUrl);
+      }
+      if (Object.prototype.hasOwnProperty.call(check, 'redirectTimeout')) {
+        setRedirectTimeout(check.redirectTimeout);
       }
     }
   } catch (e) {

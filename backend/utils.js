@@ -236,6 +236,33 @@ const redisStaleKeysCleanup = async (redisClient, keyId) => {
 }
 
 /**
+ * isAllowedRedirectUrl - Whether `rawUrl` is a safe, operator-approved
+ * redirect target: an absolute http(s) URL whose host is in `allowedHosts`.
+ * Rejects `javascript:`/`data:`/etc. schemes and any host not explicitly
+ * allowed, since `redirectUrl` can originate from untrusted client input
+ * (the `/feedback/check` skip branch) or BBB meeting/user metadata set by
+ * whoever created the meeting.
+ * @param {string} rawUrl - The candidate redirect URL.
+ * @param {Array<string>} allowedHosts - Lowercase hostnames allowed as targets.
+ * @returns {boolean}
+ * @public
+ */
+const isAllowedRedirectUrl = (rawUrl, allowedHosts) => {
+  if (!rawUrl) return false;
+
+  let parsed;
+  try {
+    parsed = new URL(rawUrl);
+  } catch (e) {
+    return false;
+  }
+
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+
+  return (allowedHosts || []).includes(parsed.hostname.toLowerCase());
+};
+
+/**
  * hasNotEligibleError - Whether any entry of `errors` carries a `key` in
  * `notEligibleErrorCodes`. Entries that are not objects (e.g. a `null` from
  * a malformed `errors` query param, as in `?errors=[null]`) are treated as
@@ -273,6 +300,7 @@ export default {
   sortBy,
   hSetWithExpiration,
   redisStaleKeysCleanup,
+  isAllowedRedirectUrl,
   hasNotEligibleError,
   firstErrorKey,
   firstErrorMessage,

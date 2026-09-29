@@ -11,4 +11,9 @@ location ~ ^/feedback/(feedbackData\.json|locales/) {
 location /feedback {
   root /usr/share/bigbluebutton;
   try_files $uri /feedback/index.html;
+  # Defense in depth against script injection (e.g. a `javascript:` redirect
+  # URL executing on this origin): the bundle has no inline scripts, so
+  # 'self' is enough for script-src. style-src needs 'unsafe-inline' because
+  # styled-components injects <style> tags at runtime.
+  add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';" always;
 }

@@ -38,6 +38,14 @@ Changes the docker-compose.yml to fit your use case. **Note:** Ensure there are 
     REDIRECT_URL (optional)
       Where to redirect user after the feedback form. Can also be set by `userdata-feedbackredirecturl` or `metadata_feedbackredirecturl`
 
+    REDIRECT_ALLOWED_HOSTS (optional)
+      Comma-separated list of extra hostnames the post-feedback redirect is allowed to target
+      (e.g. `portal.example.com,other.example.com`). The host of BASIC_URL and, if set, of
+      REDIRECT_URL are always allowed. Any `feedbackredirecturl`/`bbb_feedback_redirect_url`
+      pointing at a host outside this allowlist is ignored and logged as a warning. This
+      is a safety boundary, not just configuration, so set it to every external redirect
+      target you actually use.
+
     REDIRECT_TIMEOUT
       default: 10000
 

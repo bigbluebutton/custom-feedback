@@ -38,6 +38,22 @@ if (!SHARED_SECRET || !BASIC_URL) {
   process.exit(1);
 }
 
+// Hosts a redirect_url is allowed to point at: the BBB server itself, the
+// operator-configured default (REDIRECT_URL), and any other operator-approved
+// external targets (REDIRECT_ALLOWED_HOSTS). Anything else is rejected,
+// since redirect_url can be influenced by meeting/user metadata set by
+// whoever created the meeting, or by the client in /feedback/check.
+const ALLOWED_REDIRECT_HOSTS = [BASIC_URL, REDIRECT_URL, ...(process.env.REDIRECT_ALLOWED_HOSTS || '').split(',')]
+  .map((value) => {
+    if (!value) return null;
+    try {
+      return new URL(value).hostname.toLowerCase();
+    } catch (e) {
+      return value.trim().toLowerCase() || null;
+    }
+  })
+  .filter(Boolean);
+
 let storedHookId = null;
 
 const redisClient = createClient();
@@ -140,6 +156,38 @@ app.get('/feedback/check', async (req, res) => {
     return res.json({ redirect: `/feedback?${params.toString()}` });
   }
 
+  // The frontend also lands here with `skipped=true` already set (either
+  // because it followed our own redirect below, or because the user opened a
+  // hand-crafted link) and a client-supplied redirectUrl/redirectTimeout. That
+  // redirectUrl must never be trusted as-is: validate it against the
+  // allowlist here so the frontend never has to trust a raw URL param.
+  if (skipped === 'true') {
+    const rawRedirectUrl = req.query.redirectUrl;
+    const rawRedirectTimeout = req.query.redirectTimeout;
+
+    const validatedRedirectUrl = Utils.isAllowedRedirectUrl(rawRedirectUrl, ALLOWED_REDIRECT_HOSTS)
+      ? rawRedirectUrl
+      : null;
+
+    if (rawRedirectUrl && !validatedRedirectUrl) {
+      logger.warn(`Rejected redirectUrl not in the allowlist: ${rawRedirectUrl}`);
+    }
+
+    const parsedTimeout = parseInt(rawRedirectTimeout, 10);
+    const validatedRedirectTimeout = Number.isFinite(parsedTimeout) && parsedTimeout >= 0
+      ? parsedTimeout
+      : undefined;
+
+    const response = { proceed: true, redirectUrl: validatedRedirectUrl, redirectTimeout: validatedRedirectTimeout };
+
+    const skippedUserLocale = usersLocales[userId];
+    if (skippedUserLocale && !req.query.locale) {
+      response.locale = skippedUserLocale;
+    }
+
+    return res.json(response);
+  }
+
   if (userId && meetingId && !skipped) {
     const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
     const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
@@ -209,8 +257,16 @@ app.post('/feedback/webhook', async (req, res) => {
             screenShareBridge: meeting?.screenShareBridge,
           };
 
-          if (meeting.metadata.feedbackredirecturl || REDIRECT_URL) {
-            sessionData.redirect_url = meeting.metadata.feedbackredirecturl || REDIRECT_URL;
+          const feedbackRedirectUrl = meeting.metadata.feedbackredirecturl;
+          if (feedbackRedirectUrl && !Utils.isAllowedRedirectUrl(feedbackRedirectUrl, ALLOWED_REDIRECT_HOSTS)) {
+            logger.warn(`Meeting ${intMeetingId} set feedbackredirecturl to a host outside the allowlist, ignoring: ${feedbackRedirectUrl}`);
+          }
+          const allowedFeedbackRedirectUrl = Utils.isAllowedRedirectUrl(feedbackRedirectUrl, ALLOWED_REDIRECT_HOSTS)
+            ? feedbackRedirectUrl
+            : null;
+
+          if (allowedFeedbackRedirectUrl || REDIRECT_URL) {
+            sessionData.redirect_url = allowedFeedbackRedirectUrl || REDIRECT_URL;
           }
 
           if (REDIRECT_TIMEOUT) {
@@ -246,7 +302,13 @@ app.post('/feedback/webhook', async (req, res) => {
             role: user.role,
           };
 
-          if (userRedirectUrl) userData.redirect_url = userRedirectUrl;
+          if (userRedirectUrl) {
+            if (Utils.isAllowedRedirectUrl(userRedirectUrl, ALLOWED_REDIRECT_HOSTS)) {
+              userData.redirect_url = userRedirectUrl;
+            } else {
+              logger.warn(`User ${intUserId} set bbb_feedback_redirect_url to a host outside the allowlist, ignoring: ${userRedirectUrl}`);
+            }
+          }
 
           if (askForFeedback !== undefined) {
             userData.ask_for_feedback = askForFeedback;

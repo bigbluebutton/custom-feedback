@@ -96,8 +96,6 @@ const FeedbackFlow = ({ intl }) => {
     const sessionId = params.get('meetingId');
     const userId = params.get('userId');
     const skipped = params.get('skipped') === 'true';
-    const finalRedirectUrl = params.get('redirectUrl');
-    const redirectTimeout = params.get('redirectTimeout');
     let reason = params.get('reason');
     const errorsParam = params.get('errors');
 
@@ -119,12 +117,10 @@ const FeedbackFlow = ({ intl }) => {
     if (skipped) {
       setIsSkipped(true);
       setCurrentStep(CONFIRMATION_STEP);
-      if (finalRedirectUrl) {
-        sessionStorage.setItem('redirectUrl', finalRedirectUrl);
-      }
-      if (redirectTimeout) {
-        sessionStorage.setItem('redirectTimeout', redirectTimeout);
-      }
+      // redirectUrl/redirectTimeout are NOT read from the URL here: they can
+      // only be trusted once validated against the operator's host allowlist
+      // by /feedback/check, which index.jsx already awaited and persisted
+      // via setRedirectUrl/setRedirectTimeout before this component mounted.
       return;
     }
 

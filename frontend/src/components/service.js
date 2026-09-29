@@ -54,8 +54,46 @@ export const submitFeedback = async (feedback) => {
   }
 };
 
+// Defense in depth for the actual navigation sink (ConfirmationStep's
+// `window.location.href = redirectUrl`). Host allowlisting already happened
+// server-side (`/feedback/check`, see index.jsx) before this value was
+// stored, so the frontend can't re-check the host without duplicating that
+// allowlist. It only re-checks the scheme, to guard against a stale or
+// otherwise-written sessionStorage value ever reaching the sink as a
+// `javascript:`/`data:` URI.
+export const isSafeRedirectScheme = (rawUrl) => {
+  if (!rawUrl) return false;
+
+  let parsed;
+  try {
+    parsed = new URL(rawUrl, window.location.origin);
+  } catch (e) {
+    return false;
+  }
+
+  return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+};
+
+export const setRedirectUrl = (redirectUrl) => {
+  if (redirectUrl) {
+    sessionStorage.setItem('redirectUrl', redirectUrl);
+  } else {
+    sessionStorage.removeItem('redirectUrl');
+  }
+};
+
+export const setRedirectTimeout = (redirectTimeout) => {
+  if (redirectTimeout !== undefined && redirectTimeout !== null && redirectTimeout !== '') {
+    sessionStorage.setItem('redirectTimeout', redirectTimeout);
+  } else {
+    sessionStorage.removeItem('redirectTimeout');
+  }
+};
+
 export const getRedirectUrl = () => {
-  return sessionStorage.getItem('redirectUrl');
+  const storedUrl = sessionStorage.getItem('redirectUrl');
+
+  return isSafeRedirectScheme(storedUrl) ? storedUrl : null;
 };
 
 export const getRedirectTimeout = () => {
