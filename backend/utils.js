@@ -203,8 +203,12 @@ const hSetWithExpiration = async (
 ) => {
   if (trackActiveKeys) activeKeys.push(key);
 
+  const cleanField = Object.fromEntries(
+    Object.entries(field).filter(([, value]) => value !== undefined),
+  );
+
   await redisClient.multi()
-    .hSet(key, field)
+    .hSet(key, cleanField)
     .expire(key, expire_seconds)
     .exec();
 }

@@ -142,6 +142,11 @@ app.get('/feedback/check', async (req, res) => {
     logger.error({ err: e, rawErrors }, 'Error parsing errors param');
   }
 
+  if (!Array.isArray(errors)) {
+    logger.warn({ rawErrors }, 'errors param did not parse to an array, ignoring');
+    errors = [];
+  }
+
   logger.debug({ query: req.query, parsedErrors: errors }, 'Check: Processing feedback request');
 
   // Reason/Error codes that justify skipping feedback even when user has a valid session
@@ -234,11 +239,17 @@ app.post('/feedback/webhook', async (req, res) => {
 
     logger.debug(`Got webhook ${event} from ${domain}`);
     for (const evt of events) {
-      if (evt.data.type === 'event') {
+      try {
+        if (!evt?.data || evt.data.type !== 'event') continue;
+
         const eventType = evt.data.id;
 
         if (eventType === 'meeting-created') {
-          const meeting = evt.data.attributes.meeting;
+          const meeting = evt.data.attributes?.meeting;
+          if (!meeting) {
+            logger.warn({ evt }, 'meeting-created event with no meeting data, skipping');
+            continue;
+          }
           const intMeetingId = meeting['internal-meeting-id'];
           const extMeetingId = meeting['external-meeting-id'];
           // mconf-institution-guid or external-meeting-id
@@ -257,7 +268,7 @@ app.post('/feedback/webhook', async (req, res) => {
             screenShareBridge: meeting?.screenShareBridge,
           };
 
-          const feedbackRedirectUrl = meeting.metadata.feedbackredirecturl;
+          const feedbackRedirectUrl = meeting.metadata?.feedbackredirecturl;
           if (feedbackRedirectUrl && !Utils.isAllowedRedirectUrl(feedbackRedirectUrl, ALLOWED_REDIRECT_HOSTS)) {
             logger.warn(`Meeting ${intMeetingId} set feedbackredirecturl to a host outside the allowlist, ignoring: ${feedbackRedirectUrl}`);
           }
@@ -288,7 +299,11 @@ app.post('/feedback/webhook', async (req, res) => {
             },
           );
         } else if (eventType === 'user-joined') {
-          const user = evt.data.attributes.user;
+          const user = evt.data.attributes?.user;
+          if (!user) {
+            logger.warn({ evt }, 'user-joined event with no user data, skipping');
+            continue;
+          }
           const userRedirectUrl = user.userdata?.['bbb_feedback_redirect_url'];
           const askForFeedback = user.userdata?.['bbb_ask_for_feedback_on_logout'];
           const intUserId = user['internal-user-id'];
@@ -326,6 +341,8 @@ app.post('/feedback/webhook', async (req, res) => {
             userData
           );
         }
+      } catch (evtError) {
+        logger.error({ err: evtError, evt }, 'Error processing webhook event, skipping it');
       }
     }
 
@@ -349,6 +366,11 @@ app.post('/feedback/submit', async (req, res) => {
       logger.error('Error parsing feedback body:', e);
       return res.status(400).send();
     }
+  }
+
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+    logger.warn({ body }, 'Received feedback submission with a non-object body.');
+    return res.status(400).json({ status: 'error', message: 'Invalid feedback body' });
   }
 
   const { session, user, feedback, device, rating } = body;
