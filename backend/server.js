@@ -130,13 +130,13 @@ app.get('/feedback/check', async (req, res) => {
 
   // Reason/Error codes that justify skipping feedback even when user has a valid session
   const hasSkipReason = REASON_CODE_NOT_ELEGIBLE_FOR_FEEDBACK.includes(reasonCode);
-  const hasSkipError = errors.some((e) => ERROR_CODE_NOT_ELEGIBLE_FOR_FEEDBACK.includes(e?.key));
+  const hasSkipError = Utils.hasNotEligibleError(errors, ERROR_CODE_NOT_ELEGIBLE_FOR_FEEDBACK);
 
   if (!skipped && (hasSkipReason || hasSkipError)) {
     const params = new URLSearchParams({ skipped: 'true' });
-    const message = reason || errors[0]?.message;
+    const message = reason || Utils.firstErrorMessage(errors);
     if (message) params.set('reason', message);
-    logger.info(`Forced feedback skip: ${hasSkipReason ? `reason code: ${reasonCode}` : `error code: ${errors[0]?.key}`}`);
+    logger.info(`Forced feedback skip: ${hasSkipReason ? `reason code: ${reasonCode}` : `error code: ${Utils.firstErrorKey(errors)}`}`);
     return res.json({ redirect: `/feedback?${params.toString()}` });
   }
 

@@ -235,6 +235,35 @@ const redisStaleKeysCleanup = async (redisClient, keyId) => {
   activeKeys.splice(0, activeKeys.length, ...keysToKeep);
 }
 
+/**
+ * hasNotEligibleError - Whether any entry of `errors` carries a `key` in
+ * `notEligibleErrorCodes`. Entries that are not objects (e.g. a `null` from
+ * a malformed `errors` query param, as in `?errors=[null]`) are treated as
+ * non-matching instead of throwing.
+ * @param {Array} errors - Parsed `errors` query param entries.
+ * @param {Array<string>} notEligibleErrorCodes - Error codes that disqualify a user from feedback.
+ * @returns {boolean}
+ * @public
+ */
+const hasNotEligibleError = (errors, notEligibleErrorCodes) =>
+  (errors || []).some((error) => notEligibleErrorCodes.includes(error?.key));
+
+/**
+ * firstErrorKey - Safe accessor for the `key` of the first `errors` entry.
+ * @param {Array} errors - Parsed `errors` query param entries.
+ * @returns {string|undefined}
+ * @public
+ */
+const firstErrorKey = (errors) => errors?.[0]?.key;
+
+/**
+ * firstErrorMessage - Safe accessor for the `message` of the first `errors` entry.
+ * @param {Array} errors - Parsed `errors` query param entries.
+ * @returns {string|undefined}
+ * @public
+ */
+const firstErrorMessage = (errors) => errors?.[0]?.message;
+
 export default {
   ipFromRequest,
   shaHex,
@@ -244,4 +273,7 @@ export default {
   sortBy,
   hSetWithExpiration,
   redisStaleKeysCleanup,
+  hasNotEligibleError,
+  firstErrorKey,
+  firstErrorMessage,
 };
