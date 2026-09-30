@@ -6,6 +6,7 @@ import ProblemStep from '../ProblemStep/ProblemStep';
 import EmailStep from '../EmailStep/EmailStep';
 import ConfirmationStep from '../ConfirmatioStep/ConfirmationStep';
 import { DEFAULT_INITIAL_STEP, useFeedbackData } from '../../feedbackData';
+import { useSession } from '../../sessionContext';
 import Styled from './styles';
 
 const messages = defineMessages({
@@ -70,6 +71,7 @@ const CONFIRMATION_STEP = 'confirmation';
 
 const FeedbackFlow = ({ intl }) => {
   const feedbackData = useFeedbackData();
+  const { isValid } = useSession();
   const [currentStep, setCurrentStep] = useState(feedbackData.initialStep || DEFAULT_INITIAL_STEP);
   const [isValidSession, setIsValidSession] = useState(true);
   const [isSkipped, setIsSkipped] = useState(false);
@@ -93,8 +95,6 @@ const FeedbackFlow = ({ intl }) => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get('meetingId');
-    const userId = params.get('userId');
     const skipped = params.get('skipped') === 'true';
     let reason = params.get('reason');
     const errorsParam = params.get('errors');
@@ -124,7 +124,11 @@ const FeedbackFlow = ({ intl }) => {
       return;
     }
 
-    if (!sessionId || !userId) {
+    // Session validity comes from index.jsx's /feedback/check call (the only
+    // party that can verify a sessionToken against bbb-web), not from
+    // meetingId/userId URL params: the backend doesn't trust those, and
+    // BBB's logoutURL isn't guaranteed to carry them.
+    if (!isValid) {
       setIsValidSession(false);
       const mappedReason = reasonKeyMap[reason] || reason;
       const messageKey = `errors.${mappedReason}`;
@@ -137,17 +141,11 @@ const FeedbackFlow = ({ intl }) => {
       return;
     }
 
-    feedback.current = {
-      ...feedback.current,
-      session: { sessionId },
-      user: { userId }
-    };
-
     const savedFeedback = sessionStorage.getItem('feedbackData');
     if (savedFeedback) {
       feedback.current = JSON.parse(savedFeedback);
     }
-  }, []);
+  }, [isValid]);
 
   const updateFeedback = (data) => {
     let updatedFeedbackData = { ...feedback.current };

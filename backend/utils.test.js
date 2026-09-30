@@ -130,3 +130,33 @@ test('hSetWithExpiration strips undefined fields before calling hSet', async () 
   const hSetCall = calls.find(([op]) => op === 'hSet');
   assert.deepEqual(hSetCall[2], { session_name: 'Test' });
 });
+
+// getVerifiedIdentity is the only place /feedback/check and /feedback/submit
+// are allowed to read identity from: the User-Id/Meeting-Id headers nginx's
+// auth_request injects after bbb-web verifies the caller's sessionToken. A
+// client-supplied userId/meetingId in the query string or body must never be
+// used instead.
+
+test('getVerifiedIdentity returns userId/meetingId when both headers are present', () => {
+  const req = { headers: { 'user-id': 'user1', 'meeting-id': 'meeting1' } };
+  assert.deepEqual(Utils.getVerifiedIdentity(req), { userId: 'user1', meetingId: 'meeting1' });
+});
+
+test('getVerifiedIdentity returns null when User-Id is missing', () => {
+  const req = { headers: { 'meeting-id': 'meeting1' } };
+  assert.equal(Utils.getVerifiedIdentity(req), null);
+});
+
+test('getVerifiedIdentity returns null when Meeting-Id is missing', () => {
+  const req = { headers: { 'user-id': 'user1' } };
+  assert.equal(Utils.getVerifiedIdentity(req), null);
+});
+
+test('getVerifiedIdentity returns null when both headers are missing', () => {
+  assert.equal(Utils.getVerifiedIdentity({ headers: {} }), null);
+});
+
+test('getVerifiedIdentity does not throw when req.headers itself is missing', () => {
+  assert.doesNotThrow(() => Utils.getVerifiedIdentity({}));
+  assert.equal(Utils.getVerifiedIdentity({}), null);
+});

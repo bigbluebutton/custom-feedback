@@ -125,14 +125,22 @@ async function destroyHook() {
 
 app.get('/feedback/check', async (req, res) => {
   const {
-    userId,
-    meetingId,
     reason,
     reasonCode,
     skipped,
     errors: rawErrors = [],
     locale,
   } = req.query;
+
+  // userId/meetingId are never read from the query string: they're only
+  // trustworthy once nginx's auth_request has verified the caller's
+  // sessionToken against bbb-web and injected them as headers.
+  const identity = Utils.getVerifiedIdentity(req);
+  if (!identity) {
+    logger.warn('Rejecting /feedback/check with no verified User-Id/Meeting-Id headers');
+    return res.status(401).send();
+  }
+  const { userId, meetingId } = identity;
 
   let errors = [];
   try {
@@ -373,19 +381,31 @@ app.post('/feedback/submit', async (req, res) => {
     return res.status(400).json({ status: 'error', message: 'Invalid feedback body' });
   }
 
-  const { session, user, feedback, device, rating } = body;
+  const { user, feedback, device, rating } = body;
 
-  if (!session || !user) {
-    logger.warn('Received feedback submission with missing session or user.', body);
+  if (!user) {
+    logger.warn('Received feedback submission with missing user.', body);
     return res.status(400).json({ status: 'error', message: 'Missing session or user information' });
   }
 
+  // session.sessionId/user.userId are never read from the body: they're only
+  // trustworthy once nginx's auth_request has verified the caller's
+  // sessionToken against bbb-web and injected them as headers. A client-
+  // supplied id here would let anyone attribute/read another user's cached
+  // profile fields or feedback.
+  const identity = Utils.getVerifiedIdentity(req);
+  if (!identity) {
+    logger.warn('Rejecting /feedback/submit with no verified User-Id/Meeting-Id headers');
+    return res.status(401).send();
+  }
+  const { userId, meetingId } = identity;
+
   try {
-    const feedbackKey = `${KEY_PREFIX}:${session.sessionId}:${user.userId}`;
+    const feedbackKey = `${KEY_PREFIX}:${meetingId}:${userId}`;
     const existingFeedback = await redisClient.get(feedbackKey);
 
-    const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${session.sessionId}`);
-    const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${user.userId}`);
+    const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
+    const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
     // User redirect URL takes precedence over session redirect URL
     const redirectUrl = userData.redirect_url || sessionData.redirect_url;
 
@@ -401,11 +421,11 @@ app.post('/feedback/submit', async (req, res) => {
     }
 
     if (existingFeedback) {
-      logger.warn(`Feedback already submitted for userID: ${user.userId} sessionID: ${session.sessionId}`);
+      logger.warn(`Feedback already submitted for userID: ${userId} sessionID: ${meetingId}`);
       return res.status(400).json({ status: 'error', message: 'Feedback already submitted' });
     }
 
-    logger.info(`Submitting feedback for userID: ${userData.id || user.userId} meetingID: ${sessionData.session_id || session.sessionId}`);
+    logger.info(`Submitting feedback for userID: ${userData.id || userId} meetingID: ${sessionData.session_id || meetingId}`);
 
     const completeFeedback = {
       rating,
@@ -462,11 +482,11 @@ app.post('/feedback/submit', async (req, res) => {
       logger.debug('No FEEDBACK_URL set, logging feedback to syslog only.');
     }
 
-    await Utils.redisStaleKeysCleanup(redisClient, user.userId);
+    await Utils.redisStaleKeysCleanup(redisClient, userId);
     res.json({ status: 'success', data: completeFeedback });
   } catch (error) {
     logger.error('Error submitting feedback:', error);
-    await Utils.redisStaleKeysCleanup(redisClient, user.userId);
+    await Utils.redisStaleKeysCleanup(redisClient, userId);
     res.status(500).send();
   }
 });

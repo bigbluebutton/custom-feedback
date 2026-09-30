@@ -1,5 +1,28 @@
-location = /feedback/check   { proxy_pass http://localhost:3009; }
-location = /feedback/submit  { proxy_pass http://localhost:3009; }
+# /feedback/check and /feedback/submit are browser-facing and carry a
+# `?sessionToken=...` param the frontend reads out of sessionStorage; gate
+# them behind bbb-web's own connection check (the same mechanism
+# bbb-webrtc-sfu and other BBB-adjacent services rely on) so the backend only
+# ever sees a verified User-Id/Meeting-Id, never a client-supplied one.
+location = /feedback/check {
+  auth_request /bigbluebutton/connection/checkAuthorization;
+  auth_request_set $user_id $sent_http_user_id;
+  auth_request_set $meeting_id $sent_http_meeting_id;
+  proxy_set_header User-Id $user_id;
+  proxy_set_header Meeting-Id $meeting_id;
+  proxy_pass http://localhost:3009;
+}
+
+location = /feedback/submit {
+  auth_request /bigbluebutton/connection/checkAuthorization;
+  auth_request_set $user_id $sent_http_user_id;
+  auth_request_set $meeting_id $sent_http_meeting_id;
+  proxy_set_header User-Id $user_id;
+  proxy_set_header Meeting-Id $meeting_id;
+  proxy_pass http://localhost:3009;
+}
+
+# Server-to-server callback from bbb-web itself, not a browser session: no
+# sessionToken involved, left unauthenticated here as before.
 location = /feedback/webhook { proxy_pass http://localhost:3009; }
 
 location ~ ^/feedback/(feedbackData\.json|locales/) {

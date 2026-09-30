@@ -304,6 +304,29 @@ const firstErrorKey = (errors) => errors?.[0]?.key;
  */
 const firstErrorMessage = (errors) => errors?.[0]?.message;
 
+/**
+ * getVerifiedIdentity - Reads the caller's identity off the `User-Id`/
+ * `Meeting-Id` headers that nginx's `auth_request` injects only after
+ * bbb-web's `checkAuthorization` has validated the request's `sessionToken`
+ * (and, unless the meeting opts out, its bbb-web session). These headers
+ * are therefore the only trustworthy source of identity for a browser-
+ * originated request — a client-supplied `userId`/`meetingId` in the query
+ * string or body is not verified against BBB and must not be used instead.
+ * @param {object} req - The Express request object.
+ * @returns {{userId: string, meetingId: string}|null} - `null` if either
+ *          header is missing (the request did not go through the
+ *          authenticated nginx path).
+ * @public
+ */
+const getVerifiedIdentity = (req) => {
+  const userId = req.headers?.['user-id'];
+  const meetingId = req.headers?.['meeting-id'];
+
+  if (!userId || !meetingId) return null;
+
+  return { userId, meetingId };
+};
+
 export default {
   ipFromRequest,
   shaHex,
@@ -318,4 +341,5 @@ export default {
   isPlainObject,
   firstErrorKey,
   firstErrorMessage,
+  getVerifiedIdentity,
 };
