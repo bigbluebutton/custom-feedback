@@ -87,5 +87,20 @@
   "app.customFeedback.errors.meetingForciblyEnded": "Você não pode entrar em uma sessão que já foi encerrada à força",
   "app.customFeedback.errors.invalidPassword": "A senha informada está incorreta.",
   "app.customFeedback.errors.mismatchCreateTime": "As informações da reunião estão desatualizadas. Por favor, tente novamente.",
-  "app.customFeedback.errors.generic": "Não foi possível entrar na reunião ({reason})."
+  "app.customFeedback.errors.generic": "Não foi possível entrar na reunião ({reason}).",
+  "app.customFeedback.errors.removedFromConference": "Você foi removido da conferência",
+  "app.customFeedback.errors.loggedOut": "Você saiu da conferência",
+  "app.customFeedback.errors.permissionEjectReason": "Removido por violação de permissão",
+  "app.customFeedback.errors.ejectedFromMeeting": "Você foi removido da sessão",
+  "app.customFeedback.errors.userInactivityEjectReason": "Usuário inativo por tempo demais",
+  "app.customFeedback.errors.endedFromAPI": "A sessão foi encerrada pelo sistema",
+  "app.customFeedback.errors.endedWhenNoUserJoined": "A sessão foi encerrada porque nenhum usuário entrou",
+  "app.customFeedback.errors.endedWhenLastUserLeft": "A sessão foi encerrada porque o último usuário saiu",
+  "app.customFeedback.errors.endedAfterExceedingDuration": "A sessão foi encerrada por exceder a duração máxima",
+  "app.customFeedback.errors.breakoutEndedAfterExceedingDuration": "A sala de grupo foi encerrada por exceder a duração máxima",
+  "app.customFeedback.errors.breakoutEndedByModerator": "A sala de grupo foi encerrada pelo moderador",
+  "app.customFeedback.errors.endedDueNoAuthed": "A sessão foi encerrada porque não havia usuário autenticado na sala",
+  "app.customFeedback.errors.endedDueNoModerators": "A sessão foi encerrada porque nenhum moderador esteve presente",
+  "app.customFeedback.errors.endedDueServiceInterruption": "A sessão foi encerrada devido a uma interrupção temporária do serviço",
+  "app.customFeedback.errors.unknownReason": "Esta sessão terminou."
 }

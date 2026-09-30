@@ -87,5 +87,20 @@
   "app.customFeedback.errors.meetingForciblyEnded": "No puedes unirte a una sesión que ya fue finalizada forzosamente",
   "app.customFeedback.errors.invalidPassword": "La contraseña proporcionada es incorrecta.",
   "app.customFeedback.errors.mismatchCreateTime": "La información de la reunión está desactualizada. Por favor, inténtalo de nuevo.",
-  "app.customFeedback.errors.generic": "No fue posible unirse a la reunión ({reason})."
+  "app.customFeedback.errors.generic": "No fue posible unirse a la reunión ({reason}).",
+  "app.customFeedback.errors.removedFromConference": "Has sido eliminado de la conferencia",
+  "app.customFeedback.errors.loggedOut": "Has cerrado sesión en la conferencia",
+  "app.customFeedback.errors.permissionEjectReason": "Expulsado por violación de permisos",
+  "app.customFeedback.errors.ejectedFromMeeting": "Has sido eliminado de la sesión",
+  "app.customFeedback.errors.userInactivityEjectReason": "Usuario inactivo por demasiado tiempo",
+  "app.customFeedback.errors.endedFromAPI": "La sesión ha finalizado - terminada por el sistema",
+  "app.customFeedback.errors.endedWhenNoUserJoined": "La sesión ha finalizado porque ningún usuario se unió",
+  "app.customFeedback.errors.endedWhenLastUserLeft": "La sesión ha finalizado porque el último usuario salió",
+  "app.customFeedback.errors.endedAfterExceedingDuration": "La sesión ha finalizado por exceder la duración máxima",
+  "app.customFeedback.errors.breakoutEndedAfterExceedingDuration": "La sala de grupo ha finalizado por exceder la duración máxima",
+  "app.customFeedback.errors.breakoutEndedByModerator": "La sala de grupo ha finalizado - terminada por el moderador",
+  "app.customFeedback.errors.endedDueNoAuthed": "La sesión ha finalizado porque no había ningún usuario autenticado en la sala",
+  "app.customFeedback.errors.endedDueNoModerators": "La sesión ha finalizado porque no hubo ningún moderador presente",
+  "app.customFeedback.errors.endedDueServiceInterruption": "La sesión ha finalizado debido a una interrupción temporal del servicio",
+  "app.customFeedback.errors.unknownReason": "Esta sesión ha terminado."
 }
