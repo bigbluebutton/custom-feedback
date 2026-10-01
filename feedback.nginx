@@ -21,9 +21,20 @@ location = /feedback/submit {
   proxy_pass http://localhost:3009;
 }
 
-# Server-to-server callback from bbb-web itself, not a browser session: no
-# sessionToken involved, left unauthenticated here as before.
-location = /feedback/webhook { proxy_pass http://localhost:3009; }
+# Server-to-server callback from bbb-webhooks, not a browser session: no
+# sessionToken involved, so there's no auth_request to gate it on. Restrict
+# it to internal/private source addresses instead — bbb-webhooks must be
+# configured to call this over a private address (localhost, the docker
+# bridge network, or an internal overlay), never through the host's public
+# interface. Adjust this allowlist to match where bbb-webhooks actually runs
+location = /feedback/webhook {
+  allow 127.0.0.1;
+  allow 172.16.0.0/12; # default docker bridge networks (e.g. 172.17.0.0/16)
+  allow 10.0.0.0/8;
+  allow 192.168.0.0/16;
+  deny all;
+  proxy_pass http://localhost:3009;
+}
 
 location ~ ^/feedback/(feedbackData\.json|locales/) {
   root /usr/share/bigbluebutton;

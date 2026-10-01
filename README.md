@@ -103,7 +103,14 @@ location = /feedback/submit {
   proxy_pass http://localhost:3009;
 }
 
-location = /feedback/webhook { proxy_pass http://localhost:3009; }
+location = /feedback/webhook {
+  allow 127.0.0.1;
+  allow 172.16.0.0/12; # default docker bridge networks (e.g. 172.17.0.0/16)
+  allow 10.0.0.0/8;
+  allow 192.168.0.0/16;
+  deny all;
+  proxy_pass http://localhost:3009;
+}
 
 location ~ ^/feedback/(feedbackData\.json|locales/) {
   root /usr/share/bigbluebutton;
@@ -121,6 +128,14 @@ The overridable assets — the form definition and the locale files — get an
 explicit `Cache-Control` because they are served unhashed from a stable URL:
 without it a browser picks its own freshness lifetime and can keep serving a
 copy from before an edit.
+
+`/feedback/webhook` has no `sessionToken`/`auth_request` gate (it's a
+server-to-server call from bbb-webhooks, not a browser), so it only trusts the
+caller's source address. **Configure bbb-webhooks' `PERMANENT_HOOKS` to post
+to this endpoint over a private/internal address** (e.g. `http://localhost:3009/feedback/webhook`
+if it runs on the same host, or the docker bridge/internal overlay address if
+it runs in a sibling container). Never through the BBB host's public
+hostname or a publicly reachable IP.
 
 Testing `/feedback/check`/`/feedback/submit` directly against the back-end
 (bypassing this nginx config, e.g. in local dev) will now 401 unless you set
