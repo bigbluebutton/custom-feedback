@@ -89,12 +89,11 @@ async function startApp() {
       // against the operator's allowlist, so this is the only place that
       // gets to persist one for ConfirmationStep to use later. FeedbackFlow
       // must not read redirectUrl/redirectTimeout straight off the URL.
-      if (Object.prototype.hasOwnProperty.call(check, 'redirectUrl')) {
-        setRedirectUrl(check.redirectUrl);
-      }
-      if (Object.prototype.hasOwnProperty.call(check, 'redirectTimeout')) {
-        setRedirectTimeout(check.redirectTimeout);
-      }
+      // Set unconditionally so a prior session's values don't linger in
+      // sessionStorage when this check has none of its own - the setters
+      // already clear the key for an absent/falsy value.
+      setRedirectUrl(check.redirectUrl);
+      setRedirectTimeout(check.redirectTimeout);
     } else if (checkRes.status === 401) {
       isValidSession = false;
     }

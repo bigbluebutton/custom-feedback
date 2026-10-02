@@ -25,7 +25,7 @@ Backend (`cd backend`):
 
 Full stack via Docker: `docker compose up -d` (see `docker-compose.yml` for the env block; edit values there).
 
-There is no working test suite. `frontend`'s `test` script (`vite test`) and its `eslintConfig` (`react-app/jest`) are inert — no test files exist. Don't claim tests pass.
+`backend` has a working test suite: `npm test` runs `node --test` against `backend/*.test.js`, with no Redis or server dependency. `frontend`'s `test` script (`vite test`) and its `eslintConfig` (`react-app/jest`) are still inert — no test files exist. Don't claim frontend tests pass.
 
 Verify frontend changes by hand: `cd frontend && npm run build`, then `npx vite preview --port 4173` and curl/Playwright `http://localhost:4173/feedback/…` (preview serves `build/` at base `/feedback/`).
 Gotcha: `vite preview` **and** prod nginx SPA-fall-back any missing path — including backend-only routes like `/feedback/check` — to `index.html` (HTTP 200, `text/html`), so a fetch for an absent resource returns HTML, not 404. Content-type-guard JSON fetches accordingly.

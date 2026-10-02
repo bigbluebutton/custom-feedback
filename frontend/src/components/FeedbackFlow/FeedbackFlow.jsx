@@ -179,7 +179,7 @@ const FeedbackFlow = ({ intl }) => {
     if (errorsParam) {
       try {
         const errors = JSON.parse(errorsParam);
-        if (Array.isArray(errors) && errors.length > 0 && errors[0].key) {
+        if (Array.isArray(errors) && errors.length > 0 && errors[0]?.key) {
           reason = errors[0].key;
         }
       } catch (e) {
