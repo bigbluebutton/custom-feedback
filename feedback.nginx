@@ -1,6 +1,40 @@
-location = /feedback/check   { proxy_pass http://localhost:3009; }
-location = /feedback/submit  { proxy_pass http://localhost:3009; }
-location = /feedback/webhook { proxy_pass http://localhost:3009; }
+# /feedback/check and /feedback/submit are browser-facing and carry a
+# `?sessionToken=...` param the frontend reads out of sessionStorage; gate
+# them behind bbb-web's own connection check (the same mechanism
+# bbb-webrtc-sfu and other BBB-adjacent services rely on) so the backend only
+# ever sees a verified User-Id/Meeting-Id, never a client-supplied one.
+location = /feedback/check {
+  auth_request /bigbluebutton/connection/checkAuthorization;
+  auth_request_set $user_id $sent_http_user_id;
+  auth_request_set $meeting_id $sent_http_meeting_id;
+  proxy_set_header User-Id $user_id;
+  proxy_set_header Meeting-Id $meeting_id;
+  proxy_pass http://localhost:3009;
+}
+
+location = /feedback/submit {
+  auth_request /bigbluebutton/connection/checkAuthorization;
+  auth_request_set $user_id $sent_http_user_id;
+  auth_request_set $meeting_id $sent_http_meeting_id;
+  proxy_set_header User-Id $user_id;
+  proxy_set_header Meeting-Id $meeting_id;
+  proxy_pass http://localhost:3009;
+}
+
+# Server-to-server callback from bbb-webhooks, not a browser session: no
+# sessionToken involved, so there's no auth_request to gate it on. Restrict
+# it to internal/private source addresses instead — bbb-webhooks must be
+# configured to call this over a private address (localhost, the docker
+# bridge network, or an internal overlay), never through the host's public
+# interface. Adjust this allowlist to match where bbb-webhooks actually runs
+location = /feedback/webhook {
+  allow 127.0.0.1;
+  allow 172.16.0.0/12; # default docker bridge networks (e.g. 172.17.0.0/16)
+  allow 10.0.0.0/8;
+  allow 192.168.0.0/16;
+  deny all;
+  proxy_pass http://localhost:3009;
+}
 
 location ~ ^/feedback/(feedbackData\.json|locales/) {
   root /usr/share/bigbluebutton;
@@ -11,4 +45,9 @@ location ~ ^/feedback/(feedbackData\.json|locales/) {
 location /feedback {
   root /usr/share/bigbluebutton;
   try_files $uri /feedback/index.html;
+  # Defense in depth against script injection (e.g. a `javascript:` redirect
+  # URL executing on this origin): the bundle has no inline scripts, so
+  # 'self' is enough for script-src. style-src needs 'unsafe-inline' because
+  # styled-components injects <style> tags at runtime.
+  add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';" always;
 }

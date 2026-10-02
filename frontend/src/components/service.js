@@ -11,15 +11,29 @@ export const getDeviceInfo = () => {
   };
 };
 
-export const getURLParams = () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const sessionId = urlParams.get('meetingId');
-  const userId = urlParams.get('userId');
+// The BBB html5 client writes its sessionToken to sessionStorage under this
+// key (ObservableStorage with the 'BBB_' prefix,
+// imports/ui/services/storage/session.ts in bigbluebutton-html5). Since the
+// logout redirect that lands here is a same-origin, same-tab navigation,
+// sessionStorage survives it — no logoutURL param or html5 change needed.
+// The backend's /feedback/check and /feedback/submit are gated behind
+// nginx's auth_request to bbb-web, which reads sessionToken off the request
+// URI, so it must travel as a query param here (not a header or body field).
+export const getSessionToken = () => {
+  try {
+    return sessionStorage.getItem('BBB_sessionToken');
+  } catch (e) {
+    return null;
+  }
+};
 
-  return {
-    sessionId,
-    userId
-  };
+const withSessionToken = (path) => {
+  const sessionToken = getSessionToken();
+  if (!sessionToken) return path;
+
+  const url = new URL(path, window.location.origin);
+  url.searchParams.set('sessionToken', sessionToken);
+  return `${url.pathname}${url.search}`;
 };
 
 export const submitFeedback = async (feedback) => {
@@ -29,7 +43,7 @@ export const submitFeedback = async (feedback) => {
   sessionStorage.removeItem('feedbackTimeout');
 
   try {
-    const response = await fetch('/feedback/submit', {
+    const response = await fetch(withSessionToken('/feedback/submit'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -54,8 +68,46 @@ export const submitFeedback = async (feedback) => {
   }
 };
 
+// Defense in depth for the actual navigation sink (ConfirmationStep's
+// `window.location.href = redirectUrl`). Host allowlisting already happened
+// server-side (`/feedback/check`, see index.jsx) before this value was
+// stored, so the frontend can't re-check the host without duplicating that
+// allowlist. It only re-checks the scheme, to guard against a stale or
+// otherwise-written sessionStorage value ever reaching the sink as a
+// `javascript:`/`data:` URI.
+export const isSafeRedirectScheme = (rawUrl) => {
+  if (!rawUrl) return false;
+
+  let parsed;
+  try {
+    parsed = new URL(rawUrl, window.location.origin);
+  } catch (e) {
+    return false;
+  }
+
+  return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+};
+
+export const setRedirectUrl = (redirectUrl) => {
+  if (redirectUrl) {
+    sessionStorage.setItem('redirectUrl', redirectUrl);
+  } else {
+    sessionStorage.removeItem('redirectUrl');
+  }
+};
+
+export const setRedirectTimeout = (redirectTimeout) => {
+  if (redirectTimeout !== undefined && redirectTimeout !== null && redirectTimeout !== '') {
+    sessionStorage.setItem('redirectTimeout', redirectTimeout);
+  } else {
+    sessionStorage.removeItem('redirectTimeout');
+  }
+};
+
 export const getRedirectUrl = () => {
-  return sessionStorage.getItem('redirectUrl');
+  const storedUrl = sessionStorage.getItem('redirectUrl');
+
+  return isSafeRedirectScheme(storedUrl) ? storedUrl : null;
 };
 
 export const getRedirectTimeout = () => {
@@ -67,7 +119,7 @@ export const handleBeforeUnload = async () => {
   if (savedFeedback) {
     const feedback = JSON.parse(savedFeedback);
     const blob = new Blob([JSON.stringify(feedback)], { type: 'application/json; charset=UTF-8' });
-    navigator.sendBeacon('/feedback/submit', blob);
+    navigator.sendBeacon(withSessionToken('/feedback/submit'), blob);
     sessionStorage.removeItem('feedbackData');
   }
 };

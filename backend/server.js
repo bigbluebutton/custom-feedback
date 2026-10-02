@@ -38,6 +38,22 @@ if (!SHARED_SECRET || !BASIC_URL) {
   process.exit(1);
 }
 
+// Hosts a redirect_url is allowed to point at: the BBB server itself, the
+// operator-configured default (REDIRECT_URL), and any other operator-approved
+// external targets (REDIRECT_ALLOWED_HOSTS). Anything else is rejected,
+// since redirect_url can be influenced by meeting/user metadata set by
+// whoever created the meeting, or by the client in /feedback/check.
+const ALLOWED_REDIRECT_HOSTS = [BASIC_URL, REDIRECT_URL, ...(process.env.REDIRECT_ALLOWED_HOSTS || '').split(',')]
+  .map((value) => {
+    if (!value) return null;
+    try {
+      return new URL(value).hostname.toLowerCase();
+    } catch (e) {
+      return value.trim().toLowerCase() || null;
+    }
+  })
+  .filter(Boolean);
+
 let storedHookId = null;
 
 const redisClient = createClient();
@@ -109,14 +125,22 @@ async function destroyHook() {
 
 app.get('/feedback/check', async (req, res) => {
   const {
-    userId,
-    meetingId,
     reason,
     reasonCode,
     skipped,
     errors: rawErrors = [],
     locale,
   } = req.query;
+
+  // userId/meetingId are never read from the query string: they're only
+  // trustworthy once nginx's auth_request has verified the caller's
+  // sessionToken against bbb-web and injected them as headers.
+  const identity = Utils.getVerifiedIdentity(req);
+  if (!identity) {
+    logger.warn('Rejecting /feedback/check with no verified User-Id/Meeting-Id headers');
+    return res.status(401).send();
+  }
+  const { userId, meetingId } = identity;
 
   let errors = [];
   try {
@@ -126,26 +150,68 @@ app.get('/feedback/check', async (req, res) => {
     logger.error({ err: e, rawErrors }, 'Error parsing errors param');
   }
 
+  if (!Array.isArray(errors)) {
+    logger.warn({ rawErrors }, 'errors param did not parse to an array, ignoring');
+    errors = [];
+  }
+
   logger.debug({ query: req.query, parsedErrors: errors }, 'Check: Processing feedback request');
 
   // Reason/Error codes that justify skipping feedback even when user has a valid session
   const hasSkipReason = REASON_CODE_NOT_ELEGIBLE_FOR_FEEDBACK.includes(reasonCode);
-  const hasSkipError = errors.some(({ key }) => ERROR_CODE_NOT_ELEGIBLE_FOR_FEEDBACK.includes(key));
+  const hasSkipError = Utils.hasNotEligibleError(errors, ERROR_CODE_NOT_ELEGIBLE_FOR_FEEDBACK);
 
   if (!skipped && (hasSkipReason || hasSkipError)) {
     const params = new URLSearchParams({ skipped: 'true' });
-    const message = reason || errors[0]?.message;
+    const message = reason || Utils.firstErrorMessage(errors);
     if (message) params.set('reason', message);
-    logger.info(`Forced feedback skip: ${hasSkipReason ? `reason code: ${reasonCode}` : `error code: ${errors[0].key}`}`);
+    logger.info(`Forced feedback skip: ${hasSkipReason ? `reason code: ${reasonCode}` : `error code: ${Utils.firstErrorKey(errors)}`}`);
     return res.json({ redirect: `/feedback?${params.toString()}` });
   }
 
+  // The frontend also lands here with `skipped=true` already set (either
+  // because it followed our own redirect below, or because the user opened a
+  // hand-crafted link) and a client-supplied redirectUrl/redirectTimeout. That
+  // redirectUrl must never be trusted as-is: validate it against the
+  // allowlist here so the frontend never has to trust a raw URL param.
+  if (skipped === 'true') {
+    const rawRedirectUrl = req.query.redirectUrl;
+    const rawRedirectTimeout = req.query.redirectTimeout;
+
+    const validatedRedirectUrl = Utils.isAllowedRedirectUrl(rawRedirectUrl, ALLOWED_REDIRECT_HOSTS)
+      ? rawRedirectUrl
+      : null;
+
+    if (rawRedirectUrl && !validatedRedirectUrl) {
+      logger.warn(`Rejected redirectUrl not in the allowlist: ${rawRedirectUrl}`);
+    }
+
+    const parsedTimeout = parseInt(rawRedirectTimeout, 10);
+    const validatedRedirectTimeout = Number.isFinite(parsedTimeout) && parsedTimeout >= 0
+      ? parsedTimeout
+      : undefined;
+
+    const response = { proceed: true, redirectUrl: validatedRedirectUrl, redirectTimeout: validatedRedirectTimeout };
+
+    const skippedUserLocale = usersLocales[userId];
+    if (skippedUserLocale && !req.query.locale) {
+      response.locale = skippedUserLocale;
+    }
+
+    return res.json(response);
+  }
+
+  let userData = {};
+  let sessionData = {};
   if (userId && meetingId && !skipped) {
-    const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
-    const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
+    userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
+    sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
 
     if (userData.ask_for_feedback === 'false') {
-      const finalRedirectUrl = userData.redirect_url || sessionData.redirect_url || '';
+      const finalRedirectUrl = Utils.firstAllowedRedirectUrl(
+        [userData.redirect_url, sessionData.redirect_url],
+        ALLOWED_REDIRECT_HOSTS,
+      );
       const redirectTimeout = sessionData.redirect_timeout || REDIRECT_TIMEOUT;
 
       const params = new URLSearchParams({
@@ -169,13 +235,26 @@ app.get('/feedback/check', async (req, res) => {
     }
   }
 
+  // The normal (non-skip) path must also hand the frontend a validated
+  // redirectUrl/redirectTimeout, mirroring the skip branch above, so a
+  // session's configured values (set at meeting-created/user-joined time)
+  // actually reach ConfirmationStep instead of leaving it with nothing.
+  const response = {
+    proceed: true,
+    redirectUrl: Utils.firstAllowedRedirectUrl(
+      [userData.redirect_url, sessionData.redirect_url],
+      ALLOWED_REDIRECT_HOSTS,
+    ),
+    redirectTimeout: sessionData.redirect_timeout || REDIRECT_TIMEOUT,
+  };
+
   const userLocale = usersLocales[userId];
   if (userLocale && !req.query.locale) {
     logger.debug(`Returning locale override for user ${userId}: ${userLocale}`);
-    return res.json({ proceed: true, locale: userLocale });
+    response.locale = userLocale;
   }
 
-  return res.json({ proceed: true });
+  return res.json(response);
 });
 
 
@@ -186,11 +265,17 @@ app.post('/feedback/webhook', async (req, res) => {
 
     logger.debug(`Got webhook ${event} from ${domain}`);
     for (const evt of events) {
-      if (evt.data.type === 'event') {
+      try {
+        if (!evt?.data || evt.data.type !== 'event') continue;
+
         const eventType = evt.data.id;
 
         if (eventType === 'meeting-created') {
-          const meeting = evt.data.attributes.meeting;
+          const meeting = evt.data.attributes?.meeting;
+          if (!meeting) {
+            logger.warn({ evt }, 'meeting-created event with no meeting data, skipping');
+            continue;
+          }
           const intMeetingId = meeting['internal-meeting-id'];
           const extMeetingId = meeting['external-meeting-id'];
           // mconf-institution-guid or external-meeting-id
@@ -209,8 +294,16 @@ app.post('/feedback/webhook', async (req, res) => {
             screenShareBridge: meeting?.screenShareBridge,
           };
 
-          if (meeting.metadata.feedbackredirecturl || REDIRECT_URL) {
-            sessionData.redirect_url = meeting.metadata.feedbackredirecturl || REDIRECT_URL;
+          const feedbackRedirectUrl = meeting.metadata?.feedbackredirecturl;
+          if (feedbackRedirectUrl && !Utils.isAllowedRedirectUrl(feedbackRedirectUrl, ALLOWED_REDIRECT_HOSTS)) {
+            logger.warn(`Meeting ${intMeetingId} set feedbackredirecturl to a host outside the allowlist, ignoring: ${feedbackRedirectUrl}`);
+          }
+          const allowedFeedbackRedirectUrl = Utils.isAllowedRedirectUrl(feedbackRedirectUrl, ALLOWED_REDIRECT_HOSTS)
+            ? feedbackRedirectUrl
+            : null;
+
+          if (allowedFeedbackRedirectUrl || REDIRECT_URL) {
+            sessionData.redirect_url = allowedFeedbackRedirectUrl || REDIRECT_URL;
           }
 
           if (REDIRECT_TIMEOUT) {
@@ -232,7 +325,11 @@ app.post('/feedback/webhook', async (req, res) => {
             },
           );
         } else if (eventType === 'user-joined') {
-          const user = evt.data.attributes.user;
+          const user = evt.data.attributes?.user;
+          if (!user) {
+            logger.warn({ evt }, 'user-joined event with no user data, skipping');
+            continue;
+          }
           const userRedirectUrl = user.userdata?.['bbb_feedback_redirect_url'];
           const askForFeedback = user.userdata?.['bbb_ask_for_feedback_on_logout'];
           const intUserId = user['internal-user-id'];
@@ -246,7 +343,13 @@ app.post('/feedback/webhook', async (req, res) => {
             role: user.role,
           };
 
-          if (userRedirectUrl) userData.redirect_url = userRedirectUrl;
+          if (userRedirectUrl) {
+            if (Utils.isAllowedRedirectUrl(userRedirectUrl, ALLOWED_REDIRECT_HOSTS)) {
+              userData.redirect_url = userRedirectUrl;
+            } else {
+              logger.warn(`User ${intUserId} set bbb_feedback_redirect_url to a host outside the allowlist, ignoring: ${userRedirectUrl}`);
+            }
+          }
 
           if (askForFeedback !== undefined) {
             userData.ask_for_feedback = askForFeedback;
@@ -264,6 +367,8 @@ app.post('/feedback/webhook', async (req, res) => {
             userData
           );
         }
+      } catch (evtError) {
+        logger.error({ err: evtError, evt }, 'Error processing webhook event, skipping it');
       }
     }
 
@@ -289,21 +394,44 @@ app.post('/feedback/submit', async (req, res) => {
     }
   }
 
-  const { session, user, feedback, device, rating } = body;
+  if (!Utils.isPlainObject(body)) {
+    logger.warn({ body }, 'Received feedback submission with a non-object body.');
+    return res.status(400).json({ status: 'error', message: 'Invalid feedback body' });
+  }
 
-  if (!session || !user) {
-    logger.warn('Received feedback submission with missing session or user.', body);
+  const { user, feedback, device, rating } = body;
+
+  if (!user) {
+    logger.warn('Received feedback submission with missing user.', body);
     return res.status(400).json({ status: 'error', message: 'Missing session or user information' });
   }
 
+  // session.sessionId/user.userId are never read from the body: they're only
+  // trustworthy once nginx's auth_request has verified the caller's
+  // sessionToken against bbb-web and injected them as headers. A client-
+  // supplied id here would let anyone attribute/read another user's cached
+  // profile fields or feedback.
+  const identity = Utils.getVerifiedIdentity(req);
+  if (!identity) {
+    logger.warn('Rejecting /feedback/submit with no verified User-Id/Meeting-Id headers');
+    return res.status(401).send();
+  }
+  const { userId, meetingId } = identity;
+
   try {
-    const feedbackKey = `${KEY_PREFIX}:${session.sessionId}:${user.userId}`;
+    const feedbackKey = `${KEY_PREFIX}:${meetingId}:${userId}`;
     const existingFeedback = await redisClient.get(feedbackKey);
 
-    const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${session.sessionId}`);
-    const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${user.userId}`);
-    // User redirect URL takes precedence over session redirect URL
-    const redirectUrl = userData.redirect_url || sessionData.redirect_url;
+    const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
+    const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
+    // User redirect URL takes precedence over session redirect URL. Both are
+    // revalidated here rather than trusted as-is, since a cached Redis
+    // record could predate the allowlist or have been written by a path
+    // that skipped validation.
+    const redirectUrl = Utils.firstAllowedRedirectUrl(
+      [userData.redirect_url, sessionData.redirect_url],
+      ALLOWED_REDIRECT_HOSTS,
+    );
 
     const isFeedbackEmpty = (!feedback || Object.keys(feedback).length === 0) && (rating === undefined || rating === null);
     const essentialData = {
@@ -317,11 +445,11 @@ app.post('/feedback/submit', async (req, res) => {
     }
 
     if (existingFeedback) {
-      logger.warn(`Feedback already submitted for userID: ${user.userId} sessionID: ${session.sessionId}`);
+      logger.warn(`Feedback already submitted for userID: ${userId} sessionID: ${meetingId}`);
       return res.status(400).json({ status: 'error', message: 'Feedback already submitted' });
     }
 
-    logger.info(`Submitting feedback for userID: ${userData.id || user.userId} meetingID: ${sessionData.session_id || session.sessionId}`);
+    logger.info(`Submitting feedback for userID: ${userData.id || userId} meetingID: ${sessionData.session_id || meetingId}`);
 
     const completeFeedback = {
       rating,
@@ -378,11 +506,11 @@ app.post('/feedback/submit', async (req, res) => {
       logger.debug('No FEEDBACK_URL set, logging feedback to syslog only.');
     }
 
-    await Utils.redisStaleKeysCleanup(redisClient, user.userId);
+    await Utils.redisStaleKeysCleanup(redisClient, userId);
     res.json({ status: 'success', data: completeFeedback });
   } catch (error) {
     logger.error('Error submitting feedback:', error);
-    await Utils.redisStaleKeysCleanup(redisClient, user.userId);
+    await Utils.redisStaleKeysCleanup(redisClient, userId);
     res.status(500).send();
   }
 });

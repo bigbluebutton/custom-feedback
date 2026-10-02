@@ -20,7 +20,7 @@ const messages = defineMessages({
   }
 });
 
-const RatingStep = ({ onNext, onUpdate, stepData, intl }) => {
+const RatingStep = ({ onNext, onUpdate, stepData, intl, endReasonMessage }) => {
   const [rating, setRating] = useState(null);
   const [hover, setHover] = useState(null);
 
@@ -43,12 +43,9 @@ const RatingStep = ({ onNext, onUpdate, stepData, intl }) => {
     onNext(nextStep, { rating });
   }
 
-  const params = new URLSearchParams(window.location.search);
-  const endReason = params.get('reason');
-
   return (
     <>
-      {endReason && <Styled.EndedTitle>{endReason}</Styled.EndedTitle>}
+      {endReasonMessage && <Styled.EndedTitle>{endReasonMessage}</Styled.EndedTitle>}
       <Styled.Description>{intl.formatMessage(messages.ratingSubtitle)}</Styled.Description>
       <Styled.Stars
         onMouseLeave={() => setHover(null)}

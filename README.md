@@ -18,7 +18,7 @@ Additional feedback options can be added or existing options can be modified via
 
 The back-end is an HTTP server that listens for webhooks and collects data on meetings and users. This data is processed and stored in the server's database.
 
-At the end of the feedback process, the HTTP server receives the feedback data and data extracted from the URL, which contains meetingId and userId, and will be used to find their corresponding records in the server's database.
+At the end of the feedback process, the HTTP server receives the submitted feedback data. The meeting/user record it's filed under comes from the caller's `User-Id`/`Meeting-Id`, verified against bbb-web via nginx (see [Configure nginx](#2-configure-nginx)) and not from the `userId`/`meetingId` the URL happens to carry.
 
 ## Running with docker-compose
 
@@ -37,6 +37,14 @@ Changes the docker-compose.yml to fit your use case. **Note:** Ensure there are 
 
     REDIRECT_URL (optional)
       Where to redirect user after the feedback form. Can also be set by `userdata-feedbackredirecturl` or `metadata_feedbackredirecturl`
+
+    REDIRECT_ALLOWED_HOSTS (optional)
+      Comma-separated list of extra hostnames the post-feedback redirect is allowed to target
+      (e.g. `portal.example.com,other.example.com`). The host of BASIC_URL and, if set, of
+      REDIRECT_URL are always allowed. Any `feedbackredirecturl`/`bbb_feedback_redirect_url`
+      pointing at a host outside this allowlist is ignored and logged as a warning. This
+      is a safety boundary, not just configuration, so set it to every external redirect
+      target you actually use.
 
     REDIRECT_TIMEOUT
       default: 10000
@@ -74,12 +82,35 @@ Upgrading an existing install requires copying the file again: older versions
 proxied the whole `/feedback` path to the back-end, which no longer serves the
 static assets.
 
-The nginx configuration serves static assets (HTML, JS, CSS) directly from disk and proxies only API endpoints to the back-end:
+The nginx configuration serves static assets (HTML, JS, CSS) directly from disk and proxies only API endpoints to the back-end. `/feedback/check` and `/feedback/submit` are additionally gated behind an `auth_request` to bbb-web's `/bigbluebutton/connection/checkAuthorization` — the same internal location bbb-webrtc-sfu and BBB's other services already use, which every BBB >= 3.0 install's own nginx config already defines. nginx only forwards the request, with the caller's verified `User-Id`/`Meeting-Id` injected as headers, once bbb-web has validated the `sessionToken` the frontend attaches to these two calls:
 
 ```nginx
-location = /feedback/check   { proxy_pass http://localhost:3009; }
-location = /feedback/submit  { proxy_pass http://localhost:3009; }
-location = /feedback/webhook { proxy_pass http://localhost:3009; }
+location = /feedback/check {
+  auth_request /bigbluebutton/connection/checkAuthorization;
+  auth_request_set $user_id $sent_http_user_id;
+  auth_request_set $meeting_id $sent_http_meeting_id;
+  proxy_set_header User-Id $user_id;
+  proxy_set_header Meeting-Id $meeting_id;
+  proxy_pass http://localhost:3009;
+}
+
+location = /feedback/submit {
+  auth_request /bigbluebutton/connection/checkAuthorization;
+  auth_request_set $user_id $sent_http_user_id;
+  auth_request_set $meeting_id $sent_http_meeting_id;
+  proxy_set_header User-Id $user_id;
+  proxy_set_header Meeting-Id $meeting_id;
+  proxy_pass http://localhost:3009;
+}
+
+location = /feedback/webhook {
+  allow 127.0.0.1;
+  allow 172.16.0.0/12; # default docker bridge networks (e.g. 172.17.0.0/16)
+  allow 10.0.0.0/8;
+  allow 192.168.0.0/16;
+  deny all;
+  proxy_pass http://localhost:3009;
+}
 
 location ~ ^/feedback/(feedbackData\.json|locales/) {
   root /usr/share/bigbluebutton;
@@ -98,11 +129,25 @@ explicit `Cache-Control` because they are served unhashed from a stable URL:
 without it a browser picks its own freshness lifetime and can keep serving a
 copy from before an edit.
 
+`/feedback/webhook` has no `sessionToken`/`auth_request` gate (it's a
+server-to-server call from bbb-webhooks, not a browser), so it only trusts the
+caller's source address. **Configure bbb-webhooks' `PERMANENT_HOOKS` to post
+to this endpoint over a private/internal address** (e.g. `http://localhost:3009/feedback/webhook`
+if it runs on the same host, or the docker bridge/internal overlay address if
+it runs in a sibling container). Never through the BBB host's public
+hostname or a publicly reachable IP.
+
+Testing `/feedback/check`/`/feedback/submit` directly against the back-end
+(bypassing this nginx config, e.g. in local dev) will now 401 unless you set
+`User-Id`/`Meeting-Id` headers by hand — there's no way around bbb-web's
+check other than going through a real BBB+nginx install or an install that
+proxies these routes the same way.
+
 ### 3. Configure bbb-web
 
 Configure `bbb-web` to redirect logged-out users to the feedback application after they leave the meeting.
 
-The redirect URL should be `https://YOUR_BBB_HOST/feedback?userId=%%USERID%%&meetingId=%%MEETINGID%%`
+The redirect URL should be `https://YOUR_BBB_HOST/feedback` — no `%%USERID%%`/`%%MEETINGID%%` placeholders needed. The backend identifies the caller from their `sessionToken` (verified against bbb-web by nginx, see [Configure nginx](#2-configure-nginx)), not from URL params, so a bare `logoutURL` is enough.
 
 * Edit `logoutURL` in `/usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties`
 * Or create your meeting with `logoutURL`

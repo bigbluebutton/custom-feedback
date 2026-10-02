@@ -2,6 +2,8 @@ import ReactDOM from 'react-dom/client';
 import { IntlProvider } from 'react-intl';
 import App from './App';
 import { FeedbackDataContext, fetchFeedbackData } from './feedbackData';
+import { setRedirectUrl, setRedirectTimeout, getSessionToken } from './components/service';
+import { SessionContext } from './sessionContext';
 
 const LOCALES_PATH = '/feedback/locales';
 const FALLBACK_LOCALE = 'en';
@@ -55,8 +57,25 @@ async function startApp() {
   const urlLocale = params.get('locale');
   let userLocale = urlLocale || browserLocale;
 
+  // The backend/nginx auth layer (sessionToken -> bbb-web's checkAuthorization)
+  // is the only authoritative source for "does this visitor have a real BBB
+  // session" — a 401 here means nginx rejected the request before it ever
+  // reached Express. meetingId/userId are not a substitute: the backend
+  // doesn't trust them, and BBB's logoutURL isn't guaranteed to carry them.
+  // Any other failure (network hiccup, unexpected status) fails open, same
+  // as before, so a backend blip doesn't block someone who did leave a
+  // meeting normally.
+  let isValidSession = true;
+
   try {
-    const checkRes = await fetch(`/feedback/check?${window.location.search.replace(/^\?/, '')}`);
+    // nginx gates /feedback/check behind bbb-web's connection check, which
+    // reads sessionToken off the request URI - it must be appended here, not
+    // sent as a header or relied on being present in window.location.search.
+    const checkParams = new URLSearchParams(window.location.search);
+    const sessionToken = getSessionToken();
+    if (sessionToken) checkParams.set('sessionToken', sessionToken);
+
+    const checkRes = await fetch(`/feedback/check?${checkParams.toString()}`);
     if (checkRes.ok) {
       const check = await checkRes.json();
       if (check.redirect) {
@@ -66,6 +85,17 @@ async function startApp() {
       if (check.locale) {
         userLocale = check.locale;
       }
+      // The backend is the only party that can validate a redirectUrl
+      // against the operator's allowlist, so this is the only place that
+      // gets to persist one for ConfirmationStep to use later. FeedbackFlow
+      // must not read redirectUrl/redirectTimeout straight off the URL.
+      // Set unconditionally so a prior session's values don't linger in
+      // sessionStorage when this check has none of its own - the setters
+      // already clear the key for an absent/falsy value.
+      setRedirectUrl(check.redirectUrl);
+      setRedirectTimeout(check.redirectTimeout);
+    } else if (checkRes.status === 401) {
+      isValidSession = false;
     }
   } catch (e) {
     console.error('Error checking feedback:', e);
@@ -80,7 +110,9 @@ async function startApp() {
   root.render(
     <IntlProvider locale={locale.replace(/_/g, '-')} messages={messages}>
       <FeedbackDataContext.Provider value={feedbackData}>
-        <App />
+        <SessionContext.Provider value={{ isValid: isValidSession }}>
+          <App />
+        </SessionContext.Provider>
       </FeedbackDataContext.Provider>
     </IntlProvider>
   );
