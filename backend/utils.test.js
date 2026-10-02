@@ -160,3 +160,29 @@ test('getVerifiedIdentity does not throw when req.headers itself is missing', ()
   assert.doesNotThrow(() => Utils.getVerifiedIdentity({}));
   assert.equal(Utils.getVerifiedIdentity({}), null);
 });
+
+test('firstAllowedRedirectUrl returns the first candidate on the allowlist', () => {
+  const allowed = ['example.com'];
+  assert.equal(
+    Utils.firstAllowedRedirectUrl(['https://example.com/a', 'https://example.com/b'], allowed),
+    'https://example.com/a',
+  );
+});
+
+test('firstAllowedRedirectUrl falls through to the next candidate when the first is disallowed', () => {
+  const allowed = ['example.com'];
+  assert.equal(
+    Utils.firstAllowedRedirectUrl(['https://evil.example/a', 'https://example.com/b'], allowed),
+    'https://example.com/b',
+  );
+});
+
+test('firstAllowedRedirectUrl returns an empty string when no candidate passes', () => {
+  const allowed = ['example.com'];
+  assert.equal(Utils.firstAllowedRedirectUrl(['https://evil.example/a', 'javascript:alert(1)'], allowed), '');
+});
+
+test('firstAllowedRedirectUrl returns an empty string for an empty/undefined candidate list', () => {
+  assert.equal(Utils.firstAllowedRedirectUrl([], ['example.com']), '');
+  assert.equal(Utils.firstAllowedRedirectUrl(undefined, ['example.com']), '');
+});

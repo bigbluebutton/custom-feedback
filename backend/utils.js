@@ -267,6 +267,22 @@ const isAllowedRedirectUrl = (rawUrl, allowedHosts) => {
 };
 
 /**
+ * firstAllowedRedirectUrl - The first of `candidates` that passes
+ * `isAllowedRedirectUrl`, or `''`. Candidates are typically cached Redis
+ * values read back out at request time (e.g. `/feedback/check`'s skip
+ * branch, `/feedback/submit`), which must be revalidated on every read since
+ * a record could predate the allowlist or have been written by a path that
+ * skipped validation.
+ * @param {Array<string>} candidates - Candidate redirect URLs, in priority order.
+ * @param {Array<string>} allowedHosts - Lowercase hostnames allowed as targets.
+ * @returns {string}
+ * @public
+ */
+const firstAllowedRedirectUrl = (candidates, allowedHosts) => (
+  (candidates || []).find((candidate) => isAllowedRedirectUrl(candidate, allowedHosts)) || ''
+);
+
+/**
  * hasNotEligibleError - Whether any entry of `errors` carries a `key` in
  * `notEligibleErrorCodes`. Entries that are not objects (e.g. a `null` from
  * a malformed `errors` query param, as in `?errors=[null]`) are treated as
@@ -337,6 +353,7 @@ export default {
   hSetWithExpiration,
   redisStaleKeysCleanup,
   isAllowedRedirectUrl,
+  firstAllowedRedirectUrl,
   hasNotEligibleError,
   isPlainObject,
   firstErrorKey,

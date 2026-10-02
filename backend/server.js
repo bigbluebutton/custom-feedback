@@ -201,12 +201,17 @@ app.get('/feedback/check', async (req, res) => {
     return res.json(response);
   }
 
+  let userData = {};
+  let sessionData = {};
   if (userId && meetingId && !skipped) {
-    const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
-    const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
+    userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
+    sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
 
     if (userData.ask_for_feedback === 'false') {
-      const finalRedirectUrl = userData.redirect_url || sessionData.redirect_url || '';
+      const finalRedirectUrl = Utils.firstAllowedRedirectUrl(
+        [userData.redirect_url, sessionData.redirect_url],
+        ALLOWED_REDIRECT_HOSTS,
+      );
       const redirectTimeout = sessionData.redirect_timeout || REDIRECT_TIMEOUT;
 
       const params = new URLSearchParams({
@@ -230,13 +235,26 @@ app.get('/feedback/check', async (req, res) => {
     }
   }
 
+  // The normal (non-skip) path must also hand the frontend a validated
+  // redirectUrl/redirectTimeout, mirroring the skip branch above, so a
+  // session's configured values (set at meeting-created/user-joined time)
+  // actually reach ConfirmationStep instead of leaving it with nothing.
+  const response = {
+    proceed: true,
+    redirectUrl: Utils.firstAllowedRedirectUrl(
+      [userData.redirect_url, sessionData.redirect_url],
+      ALLOWED_REDIRECT_HOSTS,
+    ),
+    redirectTimeout: sessionData.redirect_timeout || REDIRECT_TIMEOUT,
+  };
+
   const userLocale = usersLocales[userId];
   if (userLocale && !req.query.locale) {
     logger.debug(`Returning locale override for user ${userId}: ${userLocale}`);
-    return res.json({ proceed: true, locale: userLocale });
+    response.locale = userLocale;
   }
 
-  return res.json({ proceed: true });
+  return res.json(response);
 });
 
 
@@ -406,8 +424,14 @@ app.post('/feedback/submit', async (req, res) => {
 
     const sessionData = await redisClient.hGetAll(`${KEY_PREFIX}:session:${meetingId}`);
     const userData = await redisClient.hGetAll(`${KEY_PREFIX}:user:${userId}`);
-    // User redirect URL takes precedence over session redirect URL
-    const redirectUrl = userData.redirect_url || sessionData.redirect_url;
+    // User redirect URL takes precedence over session redirect URL. Both are
+    // revalidated here rather than trusted as-is, since a cached Redis
+    // record could predate the allowlist or have been written by a path
+    // that skipped validation.
+    const redirectUrl = Utils.firstAllowedRedirectUrl(
+      [userData.redirect_url, sessionData.redirect_url],
+      ALLOWED_REDIRECT_HOSTS,
+    );
 
     const isFeedbackEmpty = (!feedback || Object.keys(feedback).length === 0) && (rating === undefined || rating === null);
     const essentialData = {
