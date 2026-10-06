@@ -25,10 +25,11 @@ Backend (`cd backend`):
 
 Full stack via Docker: `docker compose up -d` (see `docker-compose.yml` for the env block; edit values there).
 
-There is no working test suite. `frontend`'s `test` script (`vite test`) and its `eslintConfig` (`react-app/jest`) are inert — no test files exist. Don't claim tests pass.
+`backend` has a working test suite: `npm test` runs `node --test` against `backend/*.test.js`, with no Redis or server dependency. `frontend`'s `test` script (`vite test`) and its `eslintConfig` (`react-app/jest`) are still inert — no test files exist. Don't claim frontend tests pass.
 
 Verify frontend changes by hand: `cd frontend && npm run build`, then `npx vite preview --port 4173` and curl/Playwright `http://localhost:4173/feedback/…` (preview serves `build/` at base `/feedback/`).
 Gotcha: `vite preview` **and** prod nginx SPA-fall-back any missing path — including backend-only routes like `/feedback/check` — to `index.html` (HTTP 200, `text/html`), so a fetch for an absent resource returns HTML, not 404. Content-type-guard JSON fetches accordingly.
+Gotcha: outside a real BBB+nginx install, nothing calls bbb-web's `checkAuthorization`, so hitting `backend/server.js` directly for `/feedback/check`/`/feedback/submit` (e.g. via `npm start` or a bare curl) 401s unless you set `User-Id`/`Meeting-Id` headers by hand — that's the only way to exercise those two routes' logic in isolation now.
 
 ## Backend architecture (`backend/server.js`)
 
@@ -38,12 +39,33 @@ Three endpoints, all under `/feedback`:
 - `POST /feedback/webhook` — the BBB webhook callback. Parses `meeting-created` and `user-joined` events and caches them in Redis (see keys below). Session/institution and user (name, role, redirect URL, `ask_for_feedback`, locale override) data is captured here, keyed by **internal** BBB IDs.
 - `POST /feedback/submit` — receives the assembled feedback from the browser, merges it with the cached session/user data, and emits it.
 
+### Identity: `User-Id`/`Meeting-Id` headers, not client input
+
+`GET /feedback/check` and `POST /feedback/submit` never trust a client-supplied
+`userId`/`meetingId` (query param or body field) for identity. `feedback.nginx`
+puts both locations behind an `auth_request` to bbb-web's
+`/bigbluebutton/connection/checkAuthorization` — the same mechanism
+bbb-webrtc-sfu and BBB's other internal services (shared-notes, file-upload,
+sip) already rely on. nginx only forwards the request once bbb-web has
+validated the caller's `sessionToken` (read off the request URI's query
+string, plus the bbb-web session cookie unless the meeting opts out), and
+injects the verified `User-Id`/`Meeting-Id` as headers. `Utils.getVerifiedIdentity(req)`
+is the single place that reads them; both routes 401 if either header is
+missing (e.g. the request bypassed nginx, or `auth_request` isn't configured).
+The frontend gets the `sessionToken` for free: BBB's html5 client already
+writes it to `sessionStorage` (`BBB_sessionToken`) before redirecting here, and
+that storage survives the same-origin logout redirect — `getSessionToken()`/
+`withSessionToken()` in `frontend/src/components/service.js` read it back and
+attach it as a query param on every call to `/feedback/check`/`/feedback/submit`.
+`POST /feedback/webhook` is unaffected — it's a server-to-server bbb-web
+callback with no browser session involved.
+
 Redis key scheme (prefix `feedback:`):
 - `feedback:session:<internalMeetingId>` — hash of session/institution data. Expires by TTL only (never deleted on meeting-end, to avoid dropping in-flight feedback).
 - `feedback:user:<internalUserId>` — hash of user data.
 - `feedback:<sessionId>:<userId>` — the submitted feedback (dedup guard: a second submit for the same pair is rejected).
 
-Key correlation depends on the browser's `meetingId`/`userId` URL params being the **internal** IDs that the webhook stored. `utils.js` tracks written keys in an in-memory `activeKeys` array and cleans them up per-user after submit (`redisStaleKeysCleanup`).
+Key correlation depends on the verified `User-Id`/`Meeting-Id` headers (see above) being the **internal** IDs that the webhook stored — which they are, since bbb-web's `checkAuthorization` reports its own internal ids. `utils.js` tracks written keys in an in-memory `activeKeys` array and cleans them up per-user after submit (`redisStaleKeysCleanup`).
 
 Locale overrides are the one piece of state kept **outside Redis**: `bbb_override_default_locale` from the `user-joined` webhook is stored in a module-level in-memory `usersLocales` map and read back in `/feedback/check`. It is therefore lost on restart and not shared across backend replicas.
 
@@ -78,7 +100,7 @@ Because the definition is edited on the host, the renderers treat it as untruste
 - Styling uses `styled-components`. Colors come from `frontend/src/ui/palette.js`, which uses CSS custom properties with hardcoded fallbacks (e.g. `var(--color-primary, #0F70D7)`) so a host page can theme the form.
 - `service.js` holds all browser-side I/O: `submitFeedback`, device detection (`ua-parser-js`), `sessionStorage` persistence of in-progress feedback, and a `beforeunload` `sendBeacon` fallback so partial feedback is still sent if the user closes the tab.
 
-URL params the frontend reads: `meetingId`, `userId`, `skipped`, `reason`, `errors` (JSON array), `locale`, `redirectUrl`, `redirectTimeout`.
+URL params the frontend reads: `skipped`, `reason`, `errors` (JSON array), `locale`, `redirectUrl`, `redirectTimeout`. It does **not** read `meetingId`/`userId` from the URL — BBB's `logoutURL` isn't guaranteed to carry them (see "Identity" above), and the frontend has no use for them either now that identity is entirely server-side. `sessionToken` is read from `sessionStorage` (`BBB_sessionToken`), not the URL. `index.jsx` treats `/feedback/check` returning 401 as "no valid session" and passes that down via `SessionContext` (`frontend/src/sessionContext.js`); `FeedbackFlow.jsx` reads it with `useSession()` to decide whether to show the form or the "could not join" error — this replaced an older check that gated on `meetingId`/`userId` being present in the URL.
 
 Dev note: `vite.config.js` sets `base: '/feedback/'` and outputs to `build/`, but defines **no dev proxy**. The frontend fetches `/feedback/*` as same-origin relative URLs, so in `npm start` those calls hit the Vite server, not the backend — serve both behind one origin (or add a proxy) to exercise the API locally.
 
@@ -86,7 +108,7 @@ Dev note: `vite.config.js` sets `base: '/feedback/'` and outputs to `build/`, bu
 
 `docker-compose.yml` defines only the `app` service with `network_mode: host` and bundles **no** Redis — the backend relies on a Redis already running on the host (as a BBB install provides).
 
-Static assets are served by **nginx**, not Express (changed recently — the backend only serves the three API routes). The Docker image is multi-stage: it builds the frontend, and `docker-entrypoint.sh` copies the built assets into `/app/public-assets` (bind-mounted to `/usr/share/bigbluebutton/feedback`) on container start — overwriting everything **except** the operator-overridable `locales/` and `feedbackData.json`, which are seeded only when absent. Anything else made overridable must be added to that skip list too. nginx then serves `/feedback/*` static files and proxies only `/feedback/check`, `/feedback/submit`, `/feedback/webhook` to `localhost:3009`. The `feedback.nginx` snippet installs to `/usr/share/bigbluebutton/nginx/` (BBB's include dir — **not** `/etc/bigbluebutton/nginx/`). See the nginx snippet and bbb-web `logoutURL` setup in `README.md`.
+Static assets are served by **nginx**, not Express (changed recently — the backend only serves the three API routes). The Docker image is multi-stage: it builds the frontend, and `docker-entrypoint.sh` copies the built assets into `/app/public-assets` (bind-mounted to `/usr/share/bigbluebutton/feedback`) on container start — overwriting everything **except** the operator-overridable `locales/` and `feedbackData.json`, which are seeded only when absent. Anything else made overridable must be added to that skip list too. nginx then serves `/feedback/*` static files and proxies `/feedback/check`, `/feedback/submit`, `/feedback/webhook` to `localhost:3009` — the first two behind an `auth_request` to bbb-web's `/bigbluebutton/connection/checkAuthorization` (that internal location ships with every BBB >= 3.0 install's own nginx config; `feedback.nginx` only references it, it doesn't define it). The `feedback.nginx` snippet installs to `/usr/share/bigbluebutton/nginx/` (BBB's include dir — **not** `/etc/bigbluebutton/nginx/`). See the nginx snippet and bbb-web `logoutURL` setup in `README.md`.
 
 ## Conventions
 

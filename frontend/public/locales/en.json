@@ -87,5 +87,20 @@
   "app.customFeedback.errors.meetingForciblyEnded": "You cannot join a session that has already been forcibly ended",
   "app.customFeedback.errors.invalidPassword": "The password you provided is incorrect.",
   "app.customFeedback.errors.mismatchCreateTime": "The meeting information is outdated. Please try again.",
-  "app.customFeedback.errors.generic": "Could not join the meeting ({reason})."
+  "app.customFeedback.errors.generic": "Could not join the meeting ({reason}).",
+  "app.customFeedback.errors.removedFromConference": "You have been removed from the conference",
+  "app.customFeedback.errors.loggedOut": "You have logged out of the conference",
+  "app.customFeedback.errors.permissionEjectReason": "Ejected due to permission violation",
+  "app.customFeedback.errors.ejectedFromMeeting": "You have been removed from the session",
+  "app.customFeedback.errors.userInactivityEjectReason": "User inactive for too long",
+  "app.customFeedback.errors.endedFromAPI": "The session has ended - terminated by the system",
+  "app.customFeedback.errors.endedWhenNoUserJoined": "The session has ended because no users joined",
+  "app.customFeedback.errors.endedWhenLastUserLeft": "The session has ended because the last user left",
+  "app.customFeedback.errors.endedAfterExceedingDuration": "The session has ended due to exceeding the maximum duration",
+  "app.customFeedback.errors.breakoutEndedAfterExceedingDuration": "The breakout has ended due to exceeding the maximum duration",
+  "app.customFeedback.errors.breakoutEndedByModerator": "The breakout has ended - terminated by Moderator",
+  "app.customFeedback.errors.endedDueNoAuthed": "The session has ended because there was no authenticated user in the room",
+  "app.customFeedback.errors.endedDueNoModerators": "The session has ended because no moderator has been present in the session",
+  "app.customFeedback.errors.endedDueServiceInterruption": "The session has terminated due to a temporary service interruption",
+  "app.customFeedback.errors.unknownReason": "This session has ended."
 }

@@ -203,8 +203,12 @@ const hSetWithExpiration = async (
 ) => {
   if (trackActiveKeys) activeKeys.push(key);
 
+  const cleanField = Object.fromEntries(
+    Object.entries(field).filter(([, value]) => value !== undefined),
+  );
+
   await redisClient.multi()
-    .hSet(key, field)
+    .hSet(key, cleanField)
     .expire(key, expire_seconds)
     .exec();
 }
@@ -235,6 +239,110 @@ const redisStaleKeysCleanup = async (redisClient, keyId) => {
   activeKeys.splice(0, activeKeys.length, ...keysToKeep);
 }
 
+/**
+ * isAllowedRedirectUrl - Whether `rawUrl` is a safe, operator-approved
+ * redirect target: an absolute http(s) URL whose host is in `allowedHosts`.
+ * Rejects `javascript:`/`data:`/etc. schemes and any host not explicitly
+ * allowed, since `redirectUrl` can originate from untrusted client input
+ * (the `/feedback/check` skip branch) or BBB meeting/user metadata set by
+ * whoever created the meeting.
+ * @param {string} rawUrl - The candidate redirect URL.
+ * @param {Array<string>} allowedHosts - Lowercase hostnames allowed as targets.
+ * @returns {boolean}
+ * @public
+ */
+const isAllowedRedirectUrl = (rawUrl, allowedHosts) => {
+  if (!rawUrl) return false;
+
+  let parsed;
+  try {
+    parsed = new URL(rawUrl);
+  } catch (e) {
+    return false;
+  }
+
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+
+  return (allowedHosts || []).includes(parsed.hostname.toLowerCase());
+};
+
+/**
+ * firstAllowedRedirectUrl - The first of `candidates` that passes
+ * `isAllowedRedirectUrl`, or `''`. Candidates are typically cached Redis
+ * values read back out at request time (e.g. `/feedback/check`'s skip
+ * branch, `/feedback/submit`), which must be revalidated on every read since
+ * a record could predate the allowlist or have been written by a path that
+ * skipped validation.
+ * @param {Array<string>} candidates - Candidate redirect URLs, in priority order.
+ * @param {Array<string>} allowedHosts - Lowercase hostnames allowed as targets.
+ * @returns {string}
+ * @public
+ */
+const firstAllowedRedirectUrl = (candidates, allowedHosts) => (
+  (candidates || []).find((candidate) => isAllowedRedirectUrl(candidate, allowedHosts)) || ''
+);
+
+/**
+ * hasNotEligibleError - Whether any entry of `errors` carries a `key` in
+ * `notEligibleErrorCodes`. Entries that are not objects (e.g. a `null` from
+ * a malformed `errors` query param, as in `?errors=[null]`) are treated as
+ * non-matching instead of throwing, and `errors` itself is treated as empty
+ * when it is not an array (e.g. `?errors=5` parses to a number).
+ * @param {Array} errors - Parsed `errors` query param entries.
+ * @param {Array<string>} notEligibleErrorCodes - Error codes that disqualify a user from feedback.
+ * @returns {boolean}
+ * @public
+ */
+const hasNotEligibleError = (errors, notEligibleErrorCodes) =>
+  (Array.isArray(errors) ? errors : []).some((error) => notEligibleErrorCodes.includes(error?.key));
+
+/**
+ * isPlainObject - Whether `value` is a non-null, non-array object.
+ * @param {*} value - The value to check.
+ * @returns {boolean}
+ * @public
+ */
+const isPlainObject = (value) => typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * firstErrorKey - Safe accessor for the `key` of the first `errors` entry.
+ * @param {Array} errors - Parsed `errors` query param entries.
+ * @returns {string|undefined}
+ * @public
+ */
+const firstErrorKey = (errors) => errors?.[0]?.key;
+
+/**
+ * firstErrorMessage - Safe accessor for the `message` of the first `errors` entry.
+ * @param {Array} errors - Parsed `errors` query param entries.
+ * @returns {string|undefined}
+ * @public
+ */
+const firstErrorMessage = (errors) => errors?.[0]?.message;
+
+/**
+ * getVerifiedIdentity - Reads the caller's identity off the `User-Id`/
+ * `Meeting-Id` headers that nginx's `auth_request` injects only after
+ * bbb-web's `checkAuthorization` has validated the request's `sessionToken`
+ * (and, unless the meeting opts out, its bbb-web session). These headers
+ * are therefore the only trustworthy source of identity for a browser-
+ * originated request — a client-supplied `userId`/`meetingId` in the query
+ * string or body is not verified against BBB and must not be used instead.
+ * @param {object} req - The Express request object.
+ * @returns {{userId: string, meetingId: string}|null} - `null` if either
+ *          header is missing (the request did not go through the
+ *          authenticated nginx path).
+ * @public
+ */
+const getVerifiedIdentity = (req) => {
+  const userId = req.headers?.['user-id'];
+  const meetingId = req.headers?.['meeting-id'];
+
+  if (!userId || !meetingId) return null;
+
+  return { userId, meetingId };
+};
+
 export default {
   ipFromRequest,
   shaHex,
@@ -244,4 +352,11 @@ export default {
   sortBy,
   hSetWithExpiration,
   redisStaleKeysCleanup,
+  isAllowedRedirectUrl,
+  firstAllowedRedirectUrl,
+  hasNotEligibleError,
+  isPlainObject,
+  firstErrorKey,
+  firstErrorMessage,
+  getVerifiedIdentity,
 };

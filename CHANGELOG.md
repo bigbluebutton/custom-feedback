@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+### v1.13.0
+
+* feat(frontend): render the form from a deploy-time overridable definition, with accessibility, locale and stability fixes from the rewrite
+* feat: authenticate /feedback/check and /feedback/submit against bbb-web's sessionToken instead of trusting client-supplied ids
+* fix: reject unsafe redirectUrl values (javascript: URIs, open redirects); revalidate cached/stale redirects and timeouts on every check
+* fix: only trust reasonCode, not free-text reason, for the end-of-meeting message
+* fix: harden feedback endpoints and form rendering against malformed client input
+* fix(backend): submit hanging when a submission has no rating
+* fix: overridable assets (locales, feedbackData.json) cached past an operator's edit
+* build: bump express/body-parser/qs, postcss/browserslist/nanoid, react-router-dom@7 to close dependabot alerts
+
 ### v1.12.0
 
 * feat: serve static assets via nginx instead of express

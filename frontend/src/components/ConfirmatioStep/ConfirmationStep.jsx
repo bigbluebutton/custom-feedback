@@ -13,7 +13,7 @@ const messages = defineMessages({
   }
 });
 
-const ConfirmationStep = ({ intl, getRedirectUrl, getRedirectTimeout, endReason, isSkipped }) => {
+const ConfirmationStep = ({ intl, getRedirectUrl, getRedirectTimeout, endReasonMessage, isSkipped }) => {
   useEffect(() => {
     const redirectTimeout = getRedirectTimeout ? getRedirectTimeout() : null;
     const timer = setTimeout(() => {
@@ -32,7 +32,7 @@ const ConfirmationStep = ({ intl, getRedirectUrl, getRedirectTimeout, endReason,
 
   return (
     <>
-      {endReason && <Styled.EndedTitle>{endReason}</Styled.EndedTitle>}
+      {endReasonMessage && <Styled.EndedTitle>{endReasonMessage}</Styled.EndedTitle>}
       <Styled.Description>{intl.formatMessage(message)}<Styled.Dots/></Styled.Description>
     </>
   );

@@ -87,5 +87,20 @@
   "app.customFeedback.errors.meetingForciblyEnded": "Non puoi rientrare in una riunione che è stata terminata forzatamente.",
   "app.customFeedback.errors.invalidPassword": "La password fornita non è corretta.",
   "app.customFeedback.errors.mismatchCreateTime": "Le informazioni sulla riunione non sono aggiornate. Per favore, riprova.",
-  "app.customFeedback.errors.generic": "Impossibile partecipare alla riunione ({reason})."
+  "app.customFeedback.errors.generic": "Impossibile partecipare alla riunione ({reason}).",
+  "app.customFeedback.errors.removedFromConference": "Sei stato rimosso dalla conferenza",
+  "app.customFeedback.errors.loggedOut": "Hai effettuato il logout dalla conferenza",
+  "app.customFeedback.errors.permissionEjectReason": "Rimosso per violazione dei permessi",
+  "app.customFeedback.errors.ejectedFromMeeting": "Sei stato rimosso dalla sessione",
+  "app.customFeedback.errors.userInactivityEjectReason": "Utente inattivo per troppo tempo",
+  "app.customFeedback.errors.endedFromAPI": "La sessione è terminata - conclusa dal sistema",
+  "app.customFeedback.errors.endedWhenNoUserJoined": "La sessione è terminata perché nessun utente è entrato",
+  "app.customFeedback.errors.endedWhenLastUserLeft": "La sessione è terminata perché l'ultimo utente ha lasciato la riunione",
+  "app.customFeedback.errors.endedAfterExceedingDuration": "La sessione è terminata per aver superato la durata massima",
+  "app.customFeedback.errors.breakoutEndedAfterExceedingDuration": "La breakout room è terminata per aver superato la durata massima",
+  "app.customFeedback.errors.breakoutEndedByModerator": "La breakout room è terminata - conclusa dal moderatore",
+  "app.customFeedback.errors.endedDueNoAuthed": "La sessione è terminata perché non c'era nessun utente autenticato nella stanza",
+  "app.customFeedback.errors.endedDueNoModerators": "La sessione è terminata perché non era presente nessun moderatore",
+  "app.customFeedback.errors.endedDueServiceInterruption": "La sessione è terminata a causa di un'interruzione temporanea del servizio",
+  "app.customFeedback.errors.unknownReason": "Questa sessione è terminata."
 }
