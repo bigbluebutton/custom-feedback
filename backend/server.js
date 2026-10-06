@@ -213,7 +213,10 @@ app.get('/feedback/check', async (req, res) => {
     // check fails open and the user proceeds to the form, since feedback should never
     // block logout.
     if (FEEDBACK_MODERATOR_ONLY && userData.role && userData.role !== 'MODERATOR') {
-      const finalRedirectUrl = userData.redirect_url || sessionData.redirect_url || REDIRECT_URL || '';
+      const finalRedirectUrl = Utils.firstAllowedRedirectUrl(
+        [userData.redirect_url, sessionData.redirect_url, REDIRECT_URL],
+        ALLOWED_REDIRECT_HOSTS,
+      );
 
       if (finalRedirectUrl) {
         logger.info(`Non-moderator user ${userId} redirected immediately to ending URL (moderator-only feedback enabled).`);
@@ -225,9 +228,12 @@ app.get('/feedback/check', async (req, res) => {
         meetingId,
         userId,
         skipped: 'true',
-        redirectUrl: finalRedirectUrl,
         redirectTimeout: redirectTimeout,
       });
+
+      if (reason) {
+        params.set('reason', reason);
+      }
 
       if (locale) {
         params.set('locale', locale);
@@ -397,12 +403,15 @@ app.post('/feedback/webhook', async (req, res) => {
             userData
           );
         } else if (eventType === 'user-role-changed') {
-          // Not forwarded by the currently deployed bbb-webhooks (v2.3.1)
-          // see README.md's FEEDBACK_MODERATOR_ONLY limitations. Kept ready so
-          // the cached role stays fresh as soon as that relay forwards this event.
-          const user = evt.data.attributes.user;
-          const intUserId = user['internal-user-id'];
-          const newRole = user.role;
+          // Not emitted by bbb-webhooks yet (proposed in
+          // bigbluebutton/bbb-webhooks#78), so the payload shape is a guess.
+          const user = evt.data.attributes?.user;
+          const intUserId = user?.['internal-user-id'];
+          const newRole = user?.role;
+          if (!intUserId || !newRole) {
+            logger.warn({ evt }, 'user-role-changed event without the expected fields, skipping');
+            continue;
+          }
 
           logger.info(`User role changed: userId=${intUserId} newRole=${newRole}`);
 

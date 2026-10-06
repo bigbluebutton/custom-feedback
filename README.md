@@ -58,12 +58,12 @@ Changes the docker-compose.yml to fit your use case. **Note:** Ensure there are 
       - Role is only known once the `user-joined` webhook has been cached;
         if it's missing (expired TTL, restarted Redis, missed webhook) the
         user proceeds to the form rather than being blocked.
-      - Role is refreshed on a `user-role-changed` webhook event if your BBB
-        deployment's `bbb-webhooks` relay forwards one (`{ user: { "internal-user-id",
-        role } }`). The stock `mconf/bbb-webhooks` v2.3.1 does **not** forward this
-        event yet (tracked upstream: https://github.com/bigbluebutton/bbb-webhooks),
-        so on that version a viewer promoted to moderator mid-session is still
-        treated as a non-moderator on logout, same as before.
+      - A viewer promoted to moderator mid-session is still treated as a
+        non-moderator on logout. No released `bbb-webhooks` (including 3.7.0,
+        shipped with BBB 4.0) emits a role-change event; it is proposed in
+        https://github.com/bigbluebutton/bbb-webhooks/issues/78. The backend
+        already handles a `user-role-changed` event carrying
+        `{ user: { "internal-user-id", role } }` and skips it otherwise.
 
     LOG_LEVEL
       default: info
