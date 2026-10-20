@@ -49,6 +49,22 @@ Changes the docker-compose.yml to fit your use case. **Note:** Ensure there are 
     REDIRECT_TIMEOUT
       default: 10000
 
+    FEEDBACK_MODERATOR_ONLY (optional)
+      default: false
+      When true, non-moderators are redirected immediately to the ending URL
+      (REDIRECT_URL or its per-session/per-user overrides) instead of seeing
+      the feedback form; if no ending URL is configured they get the regular
+      skip-confirmation screen instead. Known limitations:
+      - Role is only known once the `user-joined` webhook has been cached;
+        if it's missing (expired TTL, restarted Redis, missed webhook) the
+        user proceeds to the form rather than being blocked.
+      - A viewer promoted to moderator mid-session is still treated as a
+        non-moderator on logout. No released `bbb-webhooks` (including 3.7.0,
+        shipped with BBB 4.0) emits a role-change event; it is proposed in
+        https://github.com/bigbluebutton/bbb-webhooks/issues/78. The backend
+        already handles a `user-role-changed` event carrying
+        `{ user: { "internal-user-id", role } }` and skips it otherwise.
+
     LOG_LEVEL
       default: info
       valid values: error, debug, info, verbose

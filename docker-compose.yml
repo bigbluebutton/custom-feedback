@@ -10,6 +10,7 @@ services:
       - REDIRECT_TIMEOUT=10000
       - REDIRECT_URL=
       - REDIRECT_ALLOWED_HOSTS=
+      - FEEDBACK_MODERATOR_ONLY=false
       - SHARED_SECRET=
       - CHECKSUM_ALGORITHM=sha1
       - BASIC_URL=
