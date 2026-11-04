@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+### v1.14.0
+
+* feat: `FEEDBACK_MODERATOR_ONLY` limits the form to moderators; other users skip straight to the redirect. PR #46
+* feat(backend): refresh the cached user role on the `user-role-changed` webhook event (needs bbb-webhooks 3.7.0, not yet released). PR #46
+
 ### v1.13.0
 
 * feat(frontend): render the form from a deploy-time overridable definition, with accessibility, locale and stability fixes from the rewrite
