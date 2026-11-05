@@ -1,4 +1,4 @@
-FROM node:22-alpine AS build-frontend
+FROM node:26-alpine AS build-frontend
 
 WORKDIR /usr/src/app/frontend
 
@@ -10,7 +10,7 @@ COPY frontend/ .
 
 RUN npm run build
 
-FROM node:22-alpine AS build-backend
+FROM node:26-alpine AS build-backend
 
 WORKDIR /usr/src/app/backend
 
