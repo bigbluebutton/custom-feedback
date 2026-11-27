@@ -47,28 +47,25 @@ const RatingStep = ({ onNext, onUpdate, stepData, intl, endReasonMessage }) => {
     <>
       {endReasonMessage && <Styled.EndedTitle>{endReasonMessage}</Styled.EndedTitle>}
       <Styled.Description>{intl.formatMessage(messages.ratingSubtitle)}</Styled.Description>
-      <Styled.Stars
-        onMouseLeave={() => setHover(null)}
-      >
-        {[...Array(maxScore).keys()].map(i => i + 1).map(i => (
-          i <= (hover || rating) ?
-          ( <Styled.FilledStar
+      <Styled.Stars onPointerLeave={() => setHover(null)}>
+        {[...Array(maxScore).keys()].map(i => i + 1).map(i => {
+          const filled = i <= (hover || rating);
+          const Icon = filled ? Styled.FilledStar : Styled.OutlinedStar;
+          return (
+            <Styled.StarButton
               key={i}
-              size={32}
-              color={colorPrimary}
-              onMouseEnter={() => setHover(i)}
+              type="button"
+              aria-label={String(i)}
+              aria-pressed={i === rating}
+              // Touch taps also emit hover events; previewing on them changes
+              // the DOM mid-tap, which makes iOS Safari drop the click.
+              onPointerEnter={(e) => e.pointerType === 'mouse' && setHover(i)}
               onClick={() => handleRatingChange(i)}
-            />
-          ) : (
-            <Styled.OutlinedStar
-              key={i}
-              size={32}
-              color={colorGray}
-              onMouseEnter={() => setHover(i)}
-              onClick={() => handleRatingChange(i)}
-            />
-          )
-        ))}
+            >
+              <Icon size={32} color={filled ? colorPrimary : colorGray} />
+            </Styled.StarButton>
+          );
+        })}
       </Styled.Stars>
       <Styled.ButtonContainer>
         <Styled.Button onClick={handleLeave} ghosted="true">

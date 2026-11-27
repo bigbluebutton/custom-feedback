@@ -60,7 +60,6 @@ const Description = styled.span`
 const Stars = styled.div`
   display: flex;
   justify-content: center;
-  gap: 8px;
 `;
 
 const ButtonContainer = styled.div`
@@ -84,13 +83,31 @@ const Button = styled.button`
   }
 `;
 
-const OutlinedStar = styled(TiStarOutline)`
+// Padding instead of a flex gap so adjacent hit areas touch: no dead zone
+// between stars for a finger to land in.
+const StarButton = styled.button`
+  display: flex;
+  min-width: 0;
+  padding: 4px;
+  border: none;
+  background: none;
   cursor: pointer;
+  touch-action: manipulation;
 `;
 
-const FilledStar = styled(TiStarFullOutline)`
-  cursor: pointer;
+// The button, not the swapped icon, must be the event target, or a re-render
+// mid-tap detaches the node the click is dispatched to.
+const starIcon = `
+  display: block;
+  width: 100%;
+  max-width: 32px;
+  height: auto;
+  pointer-events: none;
 `;
+
+const OutlinedStar = styled(TiStarOutline)`${starIcon}`;
+
+const FilledStar = styled(TiStarFullOutline)`${starIcon}`;
 
 const styles = {
   Container,
@@ -103,6 +120,7 @@ const styles = {
   Stars,
   Button,
   ButtonContainer,
+  StarButton,
   OutlinedStar,
   FilledStar,
 };
